@@ -67,7 +67,7 @@ public class MapleGuild implements java.io.Serializable {
         try {
             PreparedStatement ps = con.prepareStatement("SELECT * FROM guilds WHERE guildid=" + guildid);
             ResultSet rs = ps.executeQuery();
-            if (!rs.first()) {
+            if (!rs.next()) {
                 id = -1;
                 return;
             }
@@ -90,7 +90,7 @@ public class MapleGuild implements java.io.Serializable {
             ps = con.prepareStatement("SELECT id, name, level, job, guildrank FROM characters WHERE guildid = ? ORDER BY guildrank ASC, name ASC");
             ps.setInt(1, guildid);
             rs = ps.executeQuery();
-            if (!rs.first()) {
+            if (!rs.next()) {
                 log.error("No members in guild.  Impossible...");
                 return;
             }
@@ -362,7 +362,7 @@ public class MapleGuild implements java.io.Serializable {
             ps = con.prepareStatement("SELECT guildid FROM guilds WHERE leader = ?");
             ps.setInt(1, leaderId);
             rs = ps.executeQuery();
-            rs.first();
+            rs.next();
             return rs.getInt("guildid");
         } catch (SQLException se) {
             log.error("SQL THROW", se);
@@ -541,7 +541,7 @@ public class MapleGuild implements java.io.Serializable {
             Connection con = DatabaseConnection.getConnection();
             PreparedStatement ps = con.prepareStatement(
                     "SELECT `name`, `GP`, `logoBG`, `logoBGColor`, " +
-                    "`logo`, `logoColor` FROM guilds ORDER BY `GP` DESC LIMIT 50");
+                    "`logo`, `logoColor` FROM guilds ORDER BY `GP` DESC LIMIT 50", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs = ps.executeQuery();
             c.getSession().write(MaplePacketCreator.showGuildRanks(npcid, rs));
             ps.close();
