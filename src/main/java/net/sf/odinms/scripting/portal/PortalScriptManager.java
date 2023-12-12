@@ -13,11 +13,12 @@ import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.scripting.AbstractScriptManager;
 import net.sf.odinms.server.MaplePortal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PortalScriptManager {
+public class PortalScriptManager extends AbstractScriptManager {
 	private static final Logger log = LoggerFactory.getLogger(PortalScriptManager.class);
 	private static PortalScriptManager instance = new PortalScriptManager();
 	private Map<String, PortalScript> scripts = new HashMap<String, PortalScript>();
@@ -32,47 +33,37 @@ public class PortalScriptManager {
 		return instance;
 	}
 
-	private PortalScript getPortalScript(String scriptName) {
-		if (scripts.containsKey(scriptName)) {
-			return scripts.get(scriptName);
+	private PortalScript getPortalScript(String scriptName) throws ScriptException {
+		String scriptPath = "portal/" + scriptName + ".js";
+		PortalScript script = scripts.get(scriptPath);
+		if (script != null) {
+			return script;
 		}
-		File scriptFile = new File("scripts/portal/" + scriptName + ".js");
-		if (!scriptFile.exists()) {
-			scripts.put(scriptName, null);
+
+		ScriptEngine engine = getInvocableScriptEngine(scriptPath);
+		if (!(engine instanceof Invocable iv)) {
 			return null;
 		}
-		FileReader fr = null;
-		ScriptEngine portal = sef.getScriptEngine();
-		try {
-			fr = new FileReader(scriptFile);
-			CompiledScript compiled = ((Compilable) portal).compile(fr);
-			compiled.eval();
-		} catch (ScriptException e) {
-			log.error("THROW", e);
-		} catch (IOException e) {
-			log.error("THROW", e);
-		} finally {
-			if (fr != null) {
-				try {
-					fr.close();
-				} catch (IOException e) {
-					log.error("ERROR CLOSING", e);
-				}
-			}
+
+		script = iv.getInterface(PortalScript.class);
+		if (script == null) {
+			throw new ScriptException(String.format("Portal script \"%s\" fails to implement the PortalScript interface", scriptName));
 		}
-		PortalScript script = ((Invocable) portal).getInterface(PortalScript.class);
-		scripts.put(scriptName, script);
+
+		scripts.put(scriptPath, script);
 		return script;
 	}
 
     public boolean executePortalScript(MaplePortal portal, MapleClient c) {
-		PortalScript script = getPortalScript(portal.getScriptName());
-
-		if (script != null) {
-			return script.enter(new PortalPlayerInteraction(c, portal));
-		} else {
-			return false;
+		try {
+			PortalScript script = getPortalScript(portal.getScriptName());
+			if (script != null) {
+				return script.enter(new PortalPlayerInteraction(c, portal));
+			}
+		} catch (Exception e) {
+			log.warn("Portal script error in: {}", portal.getScriptName(), e);
 		}
+		return false;
 	}
 	
 	public void clearScripts() {
