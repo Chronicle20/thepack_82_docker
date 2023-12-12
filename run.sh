@@ -1,13 +1,35 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-docker build -t odinms_mysql odinms_mysql
-docker build -t odinms odinms
-
-ODINMS_MYSQL_CONTAINER_ID=`docker run -d -p 3306:3306 odinms_mysql`
-
-ODINMS_MYSQL_CONTAINER_IP_ADDRESS=`docker inspect --format '{{ .NetworkSettings.IPAddress }}' $ODINMS_MYSQL_CONTAINER_ID`
-
-#docker run -it --rm -e ODINMS_MYSQL_CONTAINER_IP_ADDRESS=$ODINMS_MYSQL_CONTAINER_IP_ADDRESS -p 7575:7575 -p 7576:7576 -p 7577:7577 -p 7578:7578 -p 8484:8484 odinms bash -c 'source compile_and_run.sh'
-docker run -it --rm -e ODINMS_MYSQL_CONTAINER_IP_ADDRESS=$ODINMS_MYSQL_CONTAINER_IP_ADDRESS -p 7575:7575 -p 7576:7576 -p 7577:7577 -p 7578:7578 -p 8484:8484 odinms bash
-
-docker rm -f $ODINMS_MYSQL_CONTAINER_ID
+exec java -cp ".:dist/*" \
+	-Dnet.sf.odinms.recvops=recvops.properties \
+	-Dnet.sf.odinms.sendops=sendops.properties \
+	-Dnet.sf.odinms.wzpath=wz \
+	-Djavax.net.ssl.keyStore=filename.keystore \
+	-Djavax.net.ssl.keyStorePassword=passwd \
+	-Djavax.net.ssl.trustStore=filename.keystore \
+	-Djavax.net.ssl.trustStorePassword=passwd \
+	net.sf.odinms.net.world.WorldServer &
+sleep 10
+exec java -cp ".:dist/*" \
+	-Dnet.sf.odinms.recvops=recvops.properties \
+	-Dnet.sf.odinms.sendops=sendops.properties \
+	-Dnet.sf.odinms.wzpath=wz \
+	-Dnet.sf.odinms.login.config=login.properties \
+	-Djavax.net.ssl.keyStore=filename.keystore \
+	-Djavax.net.ssl.keyStorePassword=passwd \
+	-Djavax.net.ssl.trustStore=filename.keystore \
+	-Djavax.net.ssl.trustStorePassword=passwd \
+	net.sf.odinms.net.login.LoginServer &
+sleep 10
+exec java -cp ".:dist/*" \
+	-Dnet.sf.odinms.recvops=recvops.properties \
+	-Dnet.sf.odinms.sendops=sendops.properties \
+	-Dnet.sf.odinms.wzpath=wz \
+	-Dnet.sf.odinms.channel.config=channel.properties \
+	-Djavax.net.ssl.keyStore=filename.keystore \
+	-Djavax.net.ssl.keyStorePassword=passwd \
+	-Djavax.net.ssl.trustStore=filename.keystore \
+	-Djavax.net.ssl.trustStorePassword=passwd net.sf.odinms.net.channel.ChannelServer \
+	-Dcom.sun.management.jmxremote.port=13373 \
+	-Dcom.sun.management.jmxremote.password.file=jmxremote.password \
+	-Dcom.sun.management.jmxremote.access.file=jmxremote.access
