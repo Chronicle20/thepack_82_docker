@@ -9,7 +9,6 @@ exec java -cp ".:dist/*" \
 	-Djavax.net.ssl.trustStore=filename.keystore \
 	-Djavax.net.ssl.trustStorePassword=passwd \
 	net.sf.odinms.net.world.WorldServer &
-sleep 10
 exec java -cp ".:dist/*" \
 	-Dnet.sf.odinms.recvops=recvops.properties \
 	-Dnet.sf.odinms.sendops=sendops.properties \
@@ -20,7 +19,7 @@ exec java -cp ".:dist/*" \
 	-Djavax.net.ssl.trustStore=filename.keystore \
 	-Djavax.net.ssl.trustStorePassword=passwd \
 	net.sf.odinms.net.login.LoginServer &
-sleep 10
+sleep 2
 exec java -cp ".:dist/*" \
 	-Dnet.sf.odinms.recvops=recvops.properties \
 	-Dnet.sf.odinms.sendops=sendops.properties \
