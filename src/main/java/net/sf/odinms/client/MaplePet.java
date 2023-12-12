@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +71,7 @@ public class MaplePet extends Item {
 
     public static int createPet(int itemid) {
         try {
-            PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("INSERT INTO pets (name, level, closeness, fullness) VALUES (?, ?, ?, ?)");
+            PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("INSERT INTO pets (name, level, closeness, fullness) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, MapleItemInformationProvider.getInstance().getName(itemid));
             ps.setInt(2, 1);
             ps.setInt(3, 0);

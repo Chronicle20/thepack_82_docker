@@ -106,6 +106,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
                 }
                 packetHandler.handlePacket(slea, client);
             } catch (Throwable t) {
+                log.error(t.toString());
             }
         }
     }

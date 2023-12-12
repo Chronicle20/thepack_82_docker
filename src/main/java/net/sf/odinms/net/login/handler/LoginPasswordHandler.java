@@ -49,7 +49,7 @@ public class LoginPasswordHandler implements MaplePacketHandler {
         if (loginok != 0) {
             c.getSession().write(MaplePacketCreator.getLoginFailed(loginok));
             return;
-        } else if (tempbannedTill.getTimeInMillis() != 0) {
+        } else if (tempbannedTill != null && tempbannedTill.getTimeInMillis() != 0) {
             long tempban = KoreanDateUtil.getTempBanTimestamp(tempbannedTill.getTimeInMillis());
             byte reason = c.getBanReason();
             c.getSession().write(MaplePacketCreator.getTempBan(tempban, reason));

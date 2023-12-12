@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.odinms.database.DatabaseConnection;
@@ -63,7 +64,7 @@ public class MapleRing implements Comparable<MapleRing> {
 				return ret_;
 			}
 			Connection con = DatabaseConnection.getConnection();
-			PreparedStatement ps = con.prepareStatement("INSERT INTO rings (itemid, partnerChrId, partnername) VALUES (?, ?, ?)");
+			PreparedStatement ps = con.prepareStatement("INSERT INTO rings (itemid, partnerChrId, partnername) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			ps.setInt(1, itemid);
 			ps.setInt(2, partnerId);
 			ps.setString(3, partnername);
@@ -75,7 +76,7 @@ public class MapleRing implements Comparable<MapleRing> {
 			rs.close();
 			ps.close();
 
-			ps = con.prepareStatement("INSERT INTO rings (itemid, partnerRingId, partnerChrId, partnername) VALUES (?, ?, ?, ?)");
+			ps = con.prepareStatement("INSERT INTO rings (itemid, partnerRingId, partnerChrId, partnername) VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			ps.setInt(1, itemid);
 			ps.setInt(2, ret[0]);
 			ps.setInt(3, chrId);

@@ -76,7 +76,7 @@ CREATE TABLE `accounts` (
   `loggedin` tinyint(4) NOT NULL DEFAULT '0',
   `lastlogin` timestamp NULL DEFAULT NULL,
   `createdat` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `birthday` date NOT NULL DEFAULT '0000-00-00',
+  `birthday` date NOT NULL DEFAULT '1970-01-01',
   `banned` tinyint(1) NOT NULL DEFAULT '0',
   `banreason` text,
   `gm` tinyint(1) NOT NULL DEFAULT '0',
@@ -86,7 +86,7 @@ CREATE TABLE `accounts` (
   `macs` tinytext,
   `lastknownip` varchar(30) NOT NULL DEFAULT '',
   `lastpwemail` timestamp NOT NULL DEFAULT '2002-12-31 17:00:00',
-  `tempban` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `tempban` timestamp NOT NULL DEFAULT '1970-01-01 00:00:01',
   `greason` tinyint(4) DEFAULT NULL,
   `paypalNX` int(11) DEFAULT NULL,
   `mPoints` int(11) DEFAULT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE `accounts` (
 
 /*!40000 ALTER TABLE `accounts` DISABLE KEYS */;
 INSERT INTO `accounts` (`id`,`name`,`password`,`salt`,`loggedin`,`lastlogin`,`createdat`,`birthday`,`banned`,`banreason`,`gm`,`email`,`emailcode`,`forumaccid`,`macs`,`lastknownip`,`lastpwemail`,`tempban`,`greason`,`paypalNX`,`mPoints`,`cardNX`) VALUES 
- (1,'admin','f81e14c61bd5943707588d1f758a479f2193cfe3d91f3dfe021cab0bb373ae57be3c20a07fe6eb98dc3d91adcd0c3f0c9633ca9c190c4313b1ccef6920caac06','fbc1993a5b1af39e648afe807482bea4',0,'2008-12-19 15:35:48','2008-12-17 22:26:15','0000-00-00',0,NULL,1,NULL,NULL,0,'00-23-54-3A-7B-DC','127.0.0.1','2002-12-31 17:00:00','0000-00-00 00:00:00',NULL,34837837,483483,4834834);
+ (1,'admin','f81e14c61bd5943707588d1f758a479f2193cfe3d91f3dfe021cab0bb373ae57be3c20a07fe6eb98dc3d91adcd0c3f0c9633ca9c190c4313b1ccef6920caac06','fbc1993a5b1af39e648afe807482bea4',0,'2008-12-19 15:35:48','2008-12-17 22:26:15','1970-01-01',0,NULL,1,NULL,NULL,0,'00-23-54-3A-7B-DC','127.0.0.1','2002-12-31 17:00:00','1970-01-01 00:00:01',NULL,34837837,483483,4834834);
 /*!40000 ALTER TABLE `accounts` ENABLE KEYS */;
 
 

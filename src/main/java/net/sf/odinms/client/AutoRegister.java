@@ -41,13 +41,13 @@ public class AutoRegister {
             PreparedStatement ipc = con.prepareStatement("SELECT lastknownip FROM accounts WHERE lastknownip = ?");
             ipc.setString(1, sockAddr.substring(1, sockAddr.lastIndexOf(':')));
             ResultSet rs = ipc.executeQuery();
-            if (rs.first() == false || rs.last() == true && rs.getRow() < ACCOUNTS_PER_IP) {
+            if (rs.getRow() < ACCOUNTS_PER_IP) {
                 try {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO accounts (name, password, email, birthday, macs, lastknownip) VALUES (?, ?, ?, ?, ?, ?)");
                     ps.setString(1, login);
                     ps.setString(2, LoginCrypto.hexSha1(pwd));
                     ps.setString(3, "no@email.provided");
-                    ps.setString(4, "0000-00-00");
+                    ps.setString(4, "2005-05-11");
                     ps.setString(5, "00-00-00-00-00-00");
                     ps.setString(6, sockAddr.substring(1, sockAddr.lastIndexOf(':')));
                     ps.executeUpdate();
@@ -61,6 +61,7 @@ public class AutoRegister {
             ipc.close();
             rs.close();
         } catch (SQLException ex) {
+            log.error(ex.toString());
         }
     }
 }
