@@ -1,0 +1,39 @@
+version:                                    '3.5'
+services:
+  db:
+    build:
+        context:                              ./odinms_mysql
+    restart:                                always
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    networks:
+      - internal-net
+    container_name:                         db
+  app:
+    build:
+        context:                              ./odinms
+    restart:                                always
+    depends_on:
+      - "db"     
+    environment:
+      WAIT_HOSTS:                           db:3306 
+    ports:
+      - '7575:7575'
+      - '7576:7576'
+      - '7577:7577'
+      - '7578:7578'
+      - '8484:8484'
+    expose:
+      - '7575'
+      - '7576'
+      - '7577'
+      - '7578'
+      - '8484'
+    networks:
+      - internal-net
+    container_name:                         app
+networks:
+  internal-net:
+    name:                                   internal-net
