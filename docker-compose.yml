@@ -6,7 +6,8 @@ services:
     restart:                                always
     volumes:
       - ./sql/thepack.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./mysql:/var/lib/mysql
+      - ./sql/my.cnf:/etc/mysql/my.cnf
+      - ../thePackMySQL:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD:                  ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE:                       odinms 

@@ -12,13 +12,6 @@ Pass of Dimension - 4001022
 Key of Dimension - 4001023
  */
 
-importPackage(net.sf.odinms.tools);
-importPackage(net.sf.odinms.server.life);
-importPackage(java.awt);
-importPackage(net.sf.odinms.server.pq);
-importPackage(net.sf.odinms.client);
-
-
 var status = 0;
 /*
 [1] -245 | -223 ||| -190 | -223

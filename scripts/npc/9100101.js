@@ -5,8 +5,7 @@
 
 /* Gachapon
 */
-
-importPackage(net.sf.odinms.client);
+const MapleItemInformationProvider = Java.type('net.sf.odinms.server.MapleItemInformationProvider');
 
 var status = 0;
 
@@ -97,9 +96,9 @@ function action(mode, type, selection) {
 	//category 2 and 3 are for equipment/weapons, so randomize the stats.
 	//I think a function here is missing. Will be updated next rev.
 	if ((catChoice == 2) || (catChoice == 3)) {
-		var ii = net.sf.odinms.server.MapleItemInformationProvider.getInstance();
+		var ii = MapleItemInformationProvider.getInstance();
 		var newItem = ii.randomizeStats(ii.getEquipById(prizes[catChoice][itemChoice]),true);
-		net.sf.odinms.server.MapleInventoryManipulator.addFromDrop(cm.getC(), newItem, "Created " + ii.getName(prizes[catChoice][itemChoice])  + " from Kerning Gachapon.");
+		MapleInventoryManipulator.addFromDrop(cm.getC(), newItem, "Created " + ii.getName(prizes[catChoice][itemChoice])  + " from Kerning Gachapon.");
 	} else {
 		cm.gainItem(prizes[catChoice][itemChoice], itemQuantity);
 		}

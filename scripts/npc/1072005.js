@@ -24,6 +24,8 @@
 	Hidden Street : Magician's Tree Dungeon (108000200)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 
 function start() {
@@ -41,7 +43,7 @@ function action(mode, type, selection) {
 			status--;
 		if (status == 0) {
 			cm.completeQuest(100007);
-			if (cm.getQuestStatus(100007) == net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+			if (cm.getQuestStatus(100007) == MapleQuestStatus.Status.COMPLETED) {
 				cm.startQuest(100008);
 				cm.sendOk("You're a true hero! Take this and Grendel the Really Old will acknowledge you.");
 			} else {

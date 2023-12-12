@@ -3,7 +3,9 @@
 	Victoria Road : Bowman Instructional School (100000201)
 */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 var status = 0;
 var job;
@@ -27,7 +29,7 @@ function action(mode, type, selection) {
         else
             status--;
         if (status == 0) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getJob().equals(MapleJob.BEGINNER)) {
                 if (cm.getLevel() >= 10 && cm.getChar().getDex() >= 25)
                     cm.sendNext("So you decided to become a #rBowman#k?");
                 else {
@@ -35,10 +37,10 @@ function action(mode, type, selection) {
                     cm.dispose();
                 }
             } else {
-                if (cm.getLevel() >= 30 && cm.getJob().equals(net.sf.odinms.client.MapleJob.BOWMAN)) {
-                    if (cm.getQuestStatus(100000).getId() >= net.sf.odinms.client.MapleQuestStatus.Status.STARTED.getId()) {
+                if (cm.getLevel() >= 30 && cm.getJob().equals(MapleJob.BOWMAN)) {
+                    if (cm.getQuestStatus(100000).getId() >= MapleQuestStatus.Status.STARTED.getId()) {
                         cm.completeQuest(100002);
-                        if (cm.getQuestStatus(100002) == net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+                        if (cm.getQuestStatus(100002) == MapleQuestStatus.Status.COMPLETED) {
                             status = 20;
                             cm.sendNext("I see you have done well. I will allow you to take the next step on your long road.");
                         } else {
@@ -68,8 +70,8 @@ function action(mode, type, selection) {
         else if (status == 2)
             cm.sendYesNo("Do you want to become a #rBowman#k?");
         else if (status == 3) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER))
-                cm.changeJob(net.sf.odinms.client.MapleJob.BOWMAN);
+            if (cm.getJob().equals(MapleJob.BEGINNER))
+                cm.changeJob(MapleJob.BOWMAN);
             cm.gainItem(1452002, 1);
             cm.gainItem(2060000, 1000);
             cm.sendOk("So be it! Now go, and go with pride.");
@@ -91,10 +93,10 @@ function action(mode, type, selection) {
             var jobName;
             if (selection == 0) {
                 jobName = "Hunter";
-                job = net.sf.odinms.client.MapleJob.HUNTER;
+                job = MapleJob.HUNTER;
             } else {
                 jobName = "Crossbowman";
-                job = net.sf.odinms.client.MapleJob.CROSSBOWMAN;
+                job = MapleJob.CROSSBOWMAN;
             }
             cm.sendYesNo("Do you want to become a #r" + jobName + "#k?");
         } else if (status == 23) {

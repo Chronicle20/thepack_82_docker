@@ -28,7 +28,7 @@ quest: 3230
 escape: 2040028
 */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var status = 0;
 

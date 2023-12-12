@@ -24,6 +24,8 @@
 	Victoria Road : West Rocky Mountain IV (102020300)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 
 function start() {
@@ -39,16 +41,16 @@ function action(mode, type, selection) {
 			status++;
 		else
 			status--;
-		if (status == 0 && cm.getQuestStatus(100004) ==net.sf.odinms.client.MapleQuestStatus.Status.STARTED) {
+		if (status == 0 && cm.getQuestStatus(100004) == MapleQuestStatus.Status.STARTED) {
 			status = 3;
 		}
 		if (status == 0) {
-			if (cm.getQuestStatus(100004) == net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+			if (cm.getQuestStatus(100004) == MapleQuestStatus.Status.COMPLETED) {
 				cm.sendOk("You're truly a hero!");
 				cm.dispose();
-			} else if (cm.getQuestStatus(100003).getId() >=net.sf.odinms.client.MapleQuestStatus.Status.STARTED.getId()) {
+			} else if (cm.getQuestStatus(100003).getId() >= MapleQuestStatus.Status.STARTED.getId()) {
 				cm.completeQuest(100003);
-				if (cm.getQuestStatus(100003) ==net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+				if (cm.getQuestStatus(100003) == MapleQuestStatus.Status.COMPLETED) {
 					cm.sendNext("Oh, isn't this a letter from #bDances with Balrog#k?");
 				}
 			} else {

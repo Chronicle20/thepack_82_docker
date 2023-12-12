@@ -1,4 +1,5 @@
-importPackage(net.sf.rise.client);
+
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 
 var status = 0;

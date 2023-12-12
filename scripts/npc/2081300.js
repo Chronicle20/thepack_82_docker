@@ -4,7 +4,7 @@
 	Please don't release this anywhere else.
  */
 
-importPackage(net.sf.odinms.client);
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 var status = 0;
 var job;
@@ -31,10 +31,10 @@ function action(mode, type, selection) {
                 cm.sendNext("Hello, So you want 4th Job Advancement eh?.");
             }
         } else if (status == 102) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.RANGER)) {
+            if (cm.getJob().equals(MapleJob.RANGER)) {
                 status = 111;
                 cm.sendYesNo("Conratulations on reaching such a high level. Do you want to Job Advance now?");
-            } else if (cm.getJob().equals(net.sf.odinms.client.MapleJob.SNIPER)) {
+            } else if (cm.getJob().equals(MapleJob.SNIPER)) {
                 status = 114;
                 cm.sendYesNo("Conratulations on reaching such a high level. Do you want to Job Advance now?");
             }		

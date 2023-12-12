@@ -19,10 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
-
 /*
 LudiPQ - 1 - 2 Portal
 @author Jvlaple

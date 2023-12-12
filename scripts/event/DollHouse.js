@@ -1,9 +1,7 @@
 /**
 	Hak, travel between Orbis, Mu Lung and Herb Town
 **/
-
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.tools);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var returnMap;
 var map;
@@ -21,7 +19,7 @@ function playerEntry(eim, player) {
 	map.shuffleReactors();
 	em.setProperty("noEntry","true");
 	em.schedule("timeOut", 600000);
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(600));
+	player.getClient().getSession().write(MaplePacketCreator.getClock(600));
 }
 
 function playerExit(eim, player) {

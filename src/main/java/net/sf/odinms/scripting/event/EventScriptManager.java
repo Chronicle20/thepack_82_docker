@@ -9,21 +9,20 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import net.sf.odinms.net.channel.ChannelServer;
 import net.sf.odinms.scripting.AbstractScriptManager;
+import net.sf.odinms.scripting.SynchronizedInvocable;
 
 /**
  *
  * @author Matze
  */
 public class EventScriptManager extends AbstractScriptManager {
+	private static final String INJECTED_VARIABLE_NAME = "em";
 
 	private class EventEntry {
-		public EventEntry(String script, Invocable iv, EventManager em) {
-			this.script = script;
+		public EventEntry(Invocable iv, EventManager em) {
 			this.iv = iv;
 			this.em = em;
 		}
-		
-		public String script;
 		public Invocable iv;
 		public EventManager em;
 	}
@@ -33,9 +32,8 @@ public class EventScriptManager extends AbstractScriptManager {
 	public EventScriptManager(ChannelServer cserv, String[] scripts) {
 		super();
 		for (String script : scripts) {
-			if (!script.equals("")) {
-				Invocable iv = getInvocable("event/" + script + ".js", null);
-				events.put(script, new EventEntry(script, iv, new EventManager(cserv, iv, script)));
+			if (!script.isEmpty()) {
+				events.put(script, initializeEventEntry(script, cserv));
 			}
 		}
 	}
@@ -51,12 +49,9 @@ public class EventScriptManager extends AbstractScriptManager {
 	public void init() {
 		for (EventEntry entry : events.values()) {
 			try {
-				((ScriptEngine) entry.iv).put("em", entry.em);
 				entry.iv.invokeFunction("init", (Object) null);
-			} catch (ScriptException ex) {
-				Logger.getLogger(EventScriptManager.class.getName()).log(Level.SEVERE, null, ex);
-			} catch (NoSuchMethodException ex) {
-				Logger.getLogger(EventScriptManager.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (Exception ex) {
+				log.error("Error on script: {}", entry.em.getName(), ex);
 			}
 		}
 	}
@@ -66,5 +61,12 @@ public class EventScriptManager extends AbstractScriptManager {
 			entry.em.cancel();
 		}
 	}
-	
+
+	private EventEntry initializeEventEntry(String script, ChannelServer channel) {
+		ScriptEngine engine = getInvocableScriptEngine("event/" + script + ".js");
+		Invocable iv = SynchronizedInvocable.of((Invocable) engine);
+		EventManager eventManager = new EventManager(channel, iv, script);
+		engine.put(INJECTED_VARIABLE_NAME, eventManager);
+		return new EventEntry(iv, eventManager);
+	}
 }

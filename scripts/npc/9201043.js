@@ -6,8 +6,6 @@
 var status = 0;
 var MySelection = -1;
 
-importPackage(net.sf.odinms.client);
-
 function start() {
 	status = -1;
 	action(1, 0, 0);

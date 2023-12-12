@@ -23,11 +23,7 @@
  *For Jvlaple's Horntail PQ
  *@author Jvlaple :)
  */
- 
-importPackage(net.sf.odinms.tools);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
-importPackage(java.lang);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var curStage;
 

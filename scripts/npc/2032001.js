@@ -5,7 +5,9 @@ Refining NPC:
 * Dark Crystal - Half Price compared to Vogen, but must complete quest 
 */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 var status = 0;
 var selectedItem = -1;

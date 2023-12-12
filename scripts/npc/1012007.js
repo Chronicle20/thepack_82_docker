@@ -3,8 +3,6 @@
 	located in Pet-Walking Road (100000202)
  */
 
-importPackage(net.sf.odinms.server.maps);
-
 var status = 0;
 
 function start() {

@@ -19,8 +19,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.life);
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 function init() {
 }
@@ -109,8 +109,7 @@ function allMonstersDead(eim) {
 	map.spawnItemDrop(winner, winner, price, winner.getPosition(), true, false);
 	eim.schedule("warpOut", 120000);
 	var mob = MapleLifeFactory.getMonster(monsterId);
-	em.getChannelServer().broadcastPacket( 
-		net.sf.odinms.tools.MaplePacketCreator.serverNotice(6, "[Event] " + winner.getName() + " defeated " + mob.getName() + "!"));
+	em.getChannelServer().broadcastPacket(MaplePacketCreator.serverNotice(6, "[Event] " + winner.getName() + " defeated " + mob.getName() + "!"));
 }
 
 function cancelSchedule() {

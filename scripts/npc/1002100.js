@@ -1,5 +1,7 @@
 // Jane the Alchemist
-importPackage(net.sf.odinms.client);
+
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 var amount = -1;
 var item;

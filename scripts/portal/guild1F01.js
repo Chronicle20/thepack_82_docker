@@ -19,8 +19,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-importPackage(net.sf.odinms.server.maps);
-
 /*
 Warp to Sharen III's Grave - Guild Quest
 Give guild points if holding appropriate item and not gained already

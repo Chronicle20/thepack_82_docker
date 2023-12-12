@@ -1,4 +1,5 @@
-mportPackage(net.sf.odinms.server.maps);
+
+const SavedLocationType = Java.type('net.sf.odinms.client.SavedLocationType');
 
 function enter(pi) {
 	pi.getPlayer().saveLocation(SavedLocationType.FREE_MARKET);

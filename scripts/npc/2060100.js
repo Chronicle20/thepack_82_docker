@@ -1,6 +1,9 @@
 //carta
+const MapleQuest = Java.type('net.sf.odinms.server.quest.MapleQuest');
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 function start(){
-    if(cm.getChar().getQuest(net.sf.odinms.server.quest.MapleQuest.getInstance(6301)).getStatus().equals(net.sf.odinms.client.MapleQuestStatus.Status.STARTED)) {
+    if(cm.getChar().getQuest(MapleQuest.getInstance(6301)).getStatus().equals(MapleQuestStatus.Status.STARTED)) {
         if (cm.haveItem(4000175))
             cm.warp(923000000)
         else

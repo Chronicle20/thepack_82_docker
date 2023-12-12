@@ -26,11 +26,8 @@
  * 
  * Elnath Party Quest
  */
-importPackage(java.lang);
-
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
+const System = Java.type('java.lang.System');
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var exitMap;
 var instanceId;
@@ -67,10 +64,10 @@ function setup() {
 function playerEntry(eim, player) {
 	var map = eim.getMapInstance(921100300);
 	player.changeMap(map, map.getPortal(0));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6, "Tylus is under danger. Please protect him."));
+	player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+	player.getClient().getSession().write(MaplePacketCreator.serverNotice(6, "Tylus is under danger. Please protect him."));
 	//THE CLOCK IS SHIT
-	//player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(1800));
+	//player.getClient().getSession().write(MaplePacketCreator.getClock(1800));
 }
 
 function playerDead(eim, player) {
@@ -193,7 +190,7 @@ function timeOut() {
 
 function playerClocks(eim, player) {
   if (player.getMap().hasTimer() == false){
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+	player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
 	//player.getMap().setTimer(true);
 	}
 }

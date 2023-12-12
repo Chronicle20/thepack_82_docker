@@ -26,7 +26,9 @@
 	Custom Quest 100100, 100102
 */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 var status = 0;
 var job;

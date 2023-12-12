@@ -3,7 +3,7 @@
 	located in Lith Harbor (104000000)
  */
 
-importPackage(net.sf.odinms.server.maps);
+const SavedLocationType = Java.type('net.sf.odinms.client.SavedLocationType');
 
 var status = 0;
 

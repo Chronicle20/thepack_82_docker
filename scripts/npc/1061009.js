@@ -22,8 +22,7 @@
 /* Door of Dimension
 	Enter 3rd job event
 */
-
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 function start() {
 	if (cm.getQuestStatus(100101).equals(MapleQuestStatus.Status.STARTED) && !cm.haveItem(4031059)) {

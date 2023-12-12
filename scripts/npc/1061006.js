@@ -8,7 +8,7 @@
 2054: JQ3: 105040314 [end npc: 1063002, item: 4031028 x10]
 */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var status = 0;
 var zones = 0;

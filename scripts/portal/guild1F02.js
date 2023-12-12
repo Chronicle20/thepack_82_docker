@@ -1,5 +1,3 @@
-importPackage(net.sf.odinms.server.maps);
-
 /*
 Warp to Sharen III's Grave - Guild Quest
 Give guild points if holding appropriate item and not gained already

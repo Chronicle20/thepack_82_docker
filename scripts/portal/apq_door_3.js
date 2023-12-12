@@ -18,10 +18,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 /*
 Amoria: 2nd stage to 3rd stage portal

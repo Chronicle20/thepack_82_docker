@@ -29,7 +29,8 @@
 ---------------------------------------------------------------------------------------------------
 **/
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 var questid = new Array(3615,3616,3617,3618,3630,3633,3639);
 var questitem = new Array(4031235,4031236,4031237,4031238,4031270,4031280,4031298);
@@ -54,7 +55,7 @@ function action(mode, type, selection) {
 			if(counter == 0) {
 				books = "";
 				for(i=0; i < questid.length; i++) {
-					if(cm.getQuestStatus(questid[i]) == net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+					if(cm.getQuestStatus(questid[i]) == MapleQuestStatus.Status.COMPLETED) {
 						counter += 1;
 						books += "\r\n#v"+questitem[i]+"# #b#t"+questitem[i]+"##k";
 					}

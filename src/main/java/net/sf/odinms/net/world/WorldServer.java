@@ -58,6 +58,7 @@ public class WorldServer {
 	
 	public static void main(String[] args) {
 		try {
+			System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
 			Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT, 
 				new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
 			registry.rebind("WorldRegistry", WorldRegistryImpl.getInstance());

@@ -1,7 +1,6 @@
 //Made by Moogra
 //Vicious Old Arrow/Bow maker
 
-importPackage(net.sf.odinms.scripting);//This isn't needed is it
 
 function start() {
     cm.sendYesNo("Do you want to go to the event map?");

@@ -1,6 +1,5 @@
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
+const MapleMapObjectType = Java.type('net.sf.odinms.server.maps.MapleMapObjectType');
 
 function enter(pi) {
 	var papuMap = ChannelServer.getInstance(pi.getPlayer().getClient().getChannel()).getMapFactory().getMap(220080001);

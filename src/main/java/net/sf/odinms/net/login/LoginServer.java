@@ -243,6 +243,7 @@ public class LoginServer implements Runnable, LoginServerMBean {
 
     public static void main(String args[]) {
         try {
+            System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
             LoginServer.getInstance().run();
         } catch (Exception ex) {
             log.error("Error initializing loginserver", ex);

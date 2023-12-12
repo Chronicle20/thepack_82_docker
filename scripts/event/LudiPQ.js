@@ -25,8 +25,6 @@
  * Ludi Maze PQ
  */
  
-importPackage(net.sf.odinms.world);
-
 var exitMap;
 var instanceId;
 var finishMap;

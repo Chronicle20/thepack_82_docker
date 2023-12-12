@@ -23,7 +23,7 @@
 /* Guy in dollhouse map
 */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var status = 0;
 var greeting = "Would you like to return to Eos Tower?";

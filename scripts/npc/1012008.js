@@ -1,6 +1,5 @@
 //Robo Pet Hatcher
 //By : Vietno from Ragezone+ OdinTeh Forums
-importPackage(net.sf.odinms.client);
 var status = 0;
 
 function start() {

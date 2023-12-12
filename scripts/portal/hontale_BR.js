@@ -1,6 +1,4 @@
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 function enter(pi) {
 	if (pi.getPlayer().getMapId() == 240060000) {

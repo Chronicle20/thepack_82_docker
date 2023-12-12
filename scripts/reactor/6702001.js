@@ -3,8 +3,6 @@
  *@author Jvlaple
  */
 
-importPackage(java.lang);
-
 function act() {
 	var eim = rm.getPlayer().getEventInstance();
 	var party = eim.getPlayers();

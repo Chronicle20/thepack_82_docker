@@ -1,6 +1,3 @@
-importPackage(net.sf.odinms.client);
-
-
 var status = 0;
 
 function start() {

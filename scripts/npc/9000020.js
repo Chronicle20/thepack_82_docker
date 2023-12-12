@@ -6,8 +6,6 @@ var monsters = 0;
 var towns = 0;
 var bosses = 0;
 
-importPackage(net.sf.odinms.client);
-
 function start() {
     status = -1;
     action(1, 0, 0);

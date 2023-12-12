@@ -1,11 +1,7 @@
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
-importPackage(net.sf.odinms.client);
-
 /*
 Kerning PQ: 2nd stage to 3rd stage portal
 */
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 function enter(pi) {
 	var nextMap = 103000802;

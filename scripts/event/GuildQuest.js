@@ -24,13 +24,11 @@
  * 
  * Guild Quest 
  */
+const System = Java.type('java.lang.System');
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 var exitMap;
- 
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
-importPackage(java.lang);
 
 function init() {
         em.setProperty("shuffleReactors","false");
@@ -76,7 +74,7 @@ function begin(eim) {
         //} else {
 		var iter = party.iterator();
                 while (iter.hasNext()) {
-                        iter.next().getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6,"The quest has begun."));
+                        iter.next().getClient().getSession().write(MaplePacketCreator.serverNotice(6,"The quest has begun."));
 		}
         //}
 }
@@ -84,10 +82,10 @@ function begin(eim) {
 function playerEntry(eim, player) {
 	var map = eim.getMapInstance(990000000);
 	player.changeMap(map, map.getPortal(0));
-        player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+        player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
 	
 	//TODO: hold time across map changes
-	//player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(1800));
+	//player.getClient().getSession().write(MaplePacketCreator.getClock(1800));
 }
 
 function playerRevive(eim, player) {
@@ -111,7 +109,7 @@ function playerDisconnected(eim, player) {
 		var iter = party.iterator();
                 while (iter.hasNext()) {
 			var pl = iter.next();
-                        pl.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6,"The leader of the instance has disconnected, and the remaining players shall be warped out."));
+                        pl.getClient().getSession().write(MaplePacketCreator.serverNotice(6,"The leader of the instance has disconnected, and the remaining players shall be warped out."));
 			if (pl.equals(player)) {
 				removePlayer(eim, pl);
 			}			
@@ -149,7 +147,7 @@ function end(eim, msg) {
         var iter = eim.getPlayers().iterator();
         while (iter.hasNext()) {
                 var player = iter.next();
-                player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6,msg));
+                player.getClient().getSession().write(MaplePacketCreator.serverNotice(6,msg));
 		eim.unregisterPlayer(player);
                 player.changeMap(exitMap, exitMap.getPortal(0));
 	}
@@ -169,7 +167,7 @@ function clearPQ(eim) {
         while (iter.hasNext()) {
                 var player = iter.next();
 		player.changeMap(bonusMap, bonusMap.getPortal(0));
-                player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(40));
+                player.getClient().getSession().write(MaplePacketCreator.getClock(40));
 	}
         eim.schedule("finish", 40000)
 }
@@ -201,7 +199,7 @@ function earringcheck(eim, player) {
 		var pl = iter.next();
                 if (pl.getHp() > 0 && pl.getMapId() > 990000200 && pl.getInventory(MapleInventoryType.EQUIPPED).countById(1032033) == 0) {
 			pl.addHP(-30000);
-			pl.getMap().broadcastMessage(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6,pl.getName() + " died from not wearing earrings!"));
+			pl.getMap().broadcastMessage(MaplePacketCreator.serverNotice(6,pl.getName() + " died from not wearing earrings!"));
                 }
         }
         eim.schedule("earringcheck", 15000);

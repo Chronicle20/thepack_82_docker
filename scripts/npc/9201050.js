@@ -3,7 +3,7 @@
 	Handles the quiz quest. (4900)
  */
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var minlevel = 10;
 

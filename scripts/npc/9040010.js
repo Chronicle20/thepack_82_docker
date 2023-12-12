@@ -1,4 +1,5 @@
-importPackage(java.lang);
+
+const System = Java.type('java.lang.System');
 
 function start() {
     var eim = cm.getPlayer().getEventInstance();

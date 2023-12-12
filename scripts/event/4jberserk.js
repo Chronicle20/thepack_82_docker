@@ -27,9 +27,6 @@
  * And on 4th job Rush quest script by Angel-SL
  */
 
-
-importPackage(net.sf.odinms.world);
-
 var exitMap;
 var instanceId;
 var minPlayers = 3;

@@ -15,7 +15,7 @@ var costBeginner = Array(120, 120, 80, 100);
 var selectedMap = -1;
 var job;
 
-importPackage(net.sf.odinms.client);
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 function start() {
     status = -1;
@@ -41,7 +41,7 @@ function action(mode, type, selection) {
         if (status == 0) {
             cm.sendNext("Hello, I drive the Regular Cab. If you want to go from town to town safely and fast, then ride our cab. We'll glady take you to your destination with an affordable price.");
         } else if (status == 1) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getJob().equals(MapleJob.BEGINNER)) {
                 var selStr = "We have a special 90% discount for beginners. Choose your destination, for fees will change from place to place.#b";
                 for (var i = 0; i < maps.length; i++) {
                     selStr += "\r\n#L" + i + "##m" + maps[i] + "# (" + costBeginner[i] + " mesos)#l";
@@ -57,7 +57,7 @@ function action(mode, type, selection) {
             cm.sendYesNo("You don't have anything else to do here, huh? Do you really want to go to #b#m" + maps[selection] + "##k? It'll cost you #b"+ cost[selection] + " mesos#k.");
             selectedMap = selection;
         } else if (status == 3) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getJob().equals(MapleJob.BEGINNER)) {
                 if (cm.getMeso() < costBeginner[selection]) {
                     cm.sendNext("You don't have enough mesos. Sorry to say this, but without them, you won't be able to ride the cab.");
                     cm.dispose();

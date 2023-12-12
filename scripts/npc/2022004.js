@@ -2,7 +2,8 @@
  *2022004.js - Tylus after the PQ
  *@author Jvlaple
  */
-importPackage(net.sf.odinms.client); 
+
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
  
 function start() {
 	status = -1;
@@ -22,7 +23,7 @@ function action(mode, type, selection) {
 			status++;
 		else
 			status--;
-		if (cm.getQuestStatus(6192).equals(net.sf.odinms.client.MapleQuestStatus.Status.STARTED)) {		
+		if (cm.getQuestStatus(6192).equals(MapleQuestStatus.Status.STARTED)) {		
 			if (status == 0) {
 				cm.sendNext("Hey, you saved me from all those #bCrimson Balrogs#k and #bLycanthropes#k!");
 			} else if (status == 1) {

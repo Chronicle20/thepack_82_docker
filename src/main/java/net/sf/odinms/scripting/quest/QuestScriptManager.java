@@ -3,6 +3,8 @@ package net.sf.odinms.scripting.quest;
 import java.util.HashMap;
 import java.util.Map;
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
+
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.scripting.AbstractScriptManager;
 
@@ -14,11 +16,15 @@ import net.sf.odinms.scripting.AbstractScriptManager;
 public class QuestScriptManager extends AbstractScriptManager {
 
 	private Map<MapleClient,QuestActionManager> qms = new HashMap<MapleClient,QuestActionManager>();
-	private Map<MapleClient,QuestScript> scripts = new HashMap<MapleClient,QuestScript>();
+	private Map<MapleClient,Invocable> scripts = new HashMap<MapleClient,Invocable>();
 	private static QuestScriptManager instance = new QuestScriptManager();
 	
 	public synchronized static QuestScriptManager getInstance() {
 		return instance;
+	}
+
+	private ScriptEngine getQuestScriptEngine(MapleClient c, int questid) {
+        return getInvocableScriptEngine("quest/" + questid + ".js", c);
 	}
 
 	public void start(MapleClient c, int npc, int quest) {
@@ -28,15 +34,17 @@ public class QuestScriptManager extends AbstractScriptManager {
 				return;
 			}
 			qms.put(c, qm);
-			Invocable iv = getInvocable("quest/" + quest + ".js", c);
-			if (iv == null) {
+
+			ScriptEngine engine = getQuestScriptEngine(c, quest);
+			if (engine == null) {
+				log.warn("START Quest {} is uncoded.", quest);
 				qm.dispose();
 				return;
 			}
-			engine.put("qm", qm);
-			QuestScript qs = iv.getInterface(QuestScript.class);
-			scripts.put(c, qs);
-			qs.start((byte)1, (byte)0, 0); // start it off as something
+
+			Invocable iv = (Invocable) engine;
+			scripts.put(c, iv);
+			iv.invokeFunction("start", (byte) 1, (byte) 0, 0);
 		} catch (Exception e) {
 			log.error("Error executing Quest script. (" + quest + ")", e);
 			dispose(c);
@@ -44,12 +52,12 @@ public class QuestScriptManager extends AbstractScriptManager {
 	}
 	
 	public void start(MapleClient c, byte mode, byte type, int selection) {
-		QuestScript qs = scripts.get(c);
-		if (qs != null) {
+		Invocable iv = scripts.get(c);
+		if (iv != null) {
 			try {
-				qs.start(mode, type, selection);
-			} catch (Exception e) {
-				log.error("Error executing Quest script. (" + c.getQM().getQuest() + ")", e);
+				iv.invokeFunction("start", mode, type, selection);
+			} catch (final Exception e) {
+				log.error("Error starting quest script: {}", getQM(c).getQuest(), e);
 				dispose(c);
 			}
 		}
@@ -62,15 +70,19 @@ public class QuestScriptManager extends AbstractScriptManager {
 				return;
 			}
 			qms.put(c, qm);
-			Invocable iv = getInvocable("quest/" + quest + ".js", c);
-			if (iv == null) {
+
+			ScriptEngine engine = getQuestScriptEngine(c, quest);
+			if (engine == null) {
+				log.warn("END Quest {} is uncoded.", quest);
 				qm.dispose();
 				return;
 			}
+
 			engine.put("qm", qm);
-			QuestScript qs = iv.getInterface(QuestScript.class);
-			scripts.put(c, qs);
-			qs.end((byte) 1, (byte) 0, 0); // start it off as something
+
+			Invocable iv = (Invocable) engine;
+			scripts.put(c, iv);
+			iv.invokeFunction("end", (byte) 1, (byte) 0, 0);
 		} catch (Exception e) {
 			log.error("Error executing Quest script. (" + quest + ")", e);
 			dispose(c);
@@ -78,12 +90,12 @@ public class QuestScriptManager extends AbstractScriptManager {
 	}
 
 	public void end(MapleClient c, byte mode, byte type, int selection) {
-		QuestScript qs = scripts.get(c);
-		if (qs != null) {
+		Invocable iv = scripts.get(c);
+		if (iv != null) {
 			try {
-				qs.end(mode, type, selection);
-			} catch (Exception e) {
-				log.error("Error executing Quest script. (" + c.getQM().getQuest() + ")", e);
+				iv.invokeFunction("end", mode, type, selection);
+			} catch (final Exception e) {
+				log.error("Error ending quest script: {}", getQM(c).getQuest(), e);
 				dispose(c);
 			}
 		}

@@ -22,10 +22,7 @@
 /* Chamberlain Eak
  *@author Jvlaple
 */
-importPackage(net.sf.odinms.tools);
-importPackage(net.sf.odinms.server.life);
-importPackage(java.awt);
-importPackage(java.lang);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var status;
 var curMap;

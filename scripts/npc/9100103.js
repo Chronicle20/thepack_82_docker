@@ -27,8 +27,6 @@ var uniquec = Math.floor(Math.random()*unique.length);
 //itemamount. Amount of items u get for junks.
 var itemamount = Math.floor(Math.random()*50+1);
 
-importPackage(net.sf.odinms.client);
-
 function start() {
     status = -1;
     action(1, 0, 0);

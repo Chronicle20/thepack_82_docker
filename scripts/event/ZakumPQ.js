@@ -25,7 +25,6 @@
  * Zakum Party Quest 
  */
  
-importPackage(net.sf.odinms.world);
 
 var exitMap;
 var instanceId;

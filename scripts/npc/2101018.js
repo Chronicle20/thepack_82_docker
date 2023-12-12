@@ -3,7 +3,7 @@
     Ariant Coliseum 
 **/ 
 
-importPackage(net.sf.odinms.server.maps); 
+const SavedLocationType = Java.type('net.sf.odinms.client.SavedLocationType');
 
 var status = 0; 
 

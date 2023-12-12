@@ -1,4 +1,6 @@
-importPackage(net.sf.odinms.client);
+const Calendar = Java.type('java.util.Calendar');
+
+const System = Java.type('java.lang.System');
 
 var setupTask;
 
@@ -7,10 +9,10 @@ function init() {
 }
 
 function hpInterval() {
-    var cal = java.util.Calendar.getInstance();
-    cal.set(java.util.Calendar.SECOND, 5);
+    var cal = Calendar.getInstance();
+    cal.set(Calendar.SECOND, 5);
     var nextTime = cal.getTimeInMillis();
-    while (nextTime <= java.lang.System.currentTimeMillis()) {
+    while (nextTime <= System.currentTimeMillis()) {
         nextTime += 5000;
     }
     setupTask = em.scheduleAtTimestamp("decrease", nextTime);

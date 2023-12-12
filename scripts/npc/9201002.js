@@ -32,9 +32,6 @@ var maxPlayers = 2;
 var mySelection = -1;
 var rings = Array(1112001, 1112002, 1112003, 1112005, 1112006);
 
-//importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.tools);
-
 function start() {
 	status = -1;
 	action(1, 0, 0);

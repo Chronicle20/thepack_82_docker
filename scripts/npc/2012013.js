@@ -26,7 +26,6 @@ Sunny (Orbis Train Loader) 2012013
 
 var status = 0;
 var tm;
-importPackage(net.sf.odinms.client);
 
 function start() {
 	action(1, 0, 0);

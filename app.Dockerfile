@@ -21,7 +21,23 @@ COPY --from=ghcr.io/ufoscout/docker-compose-wait:latest /wait /wait
 # Host the server in a location that won't have permissions issues.
 WORKDIR /opt/dir
 
-COPY / ./
+COPY /scripts ./scripts/
+COPY /wz ./wz/
+COPY channel.properties ./
+COPY channel.truststore ./
+COPY db.properties ./
+COPY filename.keystore ./
+COPY logging.properties ./
+COPY login.keystore ./
+COPY login.properties ./
+COPY login.truststore ./
+COPY recvops.properties ./
+COPY run.sh ./
+COPY sendops.properties ./
+COPY world.keystore ./
+COPY world.properties ./
+COPY world.truststore ./
+
 # Copy the JAR we build earlier.
 COPY --from=jar /opt/dir/target/thepack.jar ./dist/thepack.jar
 

@@ -34,6 +34,8 @@
  * 4000082 = Zombie's Gold Tooth (stage 3 req)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status;
 var mapId = 211042300;
 var stage;
@@ -59,14 +61,14 @@ function action(mode, type, selection) {
 			status--;
 		if (status == 0) {
 			if (cm.getPlayer().getLevel() >= minLevel) {
-				if (cm.getQuestStatus(100200) != net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED
-				&& cm.getQuestStatus(100200) != net.sf.odinms.client.MapleQuestStatus.Status.STARTED) {
+				if (cm.getQuestStatus(100200) != MapleQuestStatus.Status.COMPLETED
+				&& cm.getQuestStatus(100200) != MapleQuestStatus.Status.STARTED) {
 					cm.startQuest(100200);
 					cm.sendOk("You want to be permitted to do the Zakum Dungeon Quest?  Well, I, #bAdobis#k... judge you to be suitable.  You should be safe roaming around the dungeon.  Just be careful...");
 					cm.dispose();
 					return;
 				}
-				else if (cm.getQuestStatus(100201) == net.sf.odinms.client.MapleQuestStatus.Status.STARTED) {
+				else if (cm.getQuestStatus(100201) == MapleQuestStatus.Status.STARTED) {
 					// if they have gold teeth and the other items, they are good to go
 					teethmode = 1;
 					cm.sendNext("Have you got the items I asked for?  This ain't no charity.");
@@ -74,7 +76,7 @@ function action(mode, type, selection) {
 				else {
 					cm.sendSimple("Beware, for the power of olde has not been forgotten... #b\r\n#L0#Enter the Unknown Dead Mine (Stage 1)#l\r\n#L1#Face the Breath of Lava (Stage 2)#l\r\n#L2#Forging the Eyes of Fire (Stage 3)#l");						
 				}
-				if (cm.getQuestStatus(100201) == net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+				if (cm.getQuestStatus(100201) == MapleQuestStatus.Status.COMPLETED) {
 					// They're done the quests
 					teethmode = 2;
 				}

@@ -3,9 +3,7 @@
  *Tigur duude in PQ ;)
  */
  
-importPackage(net.sf.odinms.tools);
-importPackage(net.sf.odinms.server.life);
-importPackage(java.awt);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var status;
 var curMap;

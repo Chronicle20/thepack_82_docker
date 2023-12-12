@@ -7,8 +7,6 @@
  * Accepts Dr. Do's Marble + ores for 100% weapon scrolls (alternate code provided to make 50/50 100%/60% or 3-way equal chance of 10%/60%/100% instead)
  */
 
-importPackage(net.sf.odinms.client);
-
 var status = 0;
 var selectedType = -1;
 var selectedItem = -1;

@@ -26,11 +26,8 @@
  * 
  * Wedding for odinMS
  */
-importPackage(java.lang);
-
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
+const System = Java.type('java.lang.System');
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var exitMap;
 var altarMap;
@@ -75,9 +72,9 @@ function playerEntry(eim, player) {
 	player.changeMap(map, map.getPortal(0));
 	
 	//1st - 20 min 2nd - 5 min 3rd 5 min xD
-	//player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(1200));
-	//player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(180));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+	//player.getClient().getSession().write(MaplePacketCreator.getClock(1200));
+	//player.getClient().getSession().write(MaplePacketCreator.getClock(180));
+	player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
 }
 
 //lets forget this bullshit...
@@ -106,17 +103,17 @@ function playerExit(eim, player) {
 function playerWarpAltar(eim, player) {
 	if ((player.getName() != eim.getProperty("husband")) && (player.getName() != eim.getProperty("wife"))){
 	player.changeMap(altarMap, altarMap.getPortal(0));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(300));
+	player.getClient().getSession().write(MaplePacketCreator.getClock(300));
 	}else{
 	player.changeMap(altarMap, altarMap.getPortal(2));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(300));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6, "Please talk to High Priest John now!"));
+	player.getClient().getSession().write(MaplePacketCreator.getClock(300));
+	player.getClient().getSession().write(MaplePacketCreator.serverNotice(6, "Please talk to High Priest John now!"));
 	}
 }
 
 function playerWarpCake(eim, player) {
 	player.changeMap(cakeMap, cakeMap.getPortal(0));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(300));
+	player.getClient().getSession().write(MaplePacketCreator.getClock(300));
 }
 
 function playerAltar(eim, player) {

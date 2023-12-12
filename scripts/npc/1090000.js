@@ -6,7 +6,7 @@
 var status = 0;
 var job;
 
-importPackage(net.sf.odinms.client);
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 function start() {
     status = -1;
@@ -27,7 +27,7 @@ function action(mode, type, selection) {
         else
             status--;
         if (status == 0) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getJob().equals(MapleJob.BEGINNER)) {
                 if (cm.getLevel() >= 10 && cm.getChar().getDex() >= 25)
                     cm.sendNext("So you decided to become a #rPirate#k?");
                 else {
@@ -35,14 +35,14 @@ function action(mode, type, selection) {
                     cm.dispose();
                 }
             } else {
-                if (cm.getLevel() >= 30 && cm.getJob().equals(net.sf.odinms.client.MapleJob.PIRATE)) {
+                if (cm.getLevel() >= 30 && cm.getJob().equals(MapleJob.PIRATE)) {
                     status = 10;
                     cm.sendNext("The progress you have made is astonishing.");
-                } else if (cm.getLevel() >= 70 && (cm.getJob().equals(net.sf.odinms.client.MapleJob.BRAWLER) || cm.getJob().equals(net.sf.odinms.client.MapleJob.GUNSLINGER)))
+                } else if (cm.getLevel() >= 70 && (cm.getJob().equals(MapleJob.BRAWLER) || cm.getJob().equals(MapleJob.GUNSLINGER)))
                     cm.sendOk("Please go visit #bArec#k. He resides in #bEl Nath#k.");
-                else if (cm.getLevel() < 30 && cm.getJob().equals(net.sf.odinms.client.MapleJob.PIRATE))
+                else if (cm.getLevel() < 30 && cm.getJob().equals(MapleJob.PIRATE))
                     cm.sendOk("Please come back to see me once you have trained more.");
-                else if (cm.getLevel() >= 120 && (cm.getJob().equals(net.sf.odinms.client.MapleJob.GUNSLINGER) || cm.getJob().equals(net.sf.odinms.client.MapleJob.OUTLAW)))
+                else if (cm.getLevel() >= 120 && (cm.getJob().equals(MapleJob.GUNSLINGER) || cm.getJob().equals(MapleJob.OUTLAW)))
                     cm.sendOk("Please go visit the 4th job advancement person.");
                 else
                     cm.sendOk("Please let me down...");
@@ -53,8 +53,8 @@ function action(mode, type, selection) {
         else if (status == 2)
             cm.sendYesNo("Do you want to become a #rPirate#k?");
         else if (status == 3) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER))
-                cm.changeJob(net.sf.odinms.client.MapleJob.PIRATE);
+            if (cm.getJob().equals(MapleJob.BEGINNER))
+                cm.changeJob(MapleJob.PIRATE);
             cm.sendOk("So be it! Now go with pride.");
             cm.dispose();
         } else if (status == 11)
@@ -65,10 +65,10 @@ function action(mode, type, selection) {
             var jobName;
             if (selection == 0) {
                 jobName = "Gunslinger";
-                job = net.sf.odinms.client.MapleJob.GUNSLINGER;
+                job = MapleJob.GUNSLINGER;
             } else {
                 jobName = "Brawler";
-                job = net.sf.odinms.client.MapleJob.BRAWLER;
+                job = MapleJob.BRAWLER;
             }
             cm.sendYesNo("Do you want to become a #r" + jobName + "#k?");
         } else if (status == 14) {

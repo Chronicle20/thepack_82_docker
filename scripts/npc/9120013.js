@@ -1,4 +1,6 @@
-importPackage(net.sf.odinms.client);
+
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 var status;
 var questions;

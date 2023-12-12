@@ -24,8 +24,9 @@
 	El Nath: Chief's Residence (211000001)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
-importPackage(net.sf.odinms.client);
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 var status = 0;
 var minLevel = 120;
@@ -53,7 +54,7 @@ function action(mode, type, selection) {
         else
             status--;
         if (status == 0) {
-            if (cm.getQuestStatus(6192).equals(net.sf.odinms.client.MapleQuestStatus.Status.STARTED)) {
+            if (cm.getQuestStatus(6192).equals(MapleQuestStatus.Status.STARTED)) {
                 if (cm.getParty() == null) { // no party
                     cm.sendOk("Please talk to me again after you've formed a party.");
                     cm.dispose();
@@ -116,7 +117,7 @@ function action(mode, type, selection) {
             }
             if ((cm.getJob().equals(MapleJob.PAGE) || cm.getJob().equals(MapleJob.FIGHTER) || cm.getJob().equals(MapleJob.SPEARMAN)) && cm.getLevel() >= 70 &&  cm.getChar().getRemainingSp() <= (cm.getLevel() - 70) * 3) {
                 cm.sendYesNo("I knew this day would come eventually.\r\n\r\nAre you ready to become much stronger than ever before?");
-            } else if (cm.getQuestStatus(6192).equals(net.sf.odinms.client.MapleQuestStatus.Status.STARTED) == false) {
+            } else if (cm.getQuestStatus(6192).equals(MapleQuestStatus.Status.STARTED) == false) {
                 cm.sendOk("Your time has yet to come...");
                 cm.dispose();
             }

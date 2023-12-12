@@ -1,7 +1,4 @@
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
-importPackage(net.sf.odinms.client);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 /*
 Kerning PQ: 4th stage to final stage portal

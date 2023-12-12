@@ -26,7 +26,8 @@ Tian (Ludi Train Loader) 2041000
 
 var status = 0;
 var tm;
-importPackage(net.sf.odinms.client); 
+
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 function start() {
 	action(1, 0, 0);

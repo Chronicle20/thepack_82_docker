@@ -590,6 +590,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
     public static void main(String args[]) throws FileNotFoundException, IOException, NotBoundException,
             InstanceAlreadyExistsException, MBeanRegistrationException,
             NotCompliantMBeanException, MalformedObjectNameException {
+        System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
         initialProp = new Properties();
         initialProp.load(new FileReader(System.getProperty("net.sf.odinms.channel.config")));
         Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());

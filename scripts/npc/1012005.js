@@ -5,9 +5,7 @@
 	Quest : 100200
  */
 
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server);
-importPackage(net.sf.odinms.tools);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var status = 0;
 

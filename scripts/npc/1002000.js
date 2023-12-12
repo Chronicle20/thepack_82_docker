@@ -3,13 +3,13 @@
 	- Lith Harbour
  */
 
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
+
 var status = 0;
 var maps = Array(102000000, 101000000, 100000000, 103000000);
 var cost = Array(1200, 1200, 800, 1000);
 var costBeginner = Array(120, 120, 80, 100);
 var job;
-
-importPackage(net.sf.odinms.client);
 
 function start() {
     cm.sendNext("Hi, I'm Phil.");
@@ -32,7 +32,7 @@ function action(mode, type, selection) {
             cm.sendNextPrev("I can take you to various locations for just a small fee. Beginners will get a 90% discount on normal prices.")
         else if (status == 2) {
             var selStr = "Select your destination.#b";
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getJob().equals(MapleJob.BEGINNER)) {
                 for (var i = 0; i < maps.length; i++)
                     selStr += "\r\n#L" + i + "##m" + maps[i] + "# (" + costBeginner[i] + " meso)#l";
             } else {
@@ -41,7 +41,7 @@ function action(mode, type, selection) {
             }
             cm.sendSimple(selStr);
         } else if (status == 3) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getJob().equals(MapleJob.BEGINNER)) {
                 if (cm.getMeso() < costBeginner[selection]) {
                     cm.sendOk("You do not have enough mesos.")
                     cm.dispose();
@@ -56,7 +56,7 @@ function action(mode, type, selection) {
             }
             cm.sendYesNo("So you have nothing left to do here? Do you want to go to #m" + maps[selection] + "#?");
         } else if (status == 4) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER))
+            if (cm.getJob().equals(MapleJob.BEGINNER))
                 cm.gainMeso(-costBeginner[selection]);
             else
                 cm.gainMeso(-cost[selection]);

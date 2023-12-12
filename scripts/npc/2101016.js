@@ -6,8 +6,6 @@
 var status = 0;
 var copns;
 
-importPackage(net.sf.odinms.client);
-
 function start() {
 	status = -1;
 	action(1, 0, 0);

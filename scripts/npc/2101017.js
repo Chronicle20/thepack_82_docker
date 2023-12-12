@@ -3,8 +3,7 @@
  *@author Jvlaple
  */
  
-importPackage(java.lang);
-importPackage(net.sf.odinms.server);
+const MapleSquadType = Java.type('net.sf.odinms.server.MapleSquadType');
  
 var status = 0;
 var toBan = -1;

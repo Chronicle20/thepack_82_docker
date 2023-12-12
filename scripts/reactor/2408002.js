@@ -4,11 +4,8 @@
  *@author Jvlaple
 */
 
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.tools);
-importPackage(java.lang);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
+const Item = Java.type('net.sf.odinms.client.Item');
 
 function act() {
 	var eim = rm.getPlayer().getEventInstance();
@@ -46,7 +43,7 @@ function act() {
 		}
 	}
 	
-	var tehWomanfred = new net.sf.odinms.client.Item(vvpKey, 0, 1);
+	var tehWomanfred = new Item(vvpKey, 0, 1);
 	var theWomanfred = womanfred.getReactorByName("keyDrop1");
 	var dropper = eim.getPlayers().get(0);
 	womanfred.spawnItemDrop(theWomanfred, dropper, tehWomanfred, theWomanfred.getPosition(), true, true);

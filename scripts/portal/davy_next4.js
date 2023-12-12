@@ -18,10 +18,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-importPackage(java.lang);
-importPackage(net.sf.odinms.server.maps);
-importPackage(net.sf.odinms.net.channel);
-importPackage(net.sf.odinms.tools);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 /*
 @Author Jvlaple
@@ -47,7 +44,7 @@ function enter(pi) {
 		eim.setProperty("entryTimeStamp", 1000 * 60 * 6);
 		for(var g=0; g<party.size(); g++) {
 			party.get(g).changeMap(target, targetPortal);
-			party.get(g).getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(360));
+			party.get(g).getClient().getSession().write(MaplePacketCreator.getClock(360));
 		}
 		return true;
 	}

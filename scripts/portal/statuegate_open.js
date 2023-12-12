@@ -1,5 +1,3 @@
-importPackage(net.sf.odinms.server.maps);
-
 /*
 Stage 1: Gatekeeper door - Guild Quest
 

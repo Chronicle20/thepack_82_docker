@@ -1,4 +1,5 @@
-importPackage(net.sf.odinms.client);
+
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var status = 0;
 var zones = 0;

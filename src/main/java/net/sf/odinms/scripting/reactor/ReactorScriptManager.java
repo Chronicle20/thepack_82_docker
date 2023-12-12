@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.scripting.AbstractScriptManager;
@@ -26,19 +29,29 @@ public class ReactorScriptManager extends AbstractScriptManager {
 		return instance;
 	}
 
+	private Invocable initializeInvocable(MapleClient c, MapleReactor reactor) {
+		ScriptEngine engine = getInvocableScriptEngine("reactor/" + reactor.getId() + ".js", c);
+		if (engine == null) {
+			return null;
+		}
+
+		Invocable iv = (Invocable) engine;
+		ReactorActionManager rm = new ReactorActionManager(c, reactor, iv);
+		engine.put("rm", rm);
+
+		return iv;
+	}
+
 	public void act(MapleClient c, MapleReactor reactor) {
 		try {
-			ReactorActionManager rm = new ReactorActionManager(c, reactor);
-
-			Invocable iv = getInvocable("reactor/" + reactor.getId() + ".js", c);
+			Invocable iv = initializeInvocable(c, reactor);
 			if (iv == null) {
 				return;
 			}
-			engine.put("rm", rm);
-			ReactorScript rs = iv.getInterface(ReactorScript.class);
-			rs.act();
-		} catch (Exception e) {
-			log.error("Error executing reactor script.", e);
+
+			iv.invokeFunction("act");
+		} catch (final ScriptException | NoSuchMethodException | NullPointerException e) {
+			log.error("Error during act script for reactor: {}", reactor.getId(), e);
 		}
 	}
 

@@ -1,7 +1,5 @@
 //Gachaphon
 
-importPackage(net.sf.odinms.client);
-
 var status = 0;
 var chance1 = Math.floor(Math.random()*200+1);
 var chance2 = Math.floor(Math.random()*50);

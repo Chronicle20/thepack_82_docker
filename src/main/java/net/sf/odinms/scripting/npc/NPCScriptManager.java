@@ -3,6 +3,9 @@ package net.sf.odinms.scripting.npc;
 import java.util.HashMap;
 import java.util.Map;
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.scripting.AbstractScriptManager;
@@ -14,7 +17,7 @@ import net.sf.odinms.scripting.AbstractScriptManager;
 public class NPCScriptManager extends AbstractScriptManager {
 
     private Map<MapleClient, NPCConversationManager> cms = new HashMap<MapleClient, NPCConversationManager>();
-    private Map<MapleClient, NPCScript> scripts = new HashMap<MapleClient, NPCScript>();
+    private Map<MapleClient, Invocable> scripts = new HashMap<MapleClient, Invocable>();
     private static NPCScriptManager instance = new NPCScriptManager();
 
     public synchronized static NPCScriptManager getInstance() {
@@ -33,21 +36,22 @@ public class NPCScriptManager extends AbstractScriptManager {
                 return;
             }
             cms.put(c, cm);
-            Invocable iv = getInvocable("npc/" + npc + ".js", c);
+            ScriptEngine engine = getInvocableScriptEngine("npc/" + npc + ".js", c);
             if (filename != null) {
-                iv = getInvocable("npc/" + filename + ".js", c);
+                engine = getInvocableScriptEngine("npc/" + filename + ".js", c);
             }
-            if (iv == null || NPCScriptManager.getInstance() == null) {
+            if (engine == null || NPCScriptManager.getInstance() == null) {
                 cm.dispose();
                 return;
             }
             engine.put("cm", cm);
-            NPCScript ns = iv.getInterface(NPCScript.class);
-            scripts.put(c, ns);
-            if (chr != null) {
-                ns.start(chr);
-            } else {
-                ns.start();
+
+            Invocable invocable = (Invocable) engine;
+            scripts.put(c, invocable);
+            try {
+                invocable.invokeFunction("start", chr);
+            } catch (final NoSuchMethodException nsme) {
+                nsme.printStackTrace();
             }
         } catch (Exception e) {
             log.error("Error executing NPC script.", e);
@@ -57,12 +61,14 @@ public class NPCScriptManager extends AbstractScriptManager {
     }
 
     public void action(MapleClient c, byte mode, byte type, int selection) {
-        NPCScript ns = scripts.get(c);
-        if (ns != null) {
+        Invocable iv = scripts.get(c);
+        if (iv != null) {
             try {
-                ns.action(mode, type, selection);
-            } catch (Exception e) {
-                log.error("Error executing NPC script.", e);
+                iv.invokeFunction("action", mode, type, selection);
+            } catch (ScriptException | NoSuchMethodException t) {
+                if (getCM(c) != null) {
+                    log.error("Error performing NPC script action for npc: {}", getCM(c).getNpc(), t);
+                }
                 dispose(c);
             }
         }

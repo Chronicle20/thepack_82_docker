@@ -7,9 +7,7 @@
 @	Function = LPQ - 9th Stage
 @
 */
-
-importPackage(net.sf.odinms.server.pq);
-importPackage(net.sf.odinms.client);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var status = 0;
 var party;
@@ -93,5 +91,5 @@ function warpOut(eim) {
 	party = eim.getPlayers();
 	cm.warpMembers(map, "st00", party);
 	cm.getChar().getEventInstance().schedule("startBonus", (1 * 60000));
-	cm.getChar().getMap().broadcastMessage(net.sf.odinms.tools.MaplePacketCreator.getClock(60));
+	cm.getChar().getMap().broadcastMessage(MaplePacketCreator.getClock(60));
 }

@@ -25,6 +25,8 @@
  * Zakum Quest NPC 
  * Custom Quest 100202 -> Done this stage once
  */
+
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
  
 var status;
  
@@ -52,7 +54,7 @@ function action(mode, type, selection) {
         else if (status == 2) {
             cm.gainItem(4031062,1);
             cm.warp(211042300);
-            if (cm.getQuestStatus(100202) != net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+            if (cm.getQuestStatus(100202) != MapleQuestStatus.Status.COMPLETED) {
                 cm.startQuest(100202);
                 cm.completeQuest(100202);
                 cm.gainExp(10000);

@@ -9,6 +9,8 @@
 ---------------------------------------------------------------------------------------------------
 **/
 
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
+
 var status = 0;
 var cost = 1000;
 
@@ -33,7 +35,7 @@ function action(mode, type, selection) {
         if (status == 0) 
             cm.sendNext("Hi there! This cab is for VIP customers only. Instead of just taking you to different towns like the regular cabs, we offer a much better service worthy of VIP class. It's a bit pricey, but... for only 10,000 mesos, we'll take you safely to the \r\n#bAnt Tunnel#k.");
         else if (status == 1) {
-            if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER))
+            if (cm.getJob().equals(MapleJob.BEGINNER))
                 cm.sendYesNo("We have a special 90% discount for beginners. The Ant Tunnel is located deep inside in the dungeon that's placed at the center of the Victoria Island, where the 24 Hr Mobile Store is. Would you like to go there for #b1,000 mesos#k?");
             else {
                 cm.sendYesNo("The regular fee applies for all non-beginners. The Ant Tunnel is located deep inside in the dungeon that's placed at the center of the Victoria Island, where 24 Hr Mobile Store is. Would you like to go there for #b10,000 mesos#k?");

@@ -26,9 +26,6 @@
  * Based on Kerning City PQ script by Stereo
  */
 
-
-importPackage(net.sf.odinms.world);
-
 var exitMap;
 var instanceId;
 var minPlayers = 3;

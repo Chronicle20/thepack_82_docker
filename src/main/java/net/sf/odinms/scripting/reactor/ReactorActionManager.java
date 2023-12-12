@@ -21,18 +21,20 @@ import net.sf.odinms.server.maps.MapleReactor;
 import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.server.maps.MapMonitor;
 
+import javax.script.Invocable;
+
 /**
  * @author Lerk
  */
 public class ReactorActionManager extends AbstractPlayerInteraction {
 
-    private MapleReactor reactor;
-    private MapleClient c;
+    private final MapleReactor reactor;
+    private final Invocable iv;
 
-    public ReactorActionManager(MapleClient c, MapleReactor reactor) {
+    public ReactorActionManager(MapleClient c, MapleReactor reactor, Invocable iv) {
         super(c);
         this.reactor = reactor;
-        this.c = c;
+        this.iv = iv;
     }
 
     public void dropItems() {

@@ -1,5 +1,3 @@
-importPackage(net.sf.odinms.tools);
-
 //Time Setting is in millisecond
 var closeTime = 240000; //The time to close the gate
 var beginTime = 300000; //The time to begin the ride

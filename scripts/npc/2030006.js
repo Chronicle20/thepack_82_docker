@@ -1,4 +1,4 @@
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
 
 var status = 0;
 var qChars = new Array ("Q1: What EXP is needed to level up from Level 1 to Level 2?#10#12#15#20#3",

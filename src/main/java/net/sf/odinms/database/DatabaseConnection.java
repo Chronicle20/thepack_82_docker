@@ -42,17 +42,19 @@ public class DatabaseConnection {
 		
 		@Override
 		protected Connection initialValue() {
-			String driver = props.getProperty("driver");
-			String url = props.getProperty("url");
-			String user = props.getProperty("user");
-			String password = props.getProperty("password");
+			Properties properties = new Properties();
+			properties.setProperty("useSSL", "false");
+			properties.setProperty("verifyServerCertificate", "false");
+			properties.setProperty("requireSSL", "false");
+			properties.setProperty("user", props.getProperty("user"));
+			properties.setProperty("password", props.getProperty("password"));
 			try {
-				Class.forName(driver); // touch the mysql driver
+				Class.forName(props.getProperty("driver")); // touch the mysql driver
 			} catch (ClassNotFoundException e) {
 				log.error("ERROR", e);
 			}
 			try {
-				Connection con = DriverManager.getConnection(url, user, password);
+				Connection con = DriverManager.getConnection(props.getProperty("url"), properties);
 				allConnections.add(con);
 				return con;
 			} catch (SQLException e) {

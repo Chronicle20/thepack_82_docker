@@ -9,8 +9,9 @@
 	Dragon Evolver
 */
 
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server);
+const MapleItemInformationProvider = Java.type('net.sf.odinms.server.MapleItemInformationProvider');
+
+const MapleInventoryManipulator = Java.type('net.sf.odinms.server.MapleInventoryManipulator');
 
 var status = 0;
 

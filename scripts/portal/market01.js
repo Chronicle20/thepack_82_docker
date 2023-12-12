@@ -19,7 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-importPackage(net.sf.odinms.server.maps);
+const SavedLocationType = Java.type('net.sf.odinms.client.SavedLocationType');
 
 /*
 Enter Free Market script (exists 12 times for fun)

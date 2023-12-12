@@ -1,8 +1,5 @@
 var status = 0;
 
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps.pq);
-
 function start() {
     status = -1;
     action(1,0,0);

@@ -11,7 +11,8 @@
 ---------------------------------------------------------------------------------------------------
 **/
 
-importPackage(net.sf.odinms.client);
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var selected;
 var amount;
 var totalcost;

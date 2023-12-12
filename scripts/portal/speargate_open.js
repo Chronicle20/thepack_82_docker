@@ -1,5 +1,3 @@
-importPackage(net.sf.odinms.server.maps);
-
 /*
 Stage 2: Exit Door - Guild Quest
 

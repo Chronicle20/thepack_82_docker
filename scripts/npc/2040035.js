@@ -8,9 +8,6 @@
 @
  */
 
-importPackage(net.sf.odinms.server.maps.pq);
-importPackage(net.sf.odinms.client);
-
 //MULTIPLE REWARD!!!! FIX PLEASE
 var status = 0;
 

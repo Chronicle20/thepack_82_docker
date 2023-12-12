@@ -1,3 +1,5 @@
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
+
 function enter(pi) {
 	var map = pi.getPlayer().getMap();
 	var reactor = map.getReactorByName("gate01");
@@ -6,7 +8,7 @@ function enter(pi) {
 		pi.warp(670010600, 4);
 		return true;
 	} else {
-		pi.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(5, "The gate is closed."));
+		pi.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "The gate is closed."));
 		return false;
 	}
 }

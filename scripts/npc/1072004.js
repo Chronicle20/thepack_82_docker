@@ -5,8 +5,10 @@
 TECHNICALLY THIS IS BROKEN, WHAT IS THIS SUPPOSED TO DO?
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 function start() {
-    if (cm.getQuestStatus(100004) == net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+    if (cm.getQuestStatus(100004) == MapleQuestStatus.Status.COMPLETED) {
         cm.startQuest(100005);
         cm.sendOk("You're a true hero! Take this and Dances with Balrog will acknowledge you.");
     } else {

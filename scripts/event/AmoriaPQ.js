@@ -26,11 +26,8 @@
  * 
  * Amoria Party Quest
  */
-importPackage(java.lang);
-
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
+const System = Java.type('java.lang.System');
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var exitMap;
 var instanceId;
@@ -85,7 +82,7 @@ function playerEntry(eim, player) {
 	player.changeMap(map, map.getPortal(0));
 	
 	//THE CLOCK IS SHIT
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(3600));
+	player.getClient().getSession().write(MaplePacketCreator.getClock(3600));
 }
 
 function playerDead(eim, player) {
@@ -201,7 +198,7 @@ function clearPQ(eim) {
 			var player = iter.next();
 			player.changeMap(bonusMap, bonusMap.getPortal(0));
 			eim.setProperty("entryTimestamp",System.currentTimeMillis() + (2 * 60000));
-	        player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(120));
+	        player.getClient().getSession().write(MaplePacketCreator.getClock(120));
 		}
         eim.schedule("finish", 1200000)
 }
@@ -233,7 +230,7 @@ function timeOut() {
 
 function playerClocks(eim, player) {
   if (player.getMap().hasTimer() == false){
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+	player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
 	//player.getMap().setTimer(true);
 	}
 }

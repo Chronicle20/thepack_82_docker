@@ -24,9 +24,10 @@
 Tommie (Leafre -> Orbis Loader) 2082001
 **/
 
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
+
 var status = 0;
 var lm;
-importPackage(net.sf.odinms.client);
 
 function start() {
     action(1, 0, 0);

@@ -25,9 +25,7 @@
  * Pig town - part of HPQ
  */
 
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 var exitMap;
 var instanceId;
@@ -53,7 +51,7 @@ function setup(eim) {
 function playerEntry(eim, player) {
     var map = eim.getMapInstance(910010200);
     player.changeMap(map, map.getPortal(0));
-    player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(300));
+    player.getClient().getSession().write(MaplePacketCreator.getClock(300));
 }
 
 function playerDead(eim, player) {

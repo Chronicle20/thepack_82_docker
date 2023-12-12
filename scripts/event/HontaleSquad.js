@@ -26,11 +26,9 @@
  * 
  * Horntail Party Quest
  */
-importPackage(java.lang);
-
-importPackage(net.sf.odinms.world);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.server.maps);
+const System = Java.type('java.lang.System');
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
+const MapleLifeFactory = Java.type('net.sf.odinms.server.life.MapleLifeFactory');
 
 var exitMap;
 var instanceId;
@@ -82,9 +80,9 @@ function setup() {
 function playerEntry(eim, player) {
 	var map = eim.getMapInstance(240060000);
 	player.changeMap(map, map.getPortal(0));
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+	player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
 	//THE CLOCK IS SHIT
-	//player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(1800));
+	//player.getClient().getSession().write(MaplePacketCreator.getClock(1800));
 }
 
 function playerDead(eim, player) {
@@ -207,7 +205,7 @@ function timeOut() {
 
 function playerClocks(eim, player) {
   if (player.getMap().hasTimer() == false){
-	player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
+	player.getClient().getSession().write(MaplePacketCreator.getClock((Long.parseLong(eim.getProperty("entryTimestamp")) - System.currentTimeMillis()) / 1000));
 	//player.getMap().setTimer(true);
 	}
 }
@@ -256,11 +254,11 @@ function headOne(eim, player) {
 		if (eim.getPlayerCount() > 0) {
 			var pIter = eim.getPlayers().iterator();
 			while (pIter.hasNext()) {
-				pIter.next().getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6,"The Enormous Creature is Approaching from the Deep Cave..."));
+				pIter.next().getClient().getSession().write(MaplePacketCreator.serverNotice(6,"The Enormous Creature is Approaching from the Deep Cave..."));
 			}
 		}
 		var theMap = eim.getMapFactory().getMap(240060000);
-		var mob = net.sf.odinms.server.life.MapleLifeFactory.getMonster(8810024);
+		var mob = MapleLifeFactory.getMonster(8810024);
 		var headd = theMap.spawnMonsterWithCoords(mob, 960, 230); //Spawn the head
 		theMap.killMonster(theMap.getMonsterByOid(headd), eim.getPlayers().get(0), false);
 	}
@@ -273,11 +271,11 @@ function headTwo(eim, player) {
 		if (eim.getPlayerCount() > 0) {
 			var pIter = eim.getPlayers().iterator();
 			while (pIter.hasNext()) {
-				pIter.next().getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6,"Watch out for Horntail... Be prepared for a long fight."));
+				pIter.next().getClient().getSession().write(MaplePacketCreator.serverNotice(6,"Watch out for Horntail... Be prepared for a long fight."));
 			}
 		}
 		var theMap = eim.getMapFactory().getMap(240060100);
-		var mob = net.sf.odinms.server.life.MapleLifeFactory.getMonster(8810025);
+		var mob = MapleLifeFactory.getMonster(8810025);
 		var headdd = theMap.spawnMonsterWithCoords(mob, -345, 230); //Spawn the head
 		theMap.killMonster(theMap.getMonsterByOid(headdd), eim.getPlayers().get(0), false);
 	}

@@ -4,7 +4,7 @@
       Took 2 lines from airflow0's code
  */
 
-importPackage(net.sf.odinms.client);
+const MapleJob = Java.type('net.sf.odinms.client.MapleJob');
 
 var status = 0;
 var jobName;
@@ -25,7 +25,7 @@ function action(mode, type, selection) {
         else
             status--;
         if (status == 1) {
-            if (cm.getLevel() < 200 && cm.getJob().equals(net.sf.odinms.client.MapleJob.BEGINNER)) {
+            if (cm.getLevel() < 200 && cm.getJob().equals(MapleJob.BEGINNER)) {
                 if (cm.getLevel() < 8) {
                     cm.sendNext("Sorry, but you have to be at least level 8 to use my services.");
                     cm.dispose();
@@ -39,15 +39,15 @@ function action(mode, type, selection) {
             } else if (cm.getLevel() < 30) {
                 cm.sendOk("Sorry, but you have to be at least level 30 to make the #rSecond Job Advancement#k.");
                 cm.dispose();
-            } else if (cm.getJob().equals(net.sf.odinms.client.MapleJob.THIEF))
+            } else if (cm.getJob().equals(MapleJob.THIEF))
                 cm.sendSimple("Congratulations on reaching such a high level. Which would you like to be? #b\r\n#L0#Assassin#l\r\n#L1#Bandit#l#k");
-            else if (cm.getJob().equals(net.sf.odinms.client.MapleJob.WARRIOR))
+            else if (cm.getJob().equals(MapleJob.WARRIOR))
                 cm.sendSimple("Congratulations on reaching such a high level. Which would you like to be? #b\r\n#L2#Fighter#l\r\n#L3#Page#l\r\n#L4#Spearman#l#k");
-            else if (cm.getJob().equals(net.sf.odinms.client.MapleJob.MAGICIAN))
+            else if (cm.getJob().equals(MapleJob.MAGICIAN))
                 cm.sendSimple("Congratulations on reaching such a high level. Which would you like to be? #b\r\n#L5#Ice Lightning Wizard#l\r\n#L6#Fire Poison Wizard#l\r\n#L7#Cleric#l#k");
-            else if (cm.getJob().equals(net.sf.odinms.client.MapleJob.BOWMAN))
+            else if (cm.getJob().equals(MapleJob.BOWMAN))
                 cm.sendSimple("Congratulations on reaching such a high level. Which would you like to be? #b\r\n#L8#Hunter#l\r\n#L9#Crossbowman#l#k");
-            else if (cm.getJob().equals(net.sf.odinms.client.MapleJob.PIRATE))
+            else if (cm.getJob().equals(MapleJob.PIRATE))
                 cm.sendSimple("Congratulations on reaching such a high level. Which would you like to be? #b\r\n#L10#Brawler#l\r\n#L11#Gunslinger#l#k");
             else if (cm.getLevel() < 70) {
                 cm.sendOk("Sorry, but you have to be at least level 70 to make the #rThird Job Advancement#k.");
@@ -68,18 +68,18 @@ function action(mode, type, selection) {
                 cm.dispose();
         } else if (status == 2) {
             switch(selection) {
-                case 0: jobName = "Assassin";             job = net.sf.odinms.client.MapleJob.ASSASSIN;    break;
-                case 1: jobName = "Bandit";               job = net.sf.odinms.client.MapleJob.BANDIT;      break;
-                case 2: jobName = "Fighter";              job = net.sf.odinms.client.MapleJob.FIGHTER;     break;
-                case 3: jobName = "Page";                 job = net.sf.odinms.client.MapleJob.PAGE;        break;
-                case 4: jobName = "Spearman";             job = net.sf.odinms.client.MapleJob.SPEARMAN;    break;
-                case 5: jobName = "Ice/Lightning Wizard"; job = net.sf.odinms.client.MapleJob.IL_WIZARD;   break;
-                case 6: jobName = "Fire/Poison Wizard";   job = net.sf.odinms.client.MapleJob.FP_WIZARD;   break;
-                case 7: jobName = "Cleric";               job = net.sf.odinms.client.MapleJob.CLERIC;      break;
-                case 8: jobName = "Hunter";               job = net.sf.odinms.client.MapleJob.HUNTER;      break;
-                case 9: jobName = "Crossbowman";          job = net.sf.odinms.client.MapleJob.CROSSBOWMAN; break;
-                case 10:jobName = "Brawler";              job = net.sf.odinms.client.MapleJob.BRAWLER;     break;
-                case 11:jobName = "Gunslinger";           job = net.sf.odinms.client.MapleJob.GUNSLINGER;  break;
+                case 0: jobName = "Assassin";             job = MapleJob.ASSASSIN;    break;
+                case 1: jobName = "Bandit";               job = MapleJob.BANDIT;      break;
+                case 2: jobName = "Fighter";              job = MapleJob.FIGHTER;     break;
+                case 3: jobName = "Page";                 job = MapleJob.PAGE;        break;
+                case 4: jobName = "Spearman";             job = MapleJob.SPEARMAN;    break;
+                case 5: jobName = "Ice/Lightning Wizard"; job = MapleJob.IL_WIZARD;   break;
+                case 6: jobName = "Fire/Poison Wizard";   job = MapleJob.FP_WIZARD;   break;
+                case 7: jobName = "Cleric";               job = MapleJob.CLERIC;      break;
+                case 8: jobName = "Hunter";               job = MapleJob.HUNTER;      break;
+                case 9: jobName = "Crossbowman";          job = MapleJob.CROSSBOWMAN; break;
+                case 10:jobName = "Brawler";              job = MapleJob.BRAWLER;     break;
+                case 11:jobName = "Gunslinger";           job = MapleJob.GUNSLINGER;  break;
             }
             cm.sendYesNo("Do you want to become a #r" + jobName + "#k?");
         } else if (status == 3) {
@@ -89,7 +89,7 @@ function action(mode, type, selection) {
         }
         else if (status == 151) {
             if (cm.c.getPlayer().getInt() >= 20) {
-                cm.changeJob(net.sf.odinms.client.MapleJob.MAGICIAN);
+                cm.changeJob(MapleJob.MAGICIAN);
                 cm.sendOk("There you go. Hope you enjoy it. See you around in the future.");
                 cm.dispose();
             } else {

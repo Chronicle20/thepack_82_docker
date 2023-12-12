@@ -1,9 +1,13 @@
 package net.sf.odinms.net.login;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
 import net.sf.odinms.client.MapleJob;
 import net.sf.odinms.database.DatabaseConnection;
 import org.slf4j.Logger;
@@ -56,19 +60,24 @@ public class RankingWorker implements Runnable {
 			charSelect.setInt(1, job.getId() / 100);
 		}
 		ResultSet rs = charSelect.executeQuery();
-		PreparedStatement ps = con.prepareStatement("UPDATE characters SET " + (job != null ? "jobRank = ?, jobRankMove = ? " : "rank = ?, rankMove = ? ") + "WHERE id = ?");
+		PreparedStatement ps = con.prepareStatement("UPDATE characters SET " + (job != null ? "jobRank = ?, jobRankMove = ? " : "`rank` = ?, rankMove = ? ") + "WHERE id = ?");
 		int rank = 0;
 		while (rs.next()) {
 			int rankMove = 0;
 			rank++;
-			if (rs.getLong("lastlogin") < lastUpdate || rs.getInt("loggedin") > 0) {
+			if (rs.getTimestamp("lastlogin").before(new Timestamp(lastUpdate)) || rs.getInt("loggedin") > 0) {
 				rankMove = rs.getInt((job != null ? "jobRankMove" : "rankMove"));
 			}
 			rankMove += rs.getInt((job != null ? "jobRank" : "rank")) - rank;
-			ps.setInt(1, rank);
-			ps.setInt(2, rankMove);
-			ps.setInt(3, rs.getInt("id"));
-			ps.executeUpdate();
+
+			try {
+				ps.setInt(1, rank);
+				ps.setInt(2, rankMove);
+				ps.setInt(3, rs.getInt("id"));
+				ps.executeUpdate();
+			} catch (SQLException e) {
+				log.error(e.toString());
+			}
 		}
 		rs.close();
 		charSelect.close();

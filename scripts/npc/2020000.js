@@ -31,8 +31,7 @@
 	* Processed Wood/Screws
 	* Arrows/Bronze Arrows/Steel Arrows
 */
-
-importPackage(net.sf.odinms.client);
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 var status = 0;
 var selectedType = -1;

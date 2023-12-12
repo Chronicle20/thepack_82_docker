@@ -2,9 +2,10 @@
 Cherry (Ellinia Boat Loader)
 **/
 
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
+
 var status = 0;
 var bm;
-importPackage(net.sf.odinms.client);
 
 function start() {
     action(1, 0, 0);

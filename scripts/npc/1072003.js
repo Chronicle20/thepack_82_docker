@@ -24,6 +24,8 @@
 	Victoria Road : Construction Site North of Kerning City (102040000)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 
 function start() {
@@ -39,20 +41,16 @@ function action(mode, type, selection) {
 			status++;
 		else
 			status--;
-		if (status == 0 && cm.getQuestStatus(100010) ==
-			net.sf.odinms.client.MapleQuestStatus.Status.STARTED) {
+		if (status == 0 && cm.getQuestStatus(100010) == MapleQuestStatus.Status.STARTED) {
 			status = 3;
 		}
 		if (status == 0) {
-			if (cm.getQuestStatus(100010) == 
-				net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+			if (cm.getQuestStatus(100010) == MapleQuestStatus.Status.COMPLETED) {
 				cm.sendOk("You're truly a hero!");
 				cm.dispose();
-			} else if (cm.getQuestStatus(100009).getId() >=
-				net.sf.odinms.client.MapleQuestStatus.Status.STARTED.getId()) {
+			} else if (cm.getQuestStatus(100009).getId() >= MapleQuestStatus.Status.STARTED.getId()) {
 				cm.completeQuest(100009);
-				if (cm.getQuestStatus(100009) ==
-					net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+				if (cm.getQuestStatus(100009) == MapleQuestStatus.Status.COMPLETED) {
 					cm.sendNext("Oh, isn't this a letter from the #bDark Lord#k?");
 				}
 			} else {

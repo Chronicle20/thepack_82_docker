@@ -1,4 +1,5 @@
-importPackage(net.sf.odinms.server.maps);
+
+const MapleMapObjectType = Java.type('net.sf.odinms.server.maps.MapleMapObjectType');
 
 var status;
 var stage;

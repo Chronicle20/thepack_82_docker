@@ -24,6 +24,8 @@
 	Hidden Street : Ant Tunnel For Bowman (108000100)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 
 function start() {
@@ -41,8 +43,7 @@ function action(mode, type, selection) {
 			status--;
 		if (status == 0) {
 			cm.completeQuest(100001);
-			if (cm.getQuestStatus(100001) ==
-				net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+			if (cm.getQuestStatus(100001) == MapleQuestStatus.Status.COMPLETED) {
 				cm.startQuest(100002);
 				cm.sendOk("You're a true hero! Take this and Athena will acknowledge you.");
 			} else {

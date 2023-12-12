@@ -1,7 +1,4 @@
 //INSERT monsterdrops (monsterid,itemid,chance) VALUES (9300061,4001101,1);
-importPackage(net.sf.odinms.client);
-importPackage(net.sf.odinms.net);
-importPackage(net.sf.odinms.tools);
 
 var exitMap;
 var instanceId;

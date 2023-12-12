@@ -27,7 +27,11 @@
 	* Level 30-50 weapons - Stimulator allowed
 */
 
-importPackage(net.sf.odinms.client);
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
+
+const MapleItemInformationProvider = Java.type('net.sf.odinms.server.MapleItemInformationProvider');
+
+const MapleInventoryManipulator = Java.type('net.sf.odinms.server.MapleInventoryManipulator');
 
 var status = 0;
 var selectedType = -1;
@@ -263,9 +267,9 @@ function action(mode, type, selection) {
 					var deleted = Math.floor(Math.random() * 10);
 					if (deleted != 0)
 					{
-						var ii = net.sf.odinms.server.MapleItemInformationProvider.getInstance();
+						var ii = MapleItemInformationProvider.getInstance();
 						var newItem = ii.randomizeStats(ii.getEquipById(item));
-						net.sf.odinms.server.MapleInventoryManipulator.addFromDrop(cm.getC(), newItem, "Created " + item  + " at Rydole (2040122, map 220020600) using a stimulator");
+						MapleInventoryManipulator.addFromDrop(cm.getC(), newItem, "Created " + item  + " at Rydole (2040122, map 220020600) using a stimulator");
 						cm.sendOk("Heeere you go! What do you think? Marvellous, isn't it?");
 					}
 					else

@@ -1,4 +1,4 @@
-importPackage(net.sf.odinms.tools);
+const MaplePacketCreator = Java.type('net.sf.odinms.tools.MaplePacketCreator');
 
 //Time Setting is in millisecond
 var closeTime = 240000; //The time to close the gate

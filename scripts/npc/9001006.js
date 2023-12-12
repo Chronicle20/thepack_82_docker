@@ -28,7 +28,7 @@ Coke Exchange Quest
 
  */
 
-importPackage(net.sf.odinms.client);
+const MapleInventoryType = Java.type('net.sf.odinms.client.MapleInventoryType');
 
 var status = 0;
 var eQuestChoices = new Array (4000209,4000210,4000211,4000212,4000213,4000214,4000216,4000217,4000219,4000221); 

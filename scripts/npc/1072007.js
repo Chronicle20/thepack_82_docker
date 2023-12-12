@@ -24,6 +24,8 @@
 	Hidden Street : Thief's Construction Site (108000400)
 */
 
+const MapleQuestStatus = Java.type('net.sf.odinms.client.MapleQuestStatus');
+
 var status = 0;
 
 function start() {
@@ -41,8 +43,7 @@ function action(mode, type, selection) {
 			status--;
 		if (status == 0) {
 			cm.completeQuest(100010);
-			if (cm.getQuestStatus(100010) ==
-				net.sf.odinms.client.MapleQuestStatus.Status.COMPLETED) {
+			if (cm.getQuestStatus(100010) == MapleQuestStatus.Status.COMPLETED) {
 				cm.startQuest(100011);
 				cm.sendOk("You're a true hero! Take this and the Dark Lord will acknowledge you.");
 			} else {
