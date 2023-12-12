@@ -14,18 +14,18 @@ public class AutoRegister {
     public static boolean success;
 
     public static boolean getAccountExists(String login) {
-        boolean accountExists = false;
         Connection con = DatabaseConnection.getConnection();
         try {
             PreparedStatement ps = con.prepareStatement("SELECT name FROM accounts WHERE name = ?");
             ps.setString(1, login);
             ResultSet rs = ps.executeQuery();
-            if (rs.first()) {
-                accountExists = true;
+            while (rs.next()) {
+                return true;
             }
+            return false;
         } catch (Exception ex) {
         }
-        return accountExists;
+        return false;
     }
 
     public static void createAccount(String login, String pwd, String eip) {
