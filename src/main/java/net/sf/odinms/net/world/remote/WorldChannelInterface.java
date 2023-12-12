@@ -21,7 +21,7 @@ import net.sf.odinms.net.world.guild.MapleGuildCharacter;
  *
  * @author Matze
  */
-public interface WorldChannelInterface extends Remote, WorldChannelCommonOperations {
+public interface WorldChannelInterface extends WorldChannelCommonOperations {
 
     public Properties getDatabaseProperties() throws RemoteException;
     public Properties getGameProperties() throws RemoteException;

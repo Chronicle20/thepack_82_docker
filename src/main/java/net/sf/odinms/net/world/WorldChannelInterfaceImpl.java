@@ -1,5 +1,6 @@
 package net.sf.odinms.net.world;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Matze
  */
-public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements WorldChannelInterface {
+public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements WorldChannelInterface, Remote {
 
     private static final long serialVersionUID = -5568606556235590482L;
     private static Logger log = LoggerFactory.getLogger(WorldChannelInterfaceImpl.class);

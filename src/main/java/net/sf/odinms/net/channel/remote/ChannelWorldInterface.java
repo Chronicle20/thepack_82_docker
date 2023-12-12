@@ -17,7 +17,7 @@ import net.sf.odinms.net.world.remote.WorldChannelCommonOperations;
  *
  * @author Matze
  */
-public interface ChannelWorldInterface extends Remote, WorldChannelCommonOperations {
+public interface ChannelWorldInterface extends WorldChannelCommonOperations {
     public void setChannelId(int id) throws RemoteException;
     public int getChannelId() throws RemoteException;
     public String getIP() throws RemoteException;
