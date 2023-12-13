@@ -3,11 +3,11 @@ package net.sf.odinms.net.login.handler;
 import net.sf.odinms.client.IItem;
 import net.sf.odinms.client.Item;
 import net.sf.odinms.client.MapleCharacter;
-import net.sf.odinms.client.MapleCharacterUtil;
+import net.sf.odinms.client.CharacterUtil;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventory;
 import net.sf.odinms.client.MapleInventoryType;
-import net.sf.odinms.client.MapleSkinColor;
+import net.sf.odinms.client.SkinColor;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.server.MapleItemInformationProvider;
 import net.sf.odinms.tools.MaplePacketCreator;
@@ -44,7 +44,7 @@ public class CreateCharHandler extends AbstractMaplePacketHandler {
         newchar.setInt(_int);
         newchar.setLuk(luk);
         newchar.setName(name);
-        newchar.setSkinColor(MapleSkinColor.getById(skinColor));
+        newchar.setSkinColor(SkinColor.getById(skinColor).orElse(SkinColor.NORMAL));
         MapleInventory equip = newchar.getInventory(MapleInventoryType.EQUIPPED);
         IItem eq_top = MapleItemInformationProvider.getInstance().getEquipById(top);
         eq_top.setPosition((byte) -5);
@@ -78,7 +78,7 @@ public class CreateCharHandler extends AbstractMaplePacketHandler {
         if ((hairColor != 0 && hairColor != 2 && hairColor != 3 && hairColor != 7)||(shoes != 1072001 && shoes != 1072005 && shoes != 1072037 && shoes != 1072038)||(weapon != 1302000 && weapon != 1322005 && weapon != 1312004)|| (skinColor < 0 || skinColor > 3)) {
             charok = false;
         }
-        if (charok && MapleCharacterUtil.canCreateChar(name, c.getWorld())) {
+        if (charok && CharacterUtil.canCreateChar(name, c.getWorld())) {
             newchar.saveToDB(false);
             c.getSession().write(MaplePacketCreator.addNewCharEntry(newchar, charok));
         }

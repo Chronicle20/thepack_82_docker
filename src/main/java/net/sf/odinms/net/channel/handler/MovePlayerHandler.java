@@ -38,15 +38,11 @@ public class MovePlayerHandler extends AbstractMovementPacketHandler {
             if (c.getPlayer().hasFakeChar()) {
                 int i = 1;
                 for (final FakeCharacter ch : c.getPlayer().getFakeChars()) {
-                    ScheduledFuture<?> scheduleRemove = TimerManager.getInstance().schedule(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            MaplePacket packet = MaplePacketCreator.movePlayer(ch.getFakeChar().getId(), res);
-                            ch.getFakeChar().getMap().broadcastMessage(ch.getFakeChar(), packet, false);
-                            updatePosition(res, ch.getFakeChar(), 0);
-                            ch.getFakeChar().getMap().movePlayer(ch.getFakeChar(), ch.getFakeChar().getPosition());
-                        }
+                    ScheduledFuture<?> scheduleRemove = TimerManager.getInstance().schedule(() -> {
+                        MaplePacket packet = MaplePacketCreator.movePlayer(ch.getFakeChar().getId(), res);
+                        ch.getFakeChar().getMap().broadcastMessage(ch.getFakeChar(), packet, false);
+                        updatePosition(res, ch.getFakeChar(), 0);
+                        ch.getFakeChar().getMap().movePlayer(ch.getFakeChar(), ch.getFakeChar().getPosition());
                     }, i * 300);
                     i++;
                 }

@@ -27,7 +27,7 @@ public class HealOvertimeHandler extends AbstractMaplePacketHandler {
 		}
 		int healMP = slea.readShort();
 		if (healMP != 0) {
-			if (healMP > Math.floor(((float)((float)c.getPlayer().getSkillLevel(SkillFactory.getSkill(2000000)) / 10) * c.getPlayer().getLevel()) + 3)) {
+			if (healMP > Math.floor((((float)c.getPlayer().getSkillLevel(SkillFactory.getSkill(2000000)) / 10) * c.getPlayer().getLevel()) + 3)) {
 				c.getPlayer().getCheatTracker().registerOffense(CheatingOffense.REGEN_HIGH_MP, String.valueOf(healMP));
 			}
 			c.getPlayer().getCheatTracker().checkMPRegen();

@@ -13,7 +13,7 @@ public class IPAddressTool {
         long ipAddress = 0;
         for (int i = 0; i < 4; i++) {
             int quad = Integer.parseInt(quads[i]);
-            ipAddress += (long) (quad % 256) * (long) Math.pow(256, (double) (4 - i));
+            ipAddress += (long) (quad % 256) * (long) Math.pow(256, 4 - i);
         }
         return ipAddress;
     }
@@ -21,8 +21,8 @@ public class IPAddressTool {
     public static String longToDottedQuad(long longIP) throws RuntimeException {
         StringBuilder ipAddress = new StringBuilder();
         for (int i = 0; i < 4; i++) {
-            int quad = (int) (longIP / (long) Math.pow(256, (double) (4 - i)));
-            longIP -= (long) quad * (long) Math.pow(256, (double) (4 - i));
+            int quad = (int) (longIP / (long) Math.pow(256, 4 - i));
+            longIP -= (long) quad * (long) Math.pow(256, 4 - i);
             if (i > 0) {
                 ipAddress.append(".");
             }

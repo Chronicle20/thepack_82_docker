@@ -5,7 +5,7 @@ import java.util.Random;
 import net.sf.odinms.client.ExpTable;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventoryType;
-import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.Pet;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.server.MapleInventoryManipulator;
 import net.sf.odinms.tools.MaplePacketCreator;
@@ -20,7 +20,7 @@ public class PetFoodHandler extends AbstractMaplePacketHandler {
         }
 		int previousFullness = 100;
 		int slot = 0;
-		MaplePet[] pets = c.getPlayer().getPets();
+		Pet[] pets = c.getPlayer().getPets();
 		for (int i = 0; i < 3; i++) {
 			if (pets[i] != null) {
 				if (pets[i].getFullness() < previousFullness) {
@@ -29,7 +29,7 @@ public class PetFoodHandler extends AbstractMaplePacketHandler {
 				}
 			}
 		}
-		MaplePet pet = c.getPlayer().getPet(slot);
+		Pet pet = c.getPlayer().getPet(slot);
 		slea.readInt();
 		slea.readShort();
 		int itemId = slea.readInt();

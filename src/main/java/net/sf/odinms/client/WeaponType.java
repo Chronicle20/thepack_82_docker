@@ -1,6 +1,6 @@
 package net.sf.odinms.client;
 
-public enum MapleWeaponType {
+public enum WeaponType {
 	NOT_A_WEAPON(0),
 	BOW(3.4),
 	CLAW(3.6),
@@ -19,13 +19,13 @@ public enum MapleWeaponType {
 	KNUCKLE(4.0),
 	GUN(5.0);
 	
-	private double damageMultiplier;
+	private final double damageMultiplier;
 	
-	private MapleWeaponType(double maxDamageMultiplier) {
+	WeaponType(double maxDamageMultiplier) {
 		this.damageMultiplier = maxDamageMultiplier;
 	}
 	
 	public double getMaxDamageMultiplier() {
 		return damageMultiplier;
 	}
-};
+}

@@ -19,7 +19,7 @@ import net.sf.odinms.tools.MaplePacketCreator;
 
 public class MapleTVEffect {
 
-    private static List<String> message = new LinkedList<String>();
+    private static List<String> message = new LinkedList<>();
     private static MapleCharacter user;
     private static boolean active;
     private static int type;
@@ -84,12 +84,6 @@ public class MapleTVEffect {
                 delay = 60000;
                 break;
         }
-        TimerManager.getInstance().schedule(new Runnable() {
-
-            @Override
-            public void run() {
-                broadCastTV(false);
-            }
-        }, delay);
+        TimerManager.getInstance().schedule(() -> broadCastTV(false), delay);
     }
 }  

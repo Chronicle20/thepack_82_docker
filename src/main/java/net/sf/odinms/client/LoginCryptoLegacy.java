@@ -98,12 +98,10 @@ public class LoginCryptoLegacy {
 			} while (--count > 0);
 			out = seed.substring(0, 12);
 			out += encode64(sha1Hash);
-		} catch (NoSuchAlgorithmException Ex) {
-			log.error("Error hashing password.", Ex);
-		} catch (UnsupportedEncodingException Ex) {
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException Ex) {
 			log.error("Error hashing password.", Ex);
 		}
-		if (out == null) {
+        if (out == null) {
 			throw new RuntimeException("Error hashing password - out = null");
 		}
 

@@ -41,7 +41,7 @@ function action(mode, type, selection) {
                 cm.sendOk("You do not have enough mesos.")
                 cm.dispose();
             } else {
-                cm.sendYesNo("Make sure you've gathered your things. Do you now want to go to #m"  maps[selection]  "#?");
+                cm.sendYesNo("Make sure you've gathered your things. Do you now want to go to #m"  maps[selection]  "#?")
                 selectedMap = selection;
             }
         } else if (status == 4) {

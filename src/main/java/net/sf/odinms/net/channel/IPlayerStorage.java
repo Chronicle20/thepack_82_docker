@@ -1,10 +1,12 @@
 package net.sf.odinms.net.channel;
 
 import java.util.Collection;
+import java.util.Optional;
+
 import net.sf.odinms.client.MapleCharacter;
 
 public interface IPlayerStorage {
-	public MapleCharacter getCharacterByName(String name);
-	public MapleCharacter getCharacterById(int id);
+	Optional<MapleCharacter> getCharacterByName(String name);
+	Optional<MapleCharacter> getCharacterById(int id);
 	Collection<MapleCharacter> getAllCharacters();
 }

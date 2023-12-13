@@ -31,7 +31,7 @@ public class MapleMapFactory {
     private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MapleMapFactory.class);
     private MapleDataProvider source;
     private MapleData nameData;
-    private Map<Integer, MapleMap> maps = new HashMap<Integer, MapleMap>();
+    private Map<Integer, MapleMap> maps = new HashMap<>();
     private int channel;
 
     public MapleMapFactory(MapleDataProvider source, MapleDataProvider stringSource) {
@@ -48,7 +48,7 @@ public class MapleMapFactory {
     }
 
     public MapleMap getMap(int mapid, boolean respawns, boolean npcs, boolean reactors) {
-        Integer omapid = Integer.valueOf(mapid);
+        Integer omapid = mapid;
         MapleMap map = maps.get(omapid);
         if (map == null) {
             synchronized (this) {
@@ -64,7 +64,7 @@ public class MapleMapFactory {
                 if (respawns) {
                     MapleData mobRate = mapData.getChildByPath("info/mobRate");
                     if (mobRate != null) {
-                        monsterRate = ((Float) mobRate.getData()).floatValue();
+                        monsterRate = (Float) mobRate.getData();
                     }
                 }
                 map = new MapleMap(mapid, channel, MapleDataTool.getInt("info/returnMap", mapData), monsterRate);
@@ -74,7 +74,7 @@ public class MapleMapFactory {
                     MaplePortal myPortal = portalFactory.makePortal(type, portal);
                     map.addPortal(myPortal);
                 }
-                List<MapleFoothold> allFootholds = new LinkedList<MapleFoothold>();
+                List<MapleFoothold> allFootholds = new LinkedList<>();
                 Point lBound = new Point();
                 Point uBound = new Point();
                 for (MapleData footRoot : mapData.getChildByPath("foothold")) {
@@ -164,7 +164,7 @@ public class MapleMapFactory {
                             MapleMonster monster = (MapleMonster) myLife;
                             int mobTime = MapleDataTool.getInt("mobTime", life, 0);
                             if (monster.isBoss()) {
-                                mobTime += mobTime / 10 * ((double) (2.5 + 10 * Math.random()));
+                                mobTime += mobTime / 10 * (2.5 + 10 * Math.random());
                             }
                             if (mobTime == -1 && respawns) { //does not respawn, force spawn once
                                 map.spawnMonster(monster);
@@ -286,16 +286,8 @@ public class MapleMapFactory {
     }
 
     private String getMapName(int mapid) {
-        String mapName = StringUtil.getLeftPaddedStr(Integer.toString(mapid), '0', 9);
-        StringBuilder builder = new StringBuilder("Map/Map");
         int area = mapid / 100000000;
-        builder.append(area);
-        builder.append("/");
-        builder.append(mapName);
-        builder.append(".img");
-
-        mapName = builder.toString();
-        return mapName;
+        return "Map/Map" + area + "/" + StringUtil.getLeftPaddedStr(Integer.toString(mapid), '0', 9) + ".img";
     }
 
     private String getMapStringName(int mapid) {
@@ -322,8 +314,7 @@ public class MapleMapFactory {
         builder.append("/");
         builder.append(mapid);
 
-        String mapName = builder.toString();
-        return mapName;
+        return builder.toString();
     }
 
     public void setChannel(int channel) {

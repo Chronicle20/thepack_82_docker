@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.sf.odinms.client.MapleCharacter;
-import net.sf.odinms.client.MapleDisease;
+import net.sf.odinms.client.Disease;
 import net.sf.odinms.client.status.MonsterStatus;
 import net.sf.odinms.server.MaplePortal;
 import net.sf.odinms.server.maps.MapleMap;
@@ -22,7 +22,7 @@ public class MobSkill {
     private int skillId;
     private int skillLevel;
     private int mpCon;
-    private List<Integer> toSummon = new ArrayList<Integer>();
+    private List<Integer> toSummon = new ArrayList<>();
     private int spawnEffect;
     private int hp;
     private int x;
@@ -87,7 +87,7 @@ public class MobSkill {
 
     public void applyEffect(MapleCharacter player, MapleMonster monster, boolean skill) {
         MonsterStatus monStat = null;
-        MapleDisease disease = null;
+        Disease disease = null;
         boolean heal = false;
         boolean dispel = false;
         boolean seduce = false;
@@ -113,24 +113,24 @@ public class MobSkill {
                 heal = true;
                 break;
             case 120:
-                disease = MapleDisease.SEAL;
+                disease = Disease.SEAL;
                 break;
             case 121:
-                disease = MapleDisease.DARKNESS;
+                disease = Disease.DARKNESS;
                 break;
             case 122:
-                disease = MapleDisease.WEAKEN;
+                disease = Disease.WEAKEN;
                 break;
             case 123:
-                disease = MapleDisease.STUN;
+                disease = Disease.STUN;
                 break;
             case 124: // Curse TODO
                 break;
             case 125:
-                disease = MapleDisease.POISON;
+                disease = Disease.POISON;
                 break;
             case 126: // Slow
-                disease = MapleDisease.SLOW;
+                disease = Disease.SLOW;
                 break;
             case 127:
                 dispel = true;
@@ -242,7 +242,7 @@ public class MobSkill {
                             character.changeMap(to, pto);
                         } else if (seduce) {
                             if (i < 10) {
-                                character.giveDebuff(MapleDisease.SEDUCE, this);
+                                character.giveDebuff(Disease.SEDUCE, this);
                                 i++;
                             }
                         } else {
@@ -264,7 +264,7 @@ public class MobSkill {
 
     private List<MapleCharacter> getPlayersInRange(MapleMonster monster, MapleCharacter player) {
         Rectangle bounds = calculateBoundingBox(monster.getPosition(), monster.isFacingLeft());
-        List<MapleCharacter> players = new ArrayList<MapleCharacter>();
+        List<MapleCharacter> players = new ArrayList<>();
         players.add(player);
         return monster.getMap().getPlayersInRange(bounds, players);
     }
@@ -305,18 +305,6 @@ public class MobSkill {
         return duration;
     }
 
-    public long getCoolTime() {
-        return cooltime;
-    }
-
-    public Point getLt() {
-        return lt;
-    }
-
-    public Point getRb() {
-        return rb;
-    }
-
     public int getLimit() {
         return limit;
     }
@@ -335,13 +323,12 @@ public class MobSkill {
             myrb = new Point(lt.x * -1 + posFrom.x, rb.y + posFrom.y);
             mylt = new Point(rb.x * -1 + posFrom.x, lt.y + posFrom.y);
         }
-        Rectangle bounds = new Rectangle(mylt.x, mylt.y, myrb.x - mylt.x, myrb.y - mylt.y);
-        return bounds;
+        return new Rectangle(mylt.x, mylt.y, myrb.x - mylt.x, myrb.y - mylt.y);
     }
 
     private List<MapleMapObject> getObjectsInRange(MapleMonster monster, MapleMapObjectType objectType) {
         Rectangle bounds = calculateBoundingBox(monster.getPosition(), monster.isFacingLeft());
-        List<MapleMapObjectType> objectTypes = new ArrayList<MapleMapObjectType>();
+        List<MapleMapObjectType> objectTypes = new ArrayList<>();
         objectTypes.add(objectType);
         return monster.getMap().getMapObjectsInBox(bounds, objectTypes);
     }

@@ -2,9 +2,9 @@ package net.sf.odinms.client;
 
 import java.util.regex.Pattern;
 
-public class MapleCharacterUtil {
+public class CharacterUtil {
 
-    private MapleCharacterUtil() {}
+    private CharacterUtil() {}
     
     public static boolean canCreateChar(String name, int world) {
         return isNameLegal(name) && MapleCharacter.getIdByName(name, world) < 0;

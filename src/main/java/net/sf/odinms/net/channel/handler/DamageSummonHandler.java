@@ -7,7 +7,6 @@ import net.sf.odinms.net.MaplePacketHandler;
 import net.sf.odinms.server.maps.MapleSummon;
 import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
-import java.util.Iterator;
 
 public class DamageSummonHandler extends AbstractMaplePacketHandler implements MaplePacketHandler {
 
@@ -17,9 +16,7 @@ public class DamageSummonHandler extends AbstractMaplePacketHandler implements M
         int damage = slea.readInt();
         int monsterIdFrom = slea.readInt();
         slea.readByte(); // stance
-        Iterator<MapleSummon> iter = c.getPlayer().getSummons().values().iterator();
-        while (iter.hasNext()) {
-            MapleSummon summon = iter.next();
+        for (MapleSummon summon : c.getPlayer().getSummons().values()) {
             if (summon.isPuppet() && summon.getOwner() == c.getPlayer()) { //We can only have one puppet(AFAIK O.O) so this check is safe.
                 summon.addHP(-damage);
                 if (summon.getHP() <= 0) {

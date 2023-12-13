@@ -18,9 +18,8 @@ public class MapleServerHandler extends IoHandlerAdapter {
 
     private final static Logger log = LoggerFactory.getLogger(MapleServerHandler.class);
     private final static short MAPLE_VERSION = 62;
-    private PacketProcessor processor;
+    private final PacketProcessor processor;
     private int channel = -1;
-    private boolean trace = false;
 
     public MapleServerHandler(PacketProcessor processor) {
         this.processor = processor;
@@ -41,13 +40,13 @@ public class MapleServerHandler extends IoHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+    public void exceptionCaught(IoSession session, Throwable cause) {
         MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
         log.error(MapleClient.getLogMessage(client, cause.getMessage()), cause);
     }
 
     @Override
-    public void sessionOpened(IoSession session) throws Exception {
+    public void sessionOpened(IoSession session) {
         log.info("IoSession with {} opened", session.getRemoteAddress());
         if (channel > -1) {
             if (ChannelServer.getInstance(channel).isShutdown()) {
@@ -55,9 +54,9 @@ public class MapleServerHandler extends IoHandlerAdapter {
                 return;
             }
         }
-        byte key[] = {0x13, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, (byte) 0xB4, 0x00, 0x00, 0x00, 0x1B, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x33, 0x00, 0x00, 0x00, 0x52, 0x00, 0x00, 0x00};
-        byte ivRecv[] = {70, 114, 122, 82};
-        byte ivSend[] = {82, 48, 120, 115};
+        byte[] key = {0x13, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, (byte) 0xB4, 0x00, 0x00, 0x00, 0x1B, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x33, 0x00, 0x00, 0x00, 0x52, 0x00, 0x00, 0x00};
+        byte[] ivRecv = {70, 114, 122, 82};
+        byte[] ivSend = {82, 48, 120, 115};
         ivRecv[3] = (byte) (Math.random() * 255);
         ivSend[3] = (byte) (Math.random() * 255);
         MapleAESOFB sendCypher = new MapleAESOFB(key, ivSend, (short) (0xFFFF - MAPLE_VERSION));
@@ -84,7 +83,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
     }
 
     @Override
-    public void messageReceived(IoSession session, Object message) throws Exception {
+    public void messageReceived(IoSession session, Object message) {
         byte[] content = (byte[]) message;
         SeekableLittleEndianAccessor slea = new GenericSeekableLittleEndianAccessor(new ByteArrayByteStream(content));
         short packetId = slea.readShort();
@@ -98,6 +97,7 @@ public class MapleServerHandler extends IoHandlerAdapter {
         }
         if (packetHandler != null && packetHandler.validateState(client)) {
             try {
+                boolean trace = false;
                 if (trace) {
                     String from = "";
                     if (client.getPlayer() != null) {

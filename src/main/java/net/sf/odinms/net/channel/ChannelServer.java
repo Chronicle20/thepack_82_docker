@@ -1,34 +1,7 @@
 package net.sf.odinms.net.channel;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.messages.CommandProcessor;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.net.MaplePacket;
@@ -51,28 +24,59 @@ import net.sf.odinms.server.ShutdownServer;
 import net.sf.odinms.server.TimerManager;
 import net.sf.odinms.server.maps.MapleMapFactory;
 import net.sf.odinms.tools.MaplePacketCreator;
-import net.sf.odinms.server.maps.MapMonitor;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 import org.apache.mina.core.future.CloseFuture;
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ChannelServer implements Runnable, ChannelServerMBean {
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 
-    private static int uniqueID = 1;
-    private int port = 7575;
-    private static Properties initialProp;
+public class ChannelServer implements Runnable, ChannelServerMBean {
     private static final Logger log = LoggerFactory.getLogger(ChannelServer.class);
+    private static int uniqueID = 1;
+    private static Properties initialProp;
     private static WorldRegistry worldRegistry;
+    private static Map<Integer, ChannelServer> instances = new HashMap<>();
+    private static Map<String, ChannelServer> pendingInstances = new HashMap<>();
+    public boolean orbgain;
+    public boolean eventOn = false;
+    public int eventMap = 0;
     private PlayerStorage players = new PlayerStorage();
     private String serverMessage;
-    private int expRate,  mesoRate,  dropRate,  bossdropRate,  petExpRate,  mountExpRate,  shopMesoRate;
-    private boolean gmWhiteText,  cashshop,  dropUndroppables,  moreThanOne;
+    private int expRate, mesoRate, dropRate, bossdropRate, petExpRate, mountExpRate, shopMesoRate;
+    private boolean gmWhiteText, cashshop, dropUndroppables, moreThanOne;
     private int channel;
     private String key;
     private Properties props = new Properties();
@@ -80,19 +84,13 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
     private WorldChannelInterface wci = null;
     private IoAcceptor acceptor;
     private String ip;
-    public boolean orbgain;
-    private boolean shutdown = false,  finishedShutdown = false;
-    private String arrayString = "";
+    private boolean shutdown = false;
+    private boolean finishedShutdown = false;
     private MapleMapFactory mapFactory;
     private EventScriptManager eventSM;
-    private static Map<Integer, ChannelServer> instances = new HashMap<Integer, ChannelServer>();
-    private static Map<String, ChannelServer> pendingInstances = new HashMap<String, ChannelServer>();
-    private Map<Integer, MapleGuildSummary> gsStore = new HashMap<Integer, MapleGuildSummary>();
+    private Map<Integer, MapleGuildSummary> gsStore = new HashMap<>();
     private Boolean worldReady = true;
-    public boolean eventOn = false;
-    public int eventMap = 0;
-    private Map<MapleSquadType, MapleSquad> mapleSquads = new HashMap<MapleSquadType, MapleSquad>();
-    private Map<Integer, MapMonitor> mapMonitors = new HashMap<Integer, MapMonitor>();
+    private Map<MapleSquadType, MapleSquad> mapleSquads = new HashMap<>();
     private int instanceId = 0;
     private boolean mts;
 
@@ -105,12 +103,39 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         return worldRegistry;
     }
 
-    public int getInstanceId() {
-        return instanceId;
+    public static ChannelServer newInstance(String key) throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, MalformedObjectNameException {
+        ChannelServer instance = new ChannelServer(key);
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        mBeanServer.registerMBean(instance, new ObjectName("net.sf.odinms.net.channel:type=ChannelServer,name=ChannelServer" + uniqueID++));
+        pendingInstances.put(key, instance);
+        return instance;
     }
 
-    public void setInstanceId(int k) {
-        instanceId = k;
+    public static ChannelServer getInstance(int channel) {
+        return instances.get(channel);
+    }
+
+    public static Collection<ChannelServer> getAllInstances() {
+        return Collections.unmodifiableCollection(instances.values());
+    }
+
+    public static void main(String[] args) throws IOException, NotBoundException,
+            InstanceAlreadyExistsException, MBeanRegistrationException,
+            NotCompliantMBeanException, MalformedObjectNameException {
+        System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
+        initialProp = new Properties();
+        initialProp.load(new FileReader(System.getProperty("net.sf.odinms.channel.config")));
+        Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());
+        worldRegistry = (WorldRegistry) registry.lookup("WorldRegistry");
+        for (int i = 0; i < Integer.parseInt(initialProp.getProperty("net.sf.odinms.channel.count", "0")); i++) {
+            newInstance(initialProp.getProperty("net.sf.odinms.channel." + i + ".key")).run();
+        }
+        DatabaseConnection.getConnection(); // touch - so we see database problems early...
+        CommandProcessor.registerMBean();
+    }
+
+    public int getInstanceId() {
+        return instanceId;
     }
 
     public void addInstanceId() {
@@ -217,7 +242,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
             throw new RuntimeException(e);
         }
 
-        port = Integer.parseInt(props.getProperty("net.sf.odinms.channel.net.port"));
+        int port = Integer.parseInt(props.getProperty("net.sf.odinms.channel.net.port"));
         ip = props.getProperty("net.sf.odinms.channel.net.interface") + ":" + port;
 
         IoBuffer.setUseDirectBuffer(false);
@@ -243,9 +268,9 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
 
     public void shutdown() {
         shutdown = true;
-        List<CloseFuture> futures = new LinkedList<CloseFuture>();
+        List<CloseFuture> futures = new LinkedList<>();
         Collection<MapleCharacter> allchars = players.getAllCharacters();
-        MapleCharacter chrs[] = allchars.toArray(new MapleCharacter[allchars.size()]);
+        MapleCharacter[] chrs = allchars.toArray(new MapleCharacter[0]);
         for (MapleCharacter chr : chrs) {
             if (chr.getTrade() != null) {
                 MapleTrade.cancelTrade(chr);
@@ -281,18 +306,6 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
 
     public MapleMapFactory getMapFactory() {
         return mapFactory;
-    }
-
-    public static ChannelServer newInstance(String key) throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, MalformedObjectNameException {
-        ChannelServer instance = new ChannelServer(key);
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-        mBeanServer.registerMBean(instance, new ObjectName("net.sf.odinms.net.channel:type=ChannelServer,name=ChannelServer" + uniqueID++));
-        pendingInstances.put(key, instance);
-        return instance;
-    }
-
-    public static ChannelServer getInstance(int channel) {
-        return instances.get(channel);
     }
 
     public void addPlayer(MapleCharacter chr) {
@@ -332,9 +345,10 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
     }
 
     public void broadcastPacket(MaplePacket data) {
-        for (MapleCharacter chr : players.getAllCharacters()) {
-            chr.getClient().getSession().write(data);
-        }
+        players.getAllCharacters().stream()
+                .map(MapleCharacter::getClient)
+                .map(MapleClient::getSession)
+                .forEach(s -> s.write(data));
     }
 
     @Override
@@ -347,33 +361,16 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         this.expRate = expRate;
     }
 
-    public String getArrayString() {
-        //If you are wondering, this is for the !array command
-        return arrayString;
-    }
-
-    public void setArrayString(String newStr) {
-        arrayString = newStr;
-    }
-
     public int getChannel() {
         return channel;
     }
 
     public void setChannel(int channel) {
-        if (pendingInstances.containsKey(key)) {
-            pendingInstances.remove(key);
-        }
-        if (instances.containsKey(channel)) {
-            instances.remove(channel);
-        }
+        pendingInstances.remove(key);
+        instances.remove(channel);
         instances.put(channel, this);
         this.channel = channel;
         this.mapFactory.setChannel(channel);
-    }
-
-    public static Collection<ChannelServer> getAllInstances() {
-        return Collections.unmodifiableCollection(instances.values());
     }
 
     public String getIP() {
@@ -430,12 +427,6 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
 
     public EventScriptManager getEventSM() {
         return eventSM;
-    }
-
-    public void reloadEvents() {
-        eventSM.cancel();
-        eventSM = new EventScriptManager(this, props.getProperty("net.sf.odinms.channel.events").split(","));
-        eventSM.init();
     }
 
     @Override
@@ -527,43 +518,41 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
             ps.close();
             rs.close();
         } catch (SQLException e) {
-            log.error("Error in charname check: \r\n" + e.toString());
+            log.error("Error in charname check: \r\n" + e);
         }
         return size >= 1;
     }
 
-    public MapleGuild getGuild(MapleGuildCharacter mgc) {
+    public Optional<MapleGuild> getGuild(MapleGuildCharacter mgc) {
         int gid = mgc.getGuildId();
-        MapleGuild g = null;
+        Optional<MapleGuild> g;
         try {
             g = this.getWorldInterface().getGuild(gid, mgc);
         } catch (RemoteException re) {
             log.error("RemoteException while fetching MapleGuild.", re);
-            return null;
+            return Optional.empty();
         }
 
-        if (gsStore.get(gid) == null) {
-            gsStore.put(gid, new MapleGuildSummary(g));
+        if (gsStore.get(gid) == null && g.isPresent()) {
+            gsStore.put(gid, new MapleGuildSummary(g.get()));
         }
 
         return g;
     }
 
-    public MapleGuildSummary getGuildSummary(int gid) {
+    public Optional<MapleGuildSummary> getGuildSummary(int gid) {
         if (gsStore.containsKey(gid)) {
-            return gsStore.get(gid);
-        } else {		//this shouldn't happen much, if ever, but if we're caught
-            //without the summary, we'll have to do a worldop
-            try {
-                MapleGuild g = this.getWorldInterface().getGuild(gid, null);
-                if (g != null) {
-                    gsStore.put(gid, new MapleGuildSummary(g));
-                }
-                return gsStore.get(gid);	//if g is null, we will end up returning null
-            } catch (RemoteException re) {
-                log.error("RemoteException while fetching GuildSummary.", re);
-                return null;
-            }
+            return Optional.ofNullable(gsStore.get(gid));
+        }
+
+        //this shouldn't happen much, if ever, but if we're caught
+        //without the summary, we'll have to do a worldop
+        try {
+            this.getWorldInterface().getGuild(gid, null).map(MapleGuildSummary::new).ifPresent(g -> gsStore.put(gid, g));
+            return Optional.ofNullable(gsStore.get(gid));
+        } catch (RemoteException re) {
+            log.error("RemoteException while fetching GuildSummary.", re);
+            return Optional.empty();
         }
     }
 
@@ -573,11 +562,11 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
 
     public void reloadGuildSummary() {
         try {
-            MapleGuild g;
+            Optional<MapleGuild> g;
             for (int i : gsStore.keySet()) {
                 g = this.getWorldInterface().getGuild(i, null);
-                if (g != null) {
-                    gsStore.put(i, new MapleGuildSummary(g));
+                if (g.isPresent()) {
+                    gsStore.put(i, new MapleGuildSummary(g.get()));
                 } else {
                     gsStore.remove(i);
                 }
@@ -585,21 +574,6 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         } catch (RemoteException re) {
             log.error("RemoteException while reloading GuildSummary.", re);
         }
-    }
-
-    public static void main(String args[]) throws FileNotFoundException, IOException, NotBoundException,
-            InstanceAlreadyExistsException, MBeanRegistrationException,
-            NotCompliantMBeanException, MalformedObjectNameException {
-        System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
-        initialProp = new Properties();
-        initialProp.load(new FileReader(System.getProperty("net.sf.odinms.channel.config")));
-        Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());
-        worldRegistry = (WorldRegistry) registry.lookup("WorldRegistry");
-        for (int i = 0; i < Integer.parseInt(initialProp.getProperty("net.sf.odinms.channel.count", "0")); i++) {
-            newInstance(initialProp.getProperty("net.sf.odinms.channel." + i + ".key")).run();
-        }
-        DatabaseConnection.getConnection(); // touch - so we see database problems early...
-        CommandProcessor.registerMBean();
     }
 
     public MapleSquad getMapleSquad(MapleSquadType type) {
@@ -616,26 +590,16 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         }
     }
 
-    public void addMapMonitor(int mapId, MapMonitor monitor) {
-        if (mapMonitors.containsKey(Integer.valueOf(mapId))) {
-            return;
-        }
-        mapMonitors.put(Integer.valueOf(mapId), monitor);
-    }
-
-    public void removeMapMonitor(int mapId) {
-        if (mapMonitors.containsKey(Integer.valueOf(mapId))) {
-            mapMonitors.remove(Integer.valueOf(mapId));
-        }
-    }
-
     public boolean removeMapleSquad(MapleSquad squad, MapleSquadType type) {
-        if (mapleSquads.containsKey(type)) {
-            if (mapleSquads.get(type) == squad) {
-                mapleSquads.remove(type);
-                return true;
-            }
+        if (!mapleSquads.containsKey(type)) {
+            return false;
         }
-        return false;
+
+        if (mapleSquads.get(type) != squad) {
+            return false;
+        }
+
+        mapleSquads.remove(type);
+        return true;
     }
 }

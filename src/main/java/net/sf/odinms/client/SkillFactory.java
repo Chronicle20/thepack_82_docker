@@ -10,17 +10,17 @@ import net.sf.odinms.provider.MapleDataTool;
 import net.sf.odinms.tools.StringUtil;
 
 public class SkillFactory {
-	private static Map<Integer, ISkill> skills = new HashMap<Integer, ISkill>();
+	private static Map<Integer, ISkill> skills = new HashMap<>();
 	private static MapleDataProvider datasource = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/Skill.wz"));
 	private static MapleData stringData = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/String.wz")).getData("Skill.img");
 
 	public static ISkill getSkill(int id) {
-		ISkill ret = skills.get(Integer.valueOf(id));
+		ISkill ret = skills.get(id);
 		if (ret != null) {
 			return ret;
 		}
 		synchronized (skills) {
-			ret = skills.get(Integer.valueOf(id));
+			ret = skills.get(id);
 			if (ret == null) {
 				int job = id / 10000;
 				MapleData skillroot = datasource.getData(StringUtil.getLeftPaddedStr(String.valueOf(job), '0', 3) + ".img");
@@ -28,7 +28,7 @@ public class SkillFactory {
 				if (skillData != null) {
 					ret = Skill.loadFromData(id, skillData);
 				}
-				skills.put(Integer.valueOf(id), ret);
+				skills.put(id, ret);
 			}
 			return ret;
 		}

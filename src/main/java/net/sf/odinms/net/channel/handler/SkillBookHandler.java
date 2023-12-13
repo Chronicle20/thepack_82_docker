@@ -61,7 +61,6 @@ public class SkillBookHandler extends AbstractMaplePacketHandler {
             }
             player.getClient().getSession().write(MaplePacketCreator.skillBookSuccess(player, skill, maxlevel, canuse, success));
         } else {
-            return;
         }
     }
 }

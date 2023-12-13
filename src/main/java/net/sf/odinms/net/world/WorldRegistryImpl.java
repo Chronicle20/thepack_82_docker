@@ -9,8 +9,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -18,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,13 +42,13 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
     private static final long serialVersionUID = -5170574938159280746L;
     private static WorldRegistryImpl instance = null;
     private static Logger log = LoggerFactory.getLogger(WorldRegistryImpl.class);
-    private Map<Integer, ChannelWorldInterface> channelServer = new LinkedHashMap<Integer, ChannelWorldInterface>();
-    private List<LoginWorldInterface> loginServer = new LinkedList<LoginWorldInterface>();
-    private Map<Integer, MapleParty> parties = new HashMap<Integer, MapleParty>();
+    private Map<Integer, ChannelWorldInterface> channelServer = new LinkedHashMap<>();
+    private List<LoginWorldInterface> loginServer = new LinkedList<>();
+    private Map<Integer, MapleParty> parties = new HashMap<>();
     private AtomicInteger runningPartyId = new AtomicInteger();
-    private Map<Integer, MapleMessenger> messengers = new HashMap<Integer, MapleMessenger>();
+    private Map<Integer, MapleMessenger> messengers = new HashMap<>();
     private AtomicInteger runningMessengerId = new AtomicInteger();
-    private Map<Integer, MapleGuild> guilds = new LinkedHashMap<Integer, MapleGuild>();
+    private Map<Integer, MapleGuild> guilds = new LinkedHashMap<>();
     private PlayerBuffStorage buffStorage = new PlayerBuffStorage();
 
     private WorldRegistryImpl() throws RemoteException {
@@ -165,7 +164,7 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
     }
 
     public List<LoginWorldInterface> getLoginServer() {
-        return new LinkedList<LoginWorldInterface>(loginServer);
+        return new LinkedList<>(loginServer);
     }
 
     public ChannelWorldInterface getChannel(int channel) {
@@ -173,7 +172,7 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
     }
 
     public Set<Integer> getChannelServer() {
-        return new HashSet<Integer>(channelServer.keySet());
+        return new HashSet<>(channelServer.keySet());
     }
 
     public Collection<ChannelWorldInterface> getAllChannelServers() {
@@ -183,8 +182,8 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
     public int getHighestChannelId() {
         int highest = 0;
         for (Integer channel : channelServer.keySet()) {
-            if (channel != null && channel.intValue() > highest) {
-                highest = channel.intValue();
+            if (channel != null && channel > highest) {
+                highest = channel;
             }
         }
         return highest;
@@ -207,14 +206,8 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
 
     public String getStatus() throws RemoteException {
         StringBuilder ret = new StringBuilder();
-        List<Entry<Integer, ChannelWorldInterface>> channelServers = new ArrayList<Entry<Integer, ChannelWorldInterface>>(channelServer.entrySet());
-        Collections.sort(channelServers, new Comparator<Entry<Integer, ChannelWorldInterface>>() {
-
-            @Override
-            public int compare(Entry<Integer, ChannelWorldInterface> o1, Entry<Integer, ChannelWorldInterface> o2) {
-                return o1.getKey().compareTo(o2.getKey());
-            }
-        });
+        List<Entry<Integer, ChannelWorldInterface>> channelServers = new ArrayList<>(channelServer.entrySet());
+        channelServers.sort(Entry.comparingByKey());
         int totalUsers = 0;
         for (Entry<Integer, ChannelWorldInterface> cs : channelServers) {
             ret.append("Channel ");
@@ -224,7 +217,7 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
                 ret.append(": online, ");
                 int channelUsers = cs.getValue().getConnected();
                 totalUsers += channelUsers;
-                ret.append(channelUsers + " users\n");
+                ret.append(channelUsers).append(" users\n");
             } catch (RemoteException e) {
                 ret.append(": offline\n");
             }
@@ -238,7 +231,7 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
             ret.append("Login: ");
             try {
                 lwi.isAvailable();
-                ret.append("online\n" + "Users waiting in login queue: " + lwi.getWaitingUsers() + " users\n" + "Current average login waiting time: " + (int) Math.ceil((double) loginInterval * ((double) lwi.getWaitingUsers() / lwi.getPossibleLoginAverage())) / 60000 + " minutes\n");
+                ret.append("online\n" + "Users waiting in login queue: ").append(lwi.getWaitingUsers()).append(" users\n").append("Current average login waiting time: ").append((int) Math.ceil((double) loginInterval * ((double) lwi.getWaitingUsers() / lwi.getPossibleLoginAverage())) / 60000).append(" minutes\n");
             } catch (RemoteException e) {
                 ret.append("offline\n");
             }
@@ -250,20 +243,20 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
         return MapleGuild.createGuild(leaderId, name);
     }
 
-    public MapleGuild getGuild(int id, MapleGuildCharacter mgc) {
+    public Optional<MapleGuild> getGuild(int id, MapleGuildCharacter mgc) {
         synchronized (guilds) {
             if (guilds.get(id) != null) {
-                return guilds.get(id);
+                return Optional.ofNullable(guilds.get(id));
             }
             if (mgc == null) {
-                return null;
+                return Optional.empty();
             }
             MapleGuild g = new MapleGuild(mgc);
             if (g.getId() == -1) {
-                return null;
+                return Optional.empty();
             }
             guilds.put(id, g);
-            return g;
+            return Optional.of(g);
         }
     }
 
@@ -281,8 +274,7 @@ public class WorldRegistryImpl extends UnicastRemoteObject implements WorldRegis
     }
 
     public void setGuildMemberOnline(MapleGuildCharacter mgc, boolean bOnline, int channel) {
-        MapleGuild g = getGuild(mgc.getGuildId(), mgc);
-        g.setOnline(mgc.getId(), bOnline, channel);
+        getGuild(mgc.getGuildId(), mgc).ifPresent(g -> g.setOnline(mgc.getId(), bOnline, channel));
     }
 
     public int addGuildMember(MapleGuildCharacter mgc) {

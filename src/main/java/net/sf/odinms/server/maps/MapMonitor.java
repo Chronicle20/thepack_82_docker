@@ -1,31 +1,26 @@
 package net.sf.odinms.server.maps;
 
-import java.util.concurrent.ScheduledFuture;
 import net.sf.odinms.server.MaplePortal;
 import net.sf.odinms.server.TimerManager;
 import net.sf.odinms.tools.MaplePacketCreator;
 
+import java.util.concurrent.ScheduledFuture;
+
 public class MapMonitor {
 
-    private ScheduledFuture<?> monitorSchedule;
-    private MapleMap map;
-    private MaplePortal portal;
-    private int ch;
-    private MapleReactor reactor;
+    private final ScheduledFuture<?> monitorSchedule;
+    private final MapleMap map;
+    private final MaplePortal portal;
+    private final MapleReactor reactor;
 
-    public MapMonitor(final MapleMap map, MaplePortal portal, int ch, MapleReactor reactor) {
+    public MapMonitor(final MapleMap map, MaplePortal portal, MapleReactor reactor) {
         this.map = map;
         this.portal = portal;
-        this.ch = ch;
         this.reactor = reactor;
         this.monitorSchedule = TimerManager.getInstance().register(
-                new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if (map.getCharacters().size() <= 0) {
-                            cancelAction();
-                        }
+                () -> {
+                    if (map.getCharacters().isEmpty()) {
+                        cancelAction();
                     }
                 }, 5000);
     }

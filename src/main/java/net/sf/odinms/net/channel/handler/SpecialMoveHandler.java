@@ -63,8 +63,7 @@ public class SpecialMoveHandler extends AbstractMaplePacketHandler {
 		}
 		if (skillLevel == 0 || skillLevel != __skillLevel) {
 			AutobanManager.getInstance().addPoints(c.getPlayer().getClient(), 1000, 0, "Using a move skill he doesn't have (" + skill.getId() + ")");
-			return;
-		} else {
+        } else {
 			if (c.getPlayer().isAlive()) {
 				if (skill.getId() != 2311002 || c.getPlayer().canDoor()) {
 					skill.getEffect(skillLevel).applyTo(c.getPlayer(), pos);

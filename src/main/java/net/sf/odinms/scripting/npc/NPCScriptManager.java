@@ -16,8 +16,8 @@ import net.sf.odinms.scripting.AbstractScriptManager;
  */
 public class NPCScriptManager extends AbstractScriptManager {
 
-    private Map<MapleClient, NPCConversationManager> cms = new HashMap<MapleClient, NPCConversationManager>();
-    private Map<MapleClient, Invocable> scripts = new HashMap<MapleClient, Invocable>();
+    private Map<MapleClient, NPCConversationManager> cms = new HashMap<>();
+    private Map<MapleClient, Invocable> scripts = new HashMap<>();
     private static NPCScriptManager instance = new NPCScriptManager();
 
     public synchronized static NPCScriptManager getInstance() {

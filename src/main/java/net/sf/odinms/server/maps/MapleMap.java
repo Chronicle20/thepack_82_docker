@@ -32,7 +32,7 @@ import net.sf.odinms.client.MapleBuffStat;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventoryType;
-import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.Pet;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.client.messages.MessageCallback;
 import net.sf.odinms.client.status.MonsterStatus;
@@ -55,12 +55,12 @@ public class MapleMap {
 
     private static final int MAX_OID = 20000;
     private static final List<MapleMapObjectType> rangedMapobjectTypes = Arrays.asList(MapleMapObjectType.ITEM, MapleMapObjectType.MONSTER, MapleMapObjectType.DOOR, MapleMapObjectType.SUMMON, MapleMapObjectType.REACTOR);
-    private Map<Integer, MapleMapObject> mapobjects = new LinkedHashMap<Integer, MapleMapObject>();
-    private Collection<SpawnPoint> monsterSpawn = new LinkedList<SpawnPoint>();
+    private Map<Integer, MapleMapObject> mapobjects = new LinkedHashMap<>();
+    private Collection<SpawnPoint> monsterSpawn = new LinkedList<>();
     private AtomicInteger spawnedMonstersOnMap = new AtomicInteger(0);
-    private Collection<MapleCharacter> characters = new LinkedHashSet<MapleCharacter>();
-    private Map<Integer, MaplePortal> portals = new HashMap<Integer, MaplePortal>();
-    private List<Rectangle> areas = new ArrayList<Rectangle>();
+    private Collection<MapleCharacter> characters = new LinkedHashSet<>();
+    private Map<Integer, MaplePortal> portals = new HashMap<>();
+    private List<Rectangle> areas = new ArrayList<>();
     private MapleFootholdTree footholds = null;
     private int mapid;
     private int runningOid = 100;
@@ -103,7 +103,7 @@ public class MapleMap {
     }
 
     public List<MapleMapObject> getMapObjectsInRect(Rectangle box, List<MapleMapObjectType> types) {
-        List<MapleMapObject> ret = new LinkedList<MapleMapObject>();
+        List<MapleMapObject> ret = new LinkedList<>();
         synchronized (mapobjects) {
             for (MapleMapObject l : mapobjects.values()) {
                 if (types.contains(l.getType())) {
@@ -117,7 +117,7 @@ public class MapleMap {
     }
 
     public Collection<MapleCharacter> getNearestPvpChar(Point attacker, double maxRange, double maxHeight, Collection<MapleCharacter> chr) {
-        Collection<MapleCharacter> character = new LinkedList<MapleCharacter>();
+        Collection<MapleCharacter> character = new LinkedList<>();
         for (MapleCharacter a : characters) {
             if (chr.contains(a.getClient().getPlayer())) {
                 Point attackedPlayer = a.getPosition();
@@ -163,7 +163,7 @@ public class MapleMap {
             if (!chr.isHidden()) {
                 broadcastMessage(chr, (MaplePacketCreator.spawnPlayerMapobject(chr)), false);
             }
-            this.mapobjects.put(Integer.valueOf(chr.getObjectId()), chr);
+            this.mapobjects.put(chr.getObjectId(), chr);
         }
     }
 
@@ -218,7 +218,7 @@ public class MapleMap {
     public void addMapObject(MapleMapObject mapobject) {
         synchronized (this.mapobjects) {
             mapobject.setObjectId(runningOid);
-            this.mapobjects.put(Integer.valueOf(runningOid), mapobject);
+            this.mapobjects.put(runningOid, mapobject);
             incrementRunningOid();
         }
     }
@@ -242,7 +242,7 @@ public class MapleMap {
                 }
             }
 
-            this.mapobjects.put(Integer.valueOf(runningOid), mapobject);
+            this.mapobjects.put(runningOid, mapobject);
             incrementRunningOid();
         }
     }
@@ -253,7 +253,7 @@ public class MapleMap {
             if (runningOid > MAX_OID) {
                 runningOid = 100;
             }
-            if (this.mapobjects.containsKey(Integer.valueOf(runningOid))) {
+            if (this.mapobjects.containsKey(runningOid)) {
                 runningOid++;
             } else {
                 return;
@@ -264,7 +264,7 @@ public class MapleMap {
 
     public void removeMapObject(int num) {
         synchronized (this.mapobjects) {
-            this.mapobjects.remove(Integer.valueOf(num));
+            this.mapobjects.remove(num);
         }
     }
 
@@ -324,11 +324,11 @@ public class MapleMap {
                 maxDrops = 5 * cserv.getDropRate() * card;
             }
         }
-        List<Integer> toDrop = new ArrayList<Integer>();
+        List<Integer> toDrop = new ArrayList<>();
         for (int i = 0; i < maxDrops; i++) {
             toDrop.add(monster.getDrop());
         }
-        Set<Integer> alreadyDropped = new HashSet<Integer>();
+        Set<Integer> alreadyDropped = new HashSet<>();
         int htpendants = 0;
         int htstones = 0;
         for (int i = 0; i < toDrop.size(); i++) {
@@ -405,19 +405,13 @@ public class MapleMap {
                     if (meso > 0) {
                         final MapleMonster dropMonster = monster;
                         final MapleCharacter dropChar = dropOwner;
-                        TimerManager.getInstance().schedule(new Runnable() {
-
-                            public void run() {
-                                spawnMesoDrop(meso, meso, dropPos, dropMonster, dropChar, isBoss);
-                            }
-                        }, monster.getAnimationTime("die1"));
+                        TimerManager.getInstance().schedule(() -> spawnMesoDrop(meso, meso, dropPos, dropMonster, dropChar, isBoss), monster.getAnimationTime("die1"));
                     }
                 } else {
                     IItem idrop;
                     MapleInventoryType type = ii.getInventoryType(drop);
                     if (type.equals(MapleInventoryType.EQUIP)) {
-                        Equip nEquip = ii.randomizeStats((Equip) ii.getEquipById(drop));
-                        idrop = nEquip;
+                        idrop = ii.randomizeStats((Equip) ii.getEquipById(drop));
                     } else {
                         idrop = new Item(drop, (byte) 0, (short) 1);
                         if (ii.isArrowForBow(drop) || ii.isArrowForCrossBow(drop)) {
@@ -426,23 +420,14 @@ public class MapleMap {
                             idrop.setQuantity((short) (1));
                         }
                     }
-                    StringBuilder logMsg = new StringBuilder("Created as a drop from monster " + monster.getObjectId() + " (" + monster.getId() + ") at " + dropPos.toString() + " on map " + mapid);
-                    idrop.log(logMsg.toString(), false);
+                    idrop.log("Created as a drop from monster " + monster.getObjectId() + " (" + monster.getId() + ") at " + dropPos.toString() + " on map " + mapid, false);
                     final MapleMapItem mdrop = new MapleMapItem(idrop, dropPos, monster, dropOwner);
                     final MapleMapObject dropMonster = monster;
                     final MapleCharacter dropChar = dropOwner;
                     final TimerManager tMan = TimerManager.getInstance();
-                    tMan.schedule(new Runnable() {
-
-                        public void run() {
-                            spawnAndAddRangedMapObject(mdrop, new DelayedPacketCreation() {
-
-                                public void sendPackets(MapleClient c) {
-                                    c.getSession().write(MaplePacketCreator.dropItemFromMapObject(drop, mdrop.getObjectId(), dropMonster.getObjectId(), isBoss ? 0 : dropChar.getId(), dropMonster.getPosition(), dropPos, (byte) 1));
-                                }
-                            });
-                            tMan.schedule(new ExpireMapItemJob(mdrop), dropLife);
-                        }
+                    tMan.schedule(() -> {
+                        spawnAndAddRangedMapObject(mdrop, c -> c.getSession().write(MaplePacketCreator.dropItemFromMapObject(drop, mdrop.getObjectId(), dropMonster.getObjectId(), isBoss ? 0 : dropChar.getId(), dropMonster.getPosition(), dropPos, (byte) 1)));
+                        tMan.schedule(new ExpireMapItemJob(mdrop), dropLife);
                     }, monster.getAnimationTime("die1"));
                 }
             }
@@ -517,13 +502,9 @@ public class MapleMap {
     @SuppressWarnings("static-access")
     public void killMonster(final MapleMonster monster, final MapleCharacter chr, final boolean withDrops, final boolean secondTime, int animation) {
         if (monster.getId() == 8810018 && !secondTime) {
-            TimerManager.getInstance().schedule(new Runnable() {
-
-                @Override
-                public void run() {
-                    killMonster(monster, chr, withDrops, true, 1);
-                    killAllMonsters(false);
-                }
+            TimerManager.getInstance().schedule(() -> {
+                killMonster(monster, chr, withDrops, true, 1);
+                killAllMonsters(false);
             }, 3000);
             return;
         }
@@ -589,7 +570,7 @@ public class MapleMap {
         if (drop) {
             players = getAllPlayer();
         }
-        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
         for (MapleMapObject monstermo : monsters) {
             MapleMonster monster = (MapleMonster) monstermo;
             spawnedMonstersOnMap.decrementAndGet();
@@ -597,7 +578,7 @@ public class MapleMap {
             broadcastMessage(MaplePacketCreator.killMonster(monster.getObjectId(), true), monster.getPosition());
             removeMapObject(monster);
             if (drop) {
-                int random = (int) Math.random() * (players.size());
+                int random = (int) (Math.random() * (players.size()));
                 dropFromMonster((MapleCharacter) players.get(random), monster);
             }
         }
@@ -614,7 +595,7 @@ public class MapleMap {
     }
 
     public List<MapleMapObject> getAllPlayer() {
-        return getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.PLAYER));
+        return getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER));
     }
 
     public void destroyReactor(int oid) {
@@ -625,13 +606,7 @@ public class MapleMap {
         removeMapObject(reactor);
         reactor.setTimerActive(false);
         if (reactor.getDelay() > 0) {
-            tMan.schedule(new Runnable() {
-
-                @Override
-                public void run() {
-                    respawnReactor(reactor);
-                }
-            }, reactor.getDelay());
+            tMan.schedule(() -> respawnReactor(reactor), reactor.getDelay());
         }
     }
 
@@ -648,17 +623,17 @@ public class MapleMap {
     }
 
     public void shuffleReactors() {
-        List<Point> points = new ArrayList<Point>();
+        List<Point> points = new ArrayList<>();
         synchronized (this.mapobjects) {
             for (MapleMapObject o : mapobjects.values()) {
                 if (o.getType() == MapleMapObjectType.REACTOR) {
-                    points.add(((MapleReactor) o).getPosition());
+                    points.add(o.getPosition());
                 }
             }
             Collections.shuffle(points);
             for (MapleMapObject o : mapobjects.values()) {
                 if (o.getType() == MapleMapObjectType.REACTOR) {
-                    ((MapleReactor) o).setPosition(points.remove(points.size() - 1));
+                    o.setPosition(points.remove(points.size() - 1));
                 }
             }
         }
@@ -669,7 +644,7 @@ public class MapleMap {
     }
 
     public void killAllMonsters() {
-        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
         for (MapleMapObject monstermo : monsters) {
             MapleMonster monster = (MapleMonster) monstermo;
             spawnedMonstersOnMap.decrementAndGet();
@@ -696,7 +671,7 @@ public class MapleMap {
     }
 
     public void killAllmonster(MapleClient c) {
-        List<MapleMapObject> monsters = getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+        List<MapleMapObject> monsters = getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
         for (MapleMapObject monstermo : monsters) {
             MapleMonster monster = (MapleMonster) monstermo;
             killMonster(monster, c.getPlayer(), false);
@@ -704,7 +679,7 @@ public class MapleMap {
     }
 
     public void killAllmonster() {
-        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
         for (MapleMapObject monstermo : monsters) {
             MapleMonster monster = (MapleMonster) monstermo;
             spawnedMonstersOnMap.decrementAndGet();
@@ -719,7 +694,7 @@ public class MapleMap {
         if (drop) {
             players = getAllPlayer();
         }
-        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER));
+        List<MapleMapObject> monsters = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER));
         for (MapleMapObject monstermo : monsters) {
             MapleMonster monster = (MapleMonster) monstermo;
             spawnedMonstersOnMap.decrementAndGet();
@@ -734,9 +709,7 @@ public class MapleMap {
     }
 
     public int playerCount() {
-        List<MapleMapObject> players = getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.PLAYER));
-        int count = players.size();
-        return count;
+        return getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.PLAYER)).size();
     }
 
     /**
@@ -869,12 +842,7 @@ public class MapleMap {
     public void spawnRevives(final MapleMonster monster) {
         monster.setMap(this);
         synchronized (this.mapobjects) {
-            spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-
-                public void sendPackets(MapleClient c) {
-                    c.getSession().write(MaplePacketCreator.spawnMonster(monster, false));
-                }
-            });
+            spawnAndAddRangedMapObject(monster, c -> c.getSession().write(MaplePacketCreator.spawnMonster(monster, false)));
             updateMonsterController(monster);
         }
         spawnedMonstersOnMap.incrementAndGet();
@@ -883,24 +851,17 @@ public class MapleMap {
     public void spawnMonster(final MapleMonster monster) {
         monster.setMap(this);
         synchronized (this.mapobjects) {
-            spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
+            spawnAndAddRangedMapObject(monster, c -> {
+                c.getSession().write(MaplePacketCreator.spawnMonster(monster, true));
 
-                public void sendPackets(MapleClient c) {
-                    c.getSession().write(MaplePacketCreator.spawnMonster(monster, true));
+                Random rand = new Random();
 
-                    Random rand = new Random();
-
-                    if (monster.getRemoveAfter() > 0) {
-                        ScheduledFuture<?> scheduleDeath = TimerManager.getInstance().schedule(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                if (monster != null) {
-                                    killMonster(monster, (MapleCharacter) getAllPlayer().get(0), false, false, 3);
-                                }
-                            }
-                        }, monster.getRemoveAfter());
-                    }
+                if (monster.getRemoveAfter() > 0) {
+                    ScheduledFuture<?> scheduleDeath = TimerManager.getInstance().schedule(() -> {
+                        if (monster != null) {
+                            killMonster(monster, (MapleCharacter) getAllPlayer().get(0), false, false, 3);
+                        }
+                    }, monster.getRemoveAfter());
                 }
             }, null);
             updateMonsterController(monster);
@@ -917,12 +878,7 @@ public class MapleMap {
             monster.setPosition(spos);
             monster.disableDrops();
             synchronized (this.mapobjects) {
-                spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-
-                    public void sendPackets(MapleClient c) {
-                        c.getSession().write(MaplePacketCreator.spawnMonster(monster, true, effect));
-                    }
-                });
+                spawnAndAddRangedMapObject(monster, c -> c.getSession().write(MaplePacketCreator.spawnMonster(monster, true, effect)));
                 updateMonsterController(monster);
             }
             spawnedMonstersOnMap.incrementAndGet();
@@ -934,12 +890,7 @@ public class MapleMap {
         monster.setMap(this);
         monster.setFake(true);
         synchronized (this.mapobjects) {
-            spawnAndAddRangedMapObject(monster, new DelayedPacketCreation() {
-
-                public void sendPackets(MapleClient c) {
-                    c.getSession().write(MaplePacketCreator.spawnFakeMonster(monster, 0));
-                }
-            });
+            spawnAndAddRangedMapObject(monster, c -> c.getSession().write(MaplePacketCreator.spawnFakeMonster(monster, 0)));
         }
         spawnedMonstersOnMap.incrementAndGet();
     }
@@ -953,12 +904,7 @@ public class MapleMap {
     public void spawnReactor(final MapleReactor reactor) {
         reactor.setMap(this);
         synchronized (this.mapobjects) {
-            spawnAndAddRangedMapObject(reactor, new DelayedPacketCreation() {
-
-                public void sendPackets(MapleClient c) {
-                    c.getSession().write(reactor.makeSpawnData());
-                }
-            });
+            spawnAndAddRangedMapObject(reactor, c -> c.getSession().write(reactor.makeSpawnData()));
         }
     }
 
@@ -970,28 +916,20 @@ public class MapleMap {
 
     public void spawnDoor(final MapleDoor door) {
         synchronized (this.mapobjects) {
-            spawnAndAddRangedMapObject(door, new DelayedPacketCreation() {
-
-                public void sendPackets(MapleClient c) {
-                    c.getSession().write(MaplePacketCreator.spawnDoor(door.getOwner().getId(), door.getTargetPosition(), false));
-                    if (door.getOwner().getParty() != null && (door.getOwner() == c.getPlayer() || door.getOwner().getParty().containsMembers(new MaplePartyCharacter(c.getPlayer())))) {
-                        c.getSession().write(MaplePacketCreator.partyPortal(door.getTown().getId(), door.getTarget().getId(), door.getTargetPosition()));
-                    }
-                    c.getSession().write(MaplePacketCreator.spawnPortal(door.getTown().getId(), door.getTarget().getId(), door.getTargetPosition()));
-                    c.getSession().write(MaplePacketCreator.enableActions());
+            spawnAndAddRangedMapObject(door, c -> {
+                c.getSession().write(MaplePacketCreator.spawnDoor(door.getOwner().getId(), door.getTargetPosition(), false));
+                if (door.getOwner().getParty() != null && (door.getOwner() == c.getPlayer() || door.getOwner().getParty().containsMembers(new MaplePartyCharacter(c.getPlayer())))) {
+                    c.getSession().write(MaplePacketCreator.partyPortal(door.getTown().getId(), door.getTarget().getId(), door.getTargetPosition()));
                 }
-            }, new SpawnCondition() {
-
-                public boolean canSpawn(MapleCharacter chr) {
-                    return chr.getMapId() == door.getTarget().getId() ||
-                            chr == door.getOwner() && chr.getParty() == null;
-                }
-            });
+                c.getSession().write(MaplePacketCreator.spawnPortal(door.getTown().getId(), door.getTarget().getId(), door.getTargetPosition()));
+                c.getSession().write(MaplePacketCreator.enableActions());
+            }, chr -> chr.getMapId() == door.getTarget().getId() ||
+                    chr == door.getOwner() && chr.getParty() == null);
         }
     }
 
     public List<MapleCharacter> getPlayersInRange(Rectangle box, List<MapleCharacter> chr) {
-        List<MapleCharacter> character = new LinkedList<MapleCharacter>();
+        List<MapleCharacter> character = new LinkedList<>();
         for (MapleCharacter a : characters) {
             if (chr.contains(a.getClient().getPlayer())) {
                 if (box.contains(a.getPosition())) {
@@ -1003,12 +941,9 @@ public class MapleMap {
     }
 
     public void spawnSummon(final MapleSummon summon) {
-        spawnAndAddRangedMapObject(summon, new DelayedPacketCreation() {
-
-            public void sendPackets(MapleClient c) {
-                int skillLevel = summon.getOwner().getSkillLevel(SkillFactory.getSkill(summon.getSkill()));
-                c.getSession().write(MaplePacketCreator.spawnSpecialMapObject(summon, skillLevel, true));
-            }
+        spawnAndAddRangedMapObject(summon, c -> {
+            int skillLevel = summon.getOwner().getSkillLevel(SkillFactory.getSkill(summon.getSkill()));
+            c.getSession().write(MaplePacketCreator.spawnSpecialMapObject(summon, skillLevel, true));
         });
     }
 
@@ -1018,16 +953,12 @@ public class MapleMap {
         TimerManager tMan = TimerManager.getInstance();
         final ScheduledFuture<?> poisonSchedule;
         if (poison) {
-            Runnable poisonTask = new Runnable() {
-
-                @Override
-                public void run() {
-                    List<MapleMapObject> affectedMonsters = getMapObjectsInBox(mist.getBox(), Collections.singletonList(MapleMapObjectType.MONSTER));
-                    for (MapleMapObject mo : affectedMonsters) {
-                        if (mist.makeChanceResult()) {
-                            MonsterStatusEffect poisonEffect = new MonsterStatusEffect(Collections.singletonMap(MonsterStatus.POISON, 1), mist.getSourceSkill(), false);
-                            ((MapleMonster) mo).applyStatus(mist.getOwner(), poisonEffect, true, duration);
-                        }
+            Runnable poisonTask = () -> {
+                List<MapleMapObject> affectedMonsters = getMapObjectsInBox(mist.getBox(), Collections.singletonList(MapleMapObjectType.MONSTER));
+                for (MapleMapObject mo : affectedMonsters) {
+                    if (mist.makeChanceResult()) {
+                        MonsterStatusEffect poisonEffect = new MonsterStatusEffect(Collections.singletonMap(MonsterStatus.POISON, 1), mist.getSourceSkill(), false);
+                        ((MapleMonster) mo).applyStatus(mist.getOwner(), poisonEffect, true, duration);
                     }
                 }
             };
@@ -1035,16 +966,12 @@ public class MapleMap {
         } else {
             poisonSchedule = null;
         }
-        tMan.schedule(new Runnable() {
-
-            @Override
-            public void run() {
-                removeMapObject(mist);
-                if (poisonSchedule != null) {
-                    poisonSchedule.cancel(false);
-                }
-                broadcastMessage(mist.makeDestroyData());
+        tMan.schedule(() -> {
+            removeMapObject(mist);
+            if (poisonSchedule != null) {
+                poisonSchedule.cancel(false);
             }
+            broadcastMessage(mist.makeDestroyData());
         }, duration);
     }
 
@@ -1059,13 +986,8 @@ public class MapleMap {
         TimerManager tMan = TimerManager.getInstance();
         final Point droppos = calcDropPos(pos, pos);
         final MapleMapItem drop = new MapleMapItem(item, droppos, dropper, owner);
-        spawnAndAddRangedMapObject(drop, new DelayedPacketCreation() {
-
-            public void sendPackets(MapleClient c) {
-                c.getSession().write(MaplePacketCreator.dropItemFromMapObject(item.getItemId(), drop.getObjectId(), 0, ffaDrop ? 0 : owner.getId(),
-                        dropper.getPosition(), droppos, (byte) 1));
-            }
-        });
+        spawnAndAddRangedMapObject(drop, c -> c.getSession().write(MaplePacketCreator.dropItemFromMapObject(item.getItemId(), drop.getObjectId(), 0, ffaDrop ? 0 : owner.getId(),
+                dropper.getPosition(), droppos, (byte) 1)));
         broadcastMessage(MaplePacketCreator.dropItemFromMapObject(item.getItemId(), drop.getObjectId(), 0, ffaDrop ? 0
                 : owner.getId(), dropper.getPosition(), droppos, (byte) 0), drop.getPosition());
         if (expire) {
@@ -1142,7 +1064,7 @@ public class MapleMap {
         for (MapleMapObject o : mapobjects.values()) {
             if (o.getType() == MapleMapObjectType.REACTOR) {
                 if (((MapleReactor) o).getReactorType() == 100) {
-                    if (((MapleReactor) o).getReactItem().getLeft() == item.getItemId() && ((MapleReactor) o).getReactItem().getRight() <= item.getQuantity()) {
+                    if (((MapleReactor) o).getReactItem().left() == item.getItemId() && ((MapleReactor) o).getReactItem().right() <= item.getQuantity()) {
                         Rectangle area = ((MapleReactor) o).getArea();
                         if (area.contains(drop.getPosition())) {
                             MapleClient ownerClient = null;
@@ -1178,13 +1100,8 @@ public class MapleMap {
         TimerManager tMan = TimerManager.getInstance();
         final Point droppos = calcDropPos(position, position);
         final MapleMapItem mdrop = new MapleMapItem(meso, displayMeso, droppos, dropper, owner);
-        spawnAndAddRangedMapObject(mdrop, new DelayedPacketCreation() {
-
-            public void sendPackets(MapleClient c) {
-                c.getSession().write(MaplePacketCreator.dropMesoFromMapObject(displayMeso, mdrop.getObjectId(), dropper.getObjectId(),
-                        ffaLoot ? 0 : owner.getId(), dropper.getPosition(), droppos, (byte) 1));
-            }
-        });
+        spawnAndAddRangedMapObject(mdrop, c -> c.getSession().write(MaplePacketCreator.dropMesoFromMapObject(displayMeso, mdrop.getObjectId(), dropper.getObjectId(),
+                ffaLoot ? 0 : owner.getId(), dropper.getPosition(), droppos, (byte) 1)));
         tMan.schedule(new ExpireMapItemJob(mdrop), dropLife);
     }
 
@@ -1195,13 +1112,9 @@ public class MapleMap {
         mapEffect = new MapleMapEffect(msg, itemId);
         broadcastMessage(mapEffect.makeStartData());
         TimerManager tMan = TimerManager.getInstance();
-        tMan.schedule(new Runnable() {
-
-            @Override
-            public void run() {
-                broadcastMessage(mapEffect.makeDestroyData());
-                mapEffect = null;
-            }
+        tMan.schedule(() -> {
+            broadcastMessage(mapEffect.makeDestroyData());
+            mapEffect = null;
         }, 30000);
     }
 
@@ -1217,7 +1130,7 @@ public class MapleMap {
         synchronized (this.mapobjects) {
             if (!chr.isHidden()) {
                 broadcastMessage(chr, (MaplePacketCreator.spawnPlayerMapobject(chr)), false);
-                MaplePet[] pets = chr.getPets();
+                Pet[] pets = chr.getPets();
                 for (int i = 0; i < 3; i++) {
                     if (pets[i] != null) {
                         broadcastMessage(chr, MaplePacketCreator.showPet(chr, pets[i], false, false), false);
@@ -1231,7 +1144,7 @@ public class MapleMap {
             if (this.getId() == 1 || this.getId() == 2 || this.getId() == 809000101 || this.getId() == 809000201) {
                 chr.getClient().getSession().write(MaplePacketCreator.showEquipEffect());
             }
-            MaplePet[] pets = chr.getPets();
+            Pet[] pets = chr.getPets();
             for (int i = 0; i < 3; i++) {
                 if (pets[i] != null) {
                     chr.getClient().getSession().write(MaplePacketCreator.showPet(chr, pets[i], false, false));
@@ -1240,7 +1153,7 @@ public class MapleMap {
             if (chr.getChalkboard() != null) {
                 chr.getClient().getSession().write((MaplePacketCreator.useChalkboard(chr, false)));
             }
-            this.mapobjects.put(Integer.valueOf(chr.getObjectId()), chr);
+            this.mapobjects.put(chr.getObjectId(), chr);
         }
 
         Connection con = DatabaseConnection.getConnection();
@@ -1307,7 +1220,7 @@ public class MapleMap {
         synchronized (characters) {
             characters.remove(chr);
         }
-        removeMapObject(Integer.valueOf(chr.getObjectId()));
+        removeMapObject(chr.getObjectId());
         broadcastMessage(MaplePacketCreator.removePlayerFromMap(chr.getId()));
         for (MapleMonster monster : chr.getControlledMonsters()) {
             monster.setController(null);
@@ -1393,14 +1306,10 @@ public class MapleMap {
     }
 
     private boolean isNonRangedType(MapleMapObjectType type) {
-        switch (type) {
-            case NPC:
-            case PLAYER:
-            case MIST:
-                //case REACTOR:
-                return true;
-        }
-        return false;
+        return switch (type) {
+            case NPC, PLAYER, MIST -> true;
+            default -> false;
+        };
     }
 
     private void sendObjectPlacement(MapleClient mapleClient) {
@@ -1431,7 +1340,7 @@ public class MapleMap {
     }
 
     public List<MapleMapObject> getMapObjectsInRange(Point from, double rangeSq, List<MapleMapObjectType> types) {
-        List<MapleMapObject> ret = new LinkedList<MapleMapObject>();
+        List<MapleMapObject> ret = new LinkedList<>();
         for (MapleMapObject l : mapobjects.values()) {
             if (types.contains(l.getType())) {
                 if (from.distanceSq(l.getPosition()) <= rangeSq) {
@@ -1443,7 +1352,7 @@ public class MapleMap {
     }
 
     public List<MapleMapObject> getMapObjectsInBox(Rectangle box, List<MapleMapObjectType> types) {
-        List<MapleMapObject> ret = new LinkedList<MapleMapObject>();
+        List<MapleMapObject> ret = new LinkedList<>();
         synchronized (mapobjects) {
             for (MapleMapObject l : mapobjects.values()) {
                 if (types.contains(l.getType())) {
@@ -1457,7 +1366,7 @@ public class MapleMap {
     }
 
     public List<MapleMapObject> getItemsInRange(Point from, double rangeSq) {
-        List<MapleMapObject> ret = new LinkedList<MapleMapObject>();
+        List<MapleMapObject> ret = new LinkedList<>();
         synchronized (mapobjects) {
             for (MapleMapObject l : mapobjects.values()) {
                 if (l.getType() == MapleMapObjectType.ITEM) {
@@ -1492,7 +1401,7 @@ public class MapleMap {
     }
 
     public List<Rectangle> getAreas() {
-        return new ArrayList<Rectangle>(areas);
+        return new ArrayList<>(areas);
     }
 
     public Rectangle getArea(int index) {
@@ -1571,7 +1480,7 @@ public class MapleMap {
             return;
         }
         Collection<MapleMapObject> visibleObjects = player.getVisibleMapObjects();
-        MapleMapObject[] visibleObjectsNow = visibleObjects.toArray(new MapleMapObject[visibleObjects.size()]);
+        MapleMapObject[] visibleObjectsNow = visibleObjects.toArray(new MapleMapObject[0]);
         for (MapleMapObject mo : visibleObjectsNow) {
             if (mapobjects.get(mo.getObjectId()) == mo) {
                 updateMapObjectVisibility(player, mo);
@@ -1720,13 +1629,9 @@ public class MapleMap {
                     reactor.setTimerActive(false);
                     //reactor.increaseState();
                     if (reactor.getDelay() > 0) { //This shit is negative.. Fix?
-                        tMan.schedule(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                reactor.setState((byte) 0);
-                                broadcastMessage(MaplePacketCreator.triggerReactor(reactor, 0));
-                            }
+                        tMan.schedule(() -> {
+                            reactor.setState((byte) 0);
+                            broadcastMessage(MaplePacketCreator.triggerReactor(reactor, 0));
                         }, reactor.getDelay());
                     }
                 }
@@ -1752,7 +1657,7 @@ public class MapleMap {
             if (numShouldSpawn <= 0) {
                 return;
             }
-            List<SpawnPoint> randomSpawn = new ArrayList<SpawnPoint>(monsterSpawn);
+            List<SpawnPoint> randomSpawn = new ArrayList<>(monsterSpawn);
             Collections.shuffle(randomSpawn);
             int spawned = 0;
             for (SpawnPoint spawnPoint : randomSpawn) {
@@ -1767,12 +1672,12 @@ public class MapleMap {
         }
     }
 
-    private static interface DelayedPacketCreation {
+    private interface DelayedPacketCreation {
 
         void sendPackets(MapleClient c);
     }
 
-    private static interface SpawnCondition {
+    private interface SpawnCondition {
 
         boolean canSpawn(MapleCharacter chr);
     }

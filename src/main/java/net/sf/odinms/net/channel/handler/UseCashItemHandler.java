@@ -6,14 +6,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+
 import net.sf.odinms.client.ExpTable;
 import net.sf.odinms.client.ISkill;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventoryType;
 import net.sf.odinms.client.MapleJob;
-import net.sf.odinms.client.MaplePet;
-import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.Pet;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.client.messages.ServernoticeMapleClientMessageCallback;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
@@ -56,7 +58,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                         player.changeSkillLevel(skillSPTo, curLevel + 1, player.getMasterLevel(skillSPTo));
                     }
                 } else {
-                    List<Pair<MapleStat, Integer>> statupdate = new ArrayList<Pair<MapleStat, Integer>>(2);
+                    List<Pair<Statistic, Integer>> statupdate = new ArrayList<>(2);
                     int APTo = slea.readInt();
                     int APFrom = slea.readInt();
                     switch (APFrom) {
@@ -65,28 +67,28 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                                 return;
                             }
                             c.getPlayer().setStr(c.getPlayer().getStr() - 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.STR, c.getPlayer().getStr()));
+                            statupdate.add(new Pair<>(Statistic.STR, c.getPlayer().getStr()));
                             break;
                         case 128: // dex
                             if (c.getPlayer().getDex() <= 4) {
                                 return;
                             }
                             c.getPlayer().setDex(c.getPlayer().getDex() - 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.DEX, c.getPlayer().getDex()));
+                            statupdate.add(new Pair<>(Statistic.DEX, c.getPlayer().getDex()));
                             break;
                         case 256: // int
                             if (c.getPlayer().getInt() <= 4) {
                                 return;
                             }
                             c.getPlayer().setInt(c.getPlayer().getInt() - 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.INT, c.getPlayer().getInt()));
+                            statupdate.add(new Pair<>(Statistic.INT, c.getPlayer().getInt()));
                             break;
                         case 512: // luk
                             if (c.getPlayer().getLuk() <= 4) {
                                 return;
                             }
                             c.getPlayer().setLuk(c.getPlayer().getLuk() - 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.LUK, c.getPlayer().getLuk()));
+                            statupdate.add(new Pair<>(Statistic.LUK, c.getPlayer().getLuk()));
                             break;
                         case 2048: // HP
                             if (c.getPlayer().getHpApUsed() <= 0 || c.getPlayer().getHpApUsed() == 10000) {
@@ -122,8 +124,8 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                             c.getPlayer().setHpApUsed(c.getPlayer().getHpApUsed() - 1);
                             c.getPlayer().setHp(maxhp);
                             c.getPlayer().setMaxHp(maxhp);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.HP, c.getPlayer().getMaxHp()));
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXHP, c.getPlayer().getMaxHp()));
+                            statupdate.add(new Pair<>(Statistic.HP, c.getPlayer().getMaxHp()));
+                            statupdate.add(new Pair<>(Statistic.MAXHP, c.getPlayer().getMaxHp()));
                             break;
                         case 8192: // MP
                             if (c.getPlayer().getHpApUsed() <= 0 || c.getPlayer().getMpApUsed() == 10000) {
@@ -154,8 +156,8 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                             c.getPlayer().setMpApUsed(c.getPlayer().getMpApUsed() - 1);
                             c.getPlayer().setMp(maxmp);
                             c.getPlayer().setMaxMp(maxmp);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MP, c.getPlayer().getMaxMp()));
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXMP, c.getPlayer().getMaxMp()));
+                            statupdate.add(new Pair<>(Statistic.MP, c.getPlayer().getMaxMp()));
+                            statupdate.add(new Pair<>(Statistic.MAXMP, c.getPlayer().getMaxMp()));
                             break;
                         default:
                             c.getSession().write(MaplePacketCreator.updatePlayerStats(MaplePacketCreator.EMPTY_STATUPDATE, true));
@@ -167,28 +169,28 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                                 return;
                             }
                             c.getPlayer().setStr(c.getPlayer().getStr() + 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.STR, c.getPlayer().getStr()));
+                            statupdate.add(new Pair<>(Statistic.STR, c.getPlayer().getStr()));
                             break;
                         case 128: // dex
                             if (c.getPlayer().getDex() >= 999) {
                                 return;
                             }
                             c.getPlayer().setDex(c.getPlayer().getDex() + 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.DEX, c.getPlayer().getDex()));
+                            statupdate.add(new Pair<>(Statistic.DEX, c.getPlayer().getDex()));
                             break;
                         case 256: // int
                             if (c.getPlayer().getInt() >= 999) {
                                 return;
                             }
                             c.getPlayer().setInt(c.getPlayer().getInt() + 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.INT, c.getPlayer().getInt()));
+                            statupdate.add(new Pair<>(Statistic.INT, c.getPlayer().getInt()));
                             break;
                         case 512: // luk
                             if (c.getPlayer().getLuk() >= 999) {
                                 return;
                             }
                             c.getPlayer().setLuk(c.getPlayer().getLuk() + 1);
-                            statupdate.add(new Pair<MapleStat, Integer>(MapleStat.LUK, c.getPlayer().getLuk()));
+                            statupdate.add(new Pair<>(Statistic.LUK, c.getPlayer().getLuk()));
                             break;
                         case 2048: // hp
                             int maxhp = c.getPlayer().getMaxHp();
@@ -222,7 +224,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                                 maxhp = Math.min(30000, maxhp);
                                 c.getPlayer().setHpApUsed(c.getPlayer().getHpApUsed() + 1);
                                 c.getPlayer().setMaxHp(maxhp);
-                                statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXHP, c.getPlayer().getMaxHp()));
+                                statupdate.add(new Pair<>(Statistic.MAXHP, c.getPlayer().getMaxHp()));
                                 break;
                             }
                         case 8192: // mp
@@ -251,7 +253,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                                 maxmp = Math.min(30000, maxmp);
                                 c.getPlayer().setMpApUsed(c.getPlayer().getMpApUsed() + 1);
                                 c.getPlayer().setMaxMp(maxmp);
-                                statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXMP, c.getPlayer().getMaxMp()));
+                                statupdate.add(new Pair<>(Statistic.MAXMP, c.getPlayer().getMaxMp()));
                                 break;
                             }
                         default:
@@ -280,7 +282,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                         int tvType = itemId % 10;
                         boolean megassenger = false;
                         boolean ear = false;
-                        MapleCharacter victim = null;
+                        Optional<MapleCharacter> victim = Optional.empty();
                         if (tvType != 1) { // 1 is the odd one out since it doesnt allow 2 players.
                             if (tvType >= 3) {
                                 megassenger = true;
@@ -295,7 +297,12 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                                 victim = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString());
                             }
                         }
-                        List<String> messages = new LinkedList<String>();
+
+                        if (victim.isEmpty()) {
+                            return;
+                        }
+
+                        List<String> messages = new LinkedList<>();
                         StringBuilder builder = new StringBuilder();
                         for (int i = 0; i < 5; i++) {
                             String message = slea.readMapleAsciiString();
@@ -307,10 +314,10 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                         }
                         slea.readInt(); // some random shit
                         if (megassenger) {
-                            c.getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.serverNotice(3, c.getChannel(), player.getName() + " : " + builder.toString(), ear).getBytes());
+                            c.getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.serverNotice(3, c.getChannel(), player.getName() + " : " + builder, ear).getBytes());
                         }
                         if (!MapleTVEffect.isActive()) {
-                            new MapleTVEffect(player, victim, messages, tvType);
+                            new MapleTVEffect(player, victim.get(), messages, tvType);
                             MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);
                         } else {
                             player.dropMessage("MapleTV is already in use");
@@ -335,7 +342,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                 c.getPlayer().getMap().startMapEffect(ii.getMsg(itemId).replaceFirst("%s", c.getPlayer().getName()).replaceFirst("%s", slea.readMapleAsciiString()), itemId);
                 MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);
             } else if (itemType == 517) {
-                MaplePet pet = c.getPlayer().getPet(0);
+                Pet pet = c.getPlayer().getPet(0);
                 if (pet == null) {
                     c.getSession().write(MaplePacketCreator.enableActions());
                     return;
@@ -362,26 +369,27 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                     }
                 } else {
                     String name = slea.readMapleAsciiString();
-                    MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(name);
-                    if (victim != null) {
-                        MapleMap target = victim.getMap();
-                        WorldLocation loc = c.getChannelServer().getWorldInterface().getLocation(name);
-                        if (c.getChannelServer().getMapFactory().getMap(loc.map).getForcedReturnId() == 999999999 || c.getChannelServer().getMapFactory().getMap(loc.map).getId() < 100000000) {//This doesn't allow tele to GM map, zakum and etc...
-                            if (!victim.isHidden()) {
-                                c.getPlayer().changeMap(target, target.findClosestSpawnpoint(victim.getPosition()));
-                            } else {
-                                MapleInventoryManipulator.addById(c, itemId, (short) 1, "Teleport Rock Error (Not found)");
-                                new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Either the player could not be found or you were trying to teleport to an illegal location.");
-                                c.getSession().write(MaplePacketCreator.enableActions());
-                            }
+                    Optional<MapleCharacter> victim = c.getChannelServer().getPlayerStorage().getCharacterByName(name);
+                    if (victim.isEmpty()) {
+                        MapleInventoryManipulator.addById(c, itemId, (short) 1, "Teleport Rock Error (Not found)");
+                        new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Player could not be found.");
+                        c.getSession().write(MaplePacketCreator.enableActions());
+                        return;
+                    }
+
+                    MapleMap target = victim.get().getMap();
+                    WorldLocation loc = c.getChannelServer().getWorldInterface().getLocation(name);
+                    if (c.getChannelServer().getMapFactory().getMap(loc.map).getForcedReturnId() == 999999999 || c.getChannelServer().getMapFactory().getMap(loc.map).getId() < 100000000) {//This doesn't allow tele to GM map, zakum and etc...
+                        if (!victim.get().isHidden()) {
+                            c.getPlayer().changeMap(target, target.findClosestSpawnpoint(victim.get().getPosition()));
                         } else {
-                            MapleInventoryManipulator.addById(c, itemId, (short) 1, "Teleport Rock Error (Can't Teleport)");
-                            new ServernoticeMapleClientMessageCallback(1, c).dropMessage("You cannot teleport to this map.");
+                            MapleInventoryManipulator.addById(c, itemId, (short) 1, "Teleport Rock Error (Not found)");
+                            new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Either the player could not be found or you were trying to teleport to an illegal location.");
                             c.getSession().write(MaplePacketCreator.enableActions());
                         }
                     } else {
-                        MapleInventoryManipulator.addById(c, itemId, (short) 1, "Teleport Rock Error (Not found)");
-                        new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Player could not be found.");
+                        MapleInventoryManipulator.addById(c, itemId, (short) 1, "Teleport Rock Error (Can't Teleport)");
+                        new ServernoticeMapleClientMessageCallback(1, c).dropMessage("You cannot teleport to this map.");
                         c.getSession().write(MaplePacketCreator.enableActions());
                     }
                 }
@@ -390,18 +398,18 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                 MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);
                 c.getSession().write(MaplePacketCreator.enableActions());
             } else if (itemType == 524) {
-                MaplePet pet = c.getPlayer().getPet(0);
+                Pet pet = c.getPlayer().getPet(0);
                 if (pet == null) {
                     c.getSession().write(MaplePacketCreator.enableActions());
                     return;
                 }
-                if (!pet.canConsume(itemId)) {
+                if (pet.cannotConsume(itemId)) {
                     pet = c.getPlayer().getPet(1);
                     if (pet != null) {
-                        if (!pet.canConsume(itemId)) {
+                        if (pet.cannotConsume(itemId)) {
                             pet = c.getPlayer().getPet(2);
                             if (pet != null) {
-                                if (!pet.canConsume(itemId)) {
+                                if (pet.cannotConsume(itemId)) {
                                     c.getSession().write(MaplePacketCreator.enableActions());
                                     return;
                                 }
@@ -418,11 +426,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                 pet.setFullness(100);
                 int closeGain = 100 * c.getChannelServer().getPetExpRate();
                 if (pet.getCloseness() < 30000) {
-                    if (pet.getCloseness() + closeGain > 30000) {
-                        pet.setCloseness(30000);
-                    } else {
-                        pet.setCloseness(pet.getCloseness() + closeGain);
-                    }
+                    pet.setCloseness(Math.min(pet.getCloseness() + closeGain, 30000));
                     while (pet.getCloseness() >= ExpTable.getClosenessNeededForLevel(pet.getLevel() + 1)) {
                         pet.setLevel(pet.getLevel() + 1);
                         c.getSession().write(MaplePacketCreator.showOwnPetLevelUp(c.getPlayer().getPetIndex(pet)));
@@ -450,7 +454,7 @@ public class UseCashItemHandler extends AbstractMaplePacketHandler {
                 c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.useChalkboard(c.getPlayer(), false));
                 c.getPlayer().getClient().getSession().write(MaplePacketCreator.enableActions());
             } else if (itemType == 539) {
-                List<String> lines = new LinkedList<String>();
+                List<String> lines = new LinkedList<>();
                 for (int i = 0; i < 4; i++) {
                     lines.add(slea.readMapleAsciiString());
                 }

@@ -46,7 +46,6 @@ public class UseItemHandler extends AbstractMaplePacketHandler {
             ii.getItemEffect(toUse.getItemId()).applyTo(c.getPlayer());
             c.getPlayer().checkBerserk();
         } else {
-            return;
         }
     }
 }

@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.server.TimerManager;
@@ -24,13 +23,13 @@ public class LoginWorker implements Runnable {
 	private static LoginWorker instance = new LoginWorker();
 	private Deque<MapleClient> waiting;
 	private Set<String> waitingNames;
-	private List<Integer> possibleLoginHistory = new LinkedList<Integer>();
+	private List<Integer> possibleLoginHistory = new LinkedList<>();
 
 	public static Logger log = LoggerFactory.getLogger(LoginWorker.class);
 
 	private LoginWorker() {
-		waiting = new LinkedList<MapleClient>();
-		waitingNames = new HashSet<String>();
+		waiting = new LinkedList<>();
+		waitingNames = new HashSet<>();
 	}
 
 	public static LoginWorker getInstance() {
@@ -91,12 +90,7 @@ public class LoginWorker implements Runnable {
 				waitingNames.remove(client.getAccountName().toLowerCase());
 				if (client.finishLogin(true) == 0) {
 					client.getSession().write(MaplePacketCreator.getAuthSuccessRequestPin(client.getAccountName()));
-					client.setIdleTask(TimerManager.getInstance().schedule(new Runnable() {
-
-						public void run() {
-							client.getSession().close();
-						}
-					}, 10 * 60 * 10000));
+					client.setIdleTask(TimerManager.getInstance().schedule(() -> client.getSession().close(), 10 * 60 * 10000));
 				} else {
 					client.getSession().write(MaplePacketCreator.getLoginFailed(7));
 				}
@@ -104,9 +98,7 @@ public class LoginWorker implements Runnable {
 
 			Map<Integer, Integer> load = LoginServer.getInstance().getWorldInterface().getChannelLoad();
 			double loadFactor = 1200 / ((double) LoginServer.getInstance().getUserLimit() / load.size());
-			for (Entry<Integer, Integer> entry : load.entrySet()) {
-				load.put(entry.getKey(), Math.min(1200, (int) (entry.getValue() * loadFactor)));
-			}
+            load.replaceAll((k, v) -> Math.min(1200, (int) (v * loadFactor)));
 			LoginServer.getInstance().setLoad(load);
 		} catch (RemoteException ex) {
 			LoginServer.getInstance().reconnectWorld();

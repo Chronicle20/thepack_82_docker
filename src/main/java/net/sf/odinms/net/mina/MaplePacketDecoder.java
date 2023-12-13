@@ -19,7 +19,7 @@ public class MaplePacketDecoder extends CumulativeProtocolDecoder {
     }
 
     @Override
-    protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) throws Exception {
+    protected boolean doDecode(IoSession session, IoBuffer in, ProtocolDecoderOutput out) {
         MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
         DecoderState decoderState = (DecoderState) session.getAttribute(DECODER_STATE_KEY);
         if (decoderState == null) {
@@ -39,7 +39,7 @@ public class MaplePacketDecoder extends CumulativeProtocolDecoder {
             return false;
         }
         if (in.remaining() >= decoderState.packetlength) {
-            byte decryptedPacket[] = new byte[decoderState.packetlength];
+            byte[] decryptedPacket = new byte[decoderState.packetlength];
             in.get(decryptedPacket, 0, decoderState.packetlength);
             decoderState.packetlength = -1;
             client.getReceiveCrypto().crypt(decryptedPacket);

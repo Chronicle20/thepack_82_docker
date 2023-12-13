@@ -23,7 +23,7 @@ import net.sf.odinms.server.maps.MapleReactor;
 
 public class ReactorScriptManager extends AbstractScriptManager {
 	private static ReactorScriptManager instance = new ReactorScriptManager();
-	private Map<Integer, List<DropEntry>> drops = new HashMap<Integer, List<DropEntry>>();
+	private Map<Integer, List<DropEntry>> drops = new HashMap<>();
 
 	public synchronized static ReactorScriptManager getInstance() {
 		return instance;
@@ -58,7 +58,7 @@ public class ReactorScriptManager extends AbstractScriptManager {
 	public List<DropEntry> getDrops(int rid) {
 		List<DropEntry> ret = drops.get(rid);
 		if (ret == null) {
-			ret = new LinkedList<DropEntry>();
+			ret = new LinkedList<>();
 			try {
 				Connection con = DatabaseConnection.getConnection();
 				PreparedStatement ps = con.prepareStatement("SELECT itemid, chance FROM reactordrops WHERE reactorid = ? AND chance >= 0");

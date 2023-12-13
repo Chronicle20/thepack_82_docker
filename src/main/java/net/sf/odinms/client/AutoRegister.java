@@ -1,16 +1,17 @@
 package net.sf.odinms.client;
 
+import net.sf.odinms.database.DatabaseConnection;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.ResultSet;
-import net.sf.odinms.database.DatabaseConnection;
+import java.sql.SQLException;
 
 public class AutoRegister {
 
+    public static final boolean autoRegister = true;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MapleClient.class);
     private static final int ACCOUNTS_PER_IP = 5;
-    public static final boolean autoRegister = true;
     public static boolean success;
 
     public static boolean getAccountExists(String login) {

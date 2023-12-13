@@ -1,6 +1,5 @@
 package net.sf.odinms.tools.data.input;
 
-import java.io.IOException;
 import net.sf.odinms.tools.HexTool;
 
 public class ByteArrayByteStream implements SeekableInputStreamBytestream {
@@ -19,7 +18,7 @@ public class ByteArrayByteStream implements SeekableInputStreamBytestream {
     }
 
     @Override
-    public void seek(long offset) throws IOException {
+    public void seek(long offset) {
         pos = (int) offset;
     }
 

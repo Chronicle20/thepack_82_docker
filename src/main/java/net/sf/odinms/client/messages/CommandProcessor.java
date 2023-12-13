@@ -22,7 +22,7 @@ public class CommandProcessor implements CommandProcessorMBean {
 
     private static CommandProcessor instance = new CommandProcessor();
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GeneralchatHandler.class);
-    private static List<Pair<MapleCharacter, String>> gmlog = new LinkedList<Pair<MapleCharacter, String>>();
+    private static List<Pair<MapleCharacter, String>> gmlog = new LinkedList<>();
     private static Runnable persister;
 
 
@@ -47,8 +47,8 @@ public class CommandProcessor implements CommandProcessorMBean {
                 try {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO gmlog (cid, command) VALUES (?, ?)");
                     for (Pair<MapleCharacter, String> logentry : gmlog) {
-                        ps.setInt(1, logentry.getLeft().getId());
-                        ps.setString(2, logentry.getRight());
+                        ps.setInt(1, logentry.left().getId());
+                        ps.setString(2, logentry.right());
                         ps.executeUpdate();
                     }
                     ps.close();
@@ -104,7 +104,7 @@ public class CommandProcessor implements CommandProcessorMBean {
         if (line.charAt(0) == '!' && gm > 0) {
             if (c.getPlayer().isLogged() && gm > 1) {
                 synchronized (gmlog) {
-                    gmlog.add(new Pair<MapleCharacter, String>(c.getPlayer(), line));
+                    gmlog.add(new Pair<>(c.getPlayer(), line));
                 }
             }
             if (gm > 0) {
@@ -128,9 +128,7 @@ public class CommandProcessor implements CommandProcessorMBean {
                 }
             }
             if (gm > 4) {
-                if (AdminCommand.executeAdminCommand(c, mc, line, log, gmlog, persister)) {
-                    return true;
-                }
+                return AdminCommand.executeAdminCommand(c, mc, line, log, gmlog, persister);
             }
             return false;
         } else if (line.charAt(0) == '@') {

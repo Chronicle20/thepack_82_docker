@@ -15,7 +15,7 @@ public class MonsterStatusEffect {
     private ScheduledFuture<?> poisonSchedule;
 
     public MonsterStatusEffect(Map<MonsterStatus, Integer> stati, ISkill skillId, boolean monsterSkill) {
-        this.stati = new ArrayMap<MonsterStatus, Integer>(stati);
+        this.stati = new ArrayMap<>(stati);
         this.skill = skillId;
         this.monsterSkill = monsterSkill;
     }
@@ -30,10 +30,6 @@ public class MonsterStatusEffect {
 
     public ISkill getSkill() {
         return skill;
-    }
-
-    public boolean isMonsterSkill() {
-        return monsterSkill;
     }
 
     public ScheduledFuture<?> getCancelTask() {

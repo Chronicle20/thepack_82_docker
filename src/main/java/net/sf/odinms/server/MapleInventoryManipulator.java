@@ -69,7 +69,7 @@ public class MapleInventoryManipulator {
             short slotMax = ii.getSlotMax(c, item.getItemId());
             List<IItem> existing = c.getPlayer().getInventory(type).listById(item.getItemId());
             if (!ii.isThrowingStar(item.getItemId()) && !ii.isBullet(item.getItemId())) {
-                if (existing.size() > 0) { // first update all existing slots to slotMax
+                if (!existing.isEmpty()) { // first update all existing slots to slotMax
                     Iterator<IItem> i = existing.iterator();
                     while (quantity > 0) {
                         if (i.hasNext()) {
@@ -136,7 +136,7 @@ public class MapleInventoryManipulator {
             short slotMax = ii.getSlotMax(c, itemId);
             List<IItem> existing = c.getPlayer().getInventory(type).listById(itemId);
             if (!ii.isThrowingStar(itemId) && !ii.isBullet(itemId)) {
-                if (existing.size() > 0) { // first update all existing slots to slotMax
+                if (!existing.isEmpty()) { // first update all existing slots to slotMax
                     Iterator<IItem> i = existing.iterator();
                     while (quantity > 0) {
                         if (i.hasNext()) {
@@ -225,7 +225,7 @@ public class MapleInventoryManipulator {
             short slotMax = ii.getSlotMax(c, item.getItemId());
             List<IItem> existing = c.getPlayer().getInventory(type).listById(item.getItemId());
             if (!ii.isThrowingStar(item.getItemId()) && !ii.isBullet(item.getItemId())) {
-                if (existing.size() > 0) { // first update all existing slots to slotMax
+                if (!existing.isEmpty()) { // first update all existing slots to slotMax
                     Iterator<IItem> i = existing.iterator();
                     while (quantity > 0) {
                         if (i.hasNext()) {
@@ -296,7 +296,7 @@ public class MapleInventoryManipulator {
             short slotMax = ii.getSlotMax(c, itemid);
             List<IItem> existing = c.getPlayer().getInventory(type).listById(itemid);
             if (!ii.isThrowingStar(itemid) && !ii.isBullet(itemid)) {
-                if (existing.size() > 0) { // first update all existing slots to slotMax
+                if (!existing.isEmpty()) { // first update all existing slots to slotMax
                     for (IItem eItem : existing) {
                         short oldQ = eItem.getQuantity();
                         if (oldQ < slotMax && owner.equals(eItem.getOwner())) {
@@ -337,7 +337,7 @@ public class MapleInventoryManipulator {
         if (item.getQuantity() == 0 && !allowZero) {
             c.getSession().write(MaplePacketCreator.clearInventoryItem(type, item.getPosition(), fromDrop));
         } else {
-            c.getSession().write(MaplePacketCreator.updateInventorySlot(type, (Item) item, fromDrop));
+            c.getSession().write(MaplePacketCreator.updateInventorySlot(type, item, fromDrop));
         }
     }
 
@@ -380,7 +380,7 @@ public class MapleInventoryManipulator {
             if ((olddstQ + oldsrcQ) > slotMax) {
                 c.getSession().write(MaplePacketCreator.moveAndMergeWithRestInventoryItem(type, src, dst,(short) ((olddstQ + oldsrcQ) - slotMax), slotMax));
             } else {
-                c.getSession().write(MaplePacketCreator.moveAndMergeInventoryItem(type, src, dst, ((Item) c.getPlayer().getInventory(type).getItem(dst)).getQuantity()));
+                c.getSession().write(MaplePacketCreator.moveAndMergeInventoryItem(type, src, dst, c.getPlayer().getInventory(type).getItem(dst).getQuantity()));
             }
         } else {
             c.getSession().write(MaplePacketCreator.moveInventoryItem(type, src, dst));
@@ -475,7 +475,7 @@ public class MapleInventoryManipulator {
         Equip source = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem(src);
         Equip target = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIP).getItem(dst);
         if (dst < 0) {
-            log.warn("Unequipping to negative slot. ({}: {}->{})", new Object[]{c.getPlayer().getName(), src, dst});
+            log.warn("Unequipping to negative slot. ({}: {}->{})", c.getPlayer().getName(), src, dst);
         }
         if (source == null) {
             return;

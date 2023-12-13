@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ import net.sf.odinms.tools.StringUtil;
 
 public class CheatTracker {
 
-    private Map<CheatingOffense, CheatingOffenseEntry> offenses = Collections.synchronizedMap(new LinkedHashMap<CheatingOffense, CheatingOffenseEntry>());
+    private Map<CheatingOffense, CheatingOffenseEntry> offenses = Collections.synchronizedMap(new LinkedHashMap<>());
     private WeakReference<MapleCharacter> chr;
     private long regenHPSince,  regenMPSince,  lastAttackTime,  lastDamage,  takingDamageSince,  lastDamageTakenTime,  summonSummonTime,  attackingSince,  lastSmegaTime;
     private int numSequentialDamage,  numSequentialSummonAttack,  numSameDamage,  sMegaSpamCount,  monsterMoveCount,  attacksWithoutHit,  numHPRegens,  numMPRegens,  numSequentialAttacks;
@@ -26,7 +25,7 @@ public class CheatTracker {
     private ScheduledFuture<?> invalidationTask;
 
     public CheatTracker(MapleCharacter chr) {
-        this.chr = new WeakReference<MapleCharacter>(chr);
+        this.chr = new WeakReference<>(chr);
         invalidationTask = TimerManager.getInstance().register(new InvalidationTask(), 60000);
         takingDamageSince = attackingSince = regenMPSince = regenHPSince = System.currentTimeMillis();
     }
@@ -208,7 +207,7 @@ public class CheatTracker {
         int ret = 0;
         CheatingOffenseEntry[] offenses_copy;
         synchronized (offenses) {
-            offenses_copy = offenses.values().toArray(new CheatingOffenseEntry[offenses.size()]);
+            offenses_copy = offenses.values().toArray(new CheatingOffenseEntry[0]);
         }
         for (CheatingOffenseEntry entry : offenses_copy) {
             if (entry.isExpired()) {
@@ -226,7 +225,7 @@ public class CheatTracker {
 
     public String getSummary() {
         StringBuilder ret = new StringBuilder();
-        List<CheatingOffenseEntry> offenseList = new ArrayList<CheatingOffenseEntry>();
+        List<CheatingOffenseEntry> offenseList = new ArrayList<>();
         synchronized (offenses) {
             for (CheatingOffenseEntry entry : offenses.values()) {
                 if (!entry.isExpired()) {
@@ -234,18 +233,14 @@ public class CheatTracker {
                 }
             }
         }
-        Collections.sort(offenseList, new Comparator<CheatingOffenseEntry>() {
-
-            @Override
-            public int compare(CheatingOffenseEntry o1, CheatingOffenseEntry o2) {
-                int thisVal = o1.getPoints();
-                int anotherVal = o2.getPoints();
-                return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
-            }
+        offenseList.sort((o1, o2) -> {
+            int thisVal = o1.getPoints();
+            int anotherVal = o2.getPoints();
+            return (Integer.compare(anotherVal, thisVal));
         });
         int to = Math.min(offenseList.size(), 4);
         for (int x = 0; x < to; x++) {
-            ret.append(StringUtil.makeEnumHumanReadable(offenseList.get(x).getOffense().name()) + ": " + offenseList.get(x).getCount());
+            ret.append(StringUtil.makeEnumHumanReadable(offenseList.get(x).getOffense().name())).append(": ").append(offenseList.get(x).getCount());
             if (x != to - 1) {
                 ret.append(" ");
             }
@@ -263,7 +258,7 @@ public class CheatTracker {
         public void run() {
             CheatingOffenseEntry[] offenses_copy;
             synchronized (offenses) {
-                offenses_copy = offenses.values().toArray(new CheatingOffenseEntry[offenses.size()]);
+                offenses_copy = offenses.values().toArray(new CheatingOffenseEntry[0]);
             }
             for (CheatingOffenseEntry offense : offenses_copy) {
                 if (offense.isExpired()) {

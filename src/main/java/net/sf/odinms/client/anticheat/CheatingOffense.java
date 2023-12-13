@@ -59,23 +59,23 @@ public enum CheatingOffense {
         return enabled;
     }
 
-    private CheatingOffense() {
+    CheatingOffense() {
         this(1);
     }
 
-    private CheatingOffense(int points) {
+    CheatingOffense(int points) {
         this(points, 60000);
     }
 
-    private CheatingOffense(int points, long validityDuration) {
+    CheatingOffense(int points, long validityDuration) {
         this(points, validityDuration, -1);
     }
 
-    private CheatingOffense(int points, long validityDuration, int autobancount) {
+    CheatingOffense(int points, long validityDuration, int autobancount) {
         this(points, validityDuration, autobancount, true);
     }
 
-    private CheatingOffense(int points, long validityDuration, int autobancount, boolean enabled) {
+    CheatingOffense(int points, long validityDuration, int autobancount, boolean enabled) {
         this.points = points;
         this.validityDuration = validityDuration;
         this.autobancount = autobancount;

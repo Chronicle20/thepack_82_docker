@@ -73,19 +73,19 @@ public class WZIMGFile {
 			case 2:
 			case 11: //??? no idea, since 0.49
 				entry.setType(MapleDataType.SHORT);
-				entry.setData(Short.valueOf(slea.readShort()));
+				entry.setData(slea.readShort());
 				break;
 			case 3:
 				entry.setType(MapleDataType.INT);
-				entry.setData(Integer.valueOf(WZTool.readValue(slea)));
+				entry.setData(WZTool.readValue(slea));
 				break;
 			case 4:
 				entry.setType(MapleDataType.FLOAT);
-				entry.setData(Float.valueOf(WZTool.readFloatValue(slea)));
+				entry.setData(WZTool.readFloatValue(slea));
 				break;
 			case 5:
 				entry.setType(MapleDataType.DOUBLE);
-				entry.setData(Double.valueOf(slea.readDouble()));
+				entry.setData(slea.readDouble());
 				break;
 			case 8:
 				entry.setType(MapleDataType.STRING);

@@ -1,10 +1,10 @@
 package net.sf.odinms.client;
 
 public class BuddylistEntry {
-	private String name;
-	private int cid;
-	private int channel;
-	private boolean visible;
+	private final String name;
+	private final int characterId;
+	private int channelId;
+	private final boolean visible;
 
 	/**
 	 * 
@@ -16,28 +16,24 @@ public class BuddylistEntry {
 	public BuddylistEntry(String name, int characterId, int channel, boolean visible) {
 		super();
 		this.name = name;
-		this.cid = characterId;
-		this.channel = channel;
+		this.characterId = characterId;
+		this.channelId = channel;
 		this.visible = visible;
 	}
 
 	/**
 	 * @return the channel the character is on. If the character is offline returns -1.
 	 */
-	public int getChannel() {
-		return channel;
+	public int getChannelId() {
+		return channelId;
 	}
 
-	public void setChannel(int channel) {
-		this.channel = channel;
+	public void setChannelId(int channelId) {
+		this.channelId = channelId;
 	}
 
 	public boolean isOnline() {
-		return channel >= 0;
-	}
-
-	public void setOffline() {
-		channel = -1;
+		return channelId >= 0;
 	}
 
 	public String getName() {
@@ -45,13 +41,9 @@ public class BuddylistEntry {
 	}
 
 	public int getCharacterId() {
-		return cid;
+		return characterId;
 	}
-	
-	public void setVisible(boolean visible) {
-		this.visible = visible;
-	}
-	
+
 	public boolean isVisible() {
 		return visible;
 	}
@@ -60,7 +52,7 @@ public class BuddylistEntry {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + cid;
+		result = prime * result + characterId;
 		return result;
 	}
 
@@ -73,8 +65,6 @@ public class BuddylistEntry {
 		if (getClass() != obj.getClass())
 			return false;
 		final BuddylistEntry other = (BuddylistEntry) obj;
-		if (cid != other.cid)
-			return false;
-		return true;
-	}
+        return characterId == other.characterId;
+    }
 }

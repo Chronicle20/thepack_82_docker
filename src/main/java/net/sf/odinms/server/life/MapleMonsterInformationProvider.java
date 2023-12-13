@@ -33,10 +33,9 @@ public class MapleMonsterInformationProvider {
 			return itemId + " chance: " + chance;
 		}
 	}
-	
-	public static final int APPROX_FADE_DELAY = 90;
+
 	private static MapleMonsterInformationProvider instance = null;
-	private Map<Integer,List<DropEntry>> drops = new HashMap<Integer, List<DropEntry>>();
+	private Map<Integer,List<DropEntry>> drops = new HashMap<>();
 	private static final Logger log = LoggerFactory.getLogger(MapleMonsterInformationProvider.class);
 	
 	private MapleMonsterInformationProvider() {
@@ -49,7 +48,7 @@ public class MapleMonsterInformationProvider {
 	
 	public List<DropEntry> retrieveDropChances(int monsterId) {
 		if (drops.containsKey(monsterId)) return drops.get(monsterId);
-		List<DropEntry> ret = new LinkedList<DropEntry>();
+		List<DropEntry> ret = new LinkedList<>();
 		try {
 			Connection con = DatabaseConnection.getConnection();
 			PreparedStatement ps = con.prepareStatement("SELECT itemid, chance, monsterid FROM monsterdrops WHERE (monsterid = ? AND chance >= 0) OR (monsterid <= 0)");
@@ -74,9 +73,5 @@ public class MapleMonsterInformationProvider {
 		}
 		drops.put(monsterId, ret);
 		return ret;
-	}
-	
-	public void clearDrops() {
-		drops.clear();
 	}
 }

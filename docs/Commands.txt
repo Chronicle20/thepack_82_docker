@@ -23,7 +23,6 @@ For characters with a GM level of 4 or higher.
 !npc [npcid]                   - Spawns a NPC [npcid].
 !removenpcs [npc arraylist]    - Removes every npc in [npc arraylist].
 !ringme [ringid] [user]        - Gives self a ring with [user].
-!sex [user] [type] [message]   - Sends a Smega for [User] with the message [message].
 !speak [user] [message]        - Makes [user] say [message].
 !unban [userid]                - Unbans [user]'s IP and account.
 !zakum                         - Spawns Zakum.
@@ -90,7 +89,6 @@ PERSON COMMANDS:
 !killeveryone                  - Kills everyone in the server.
 !killmap                       - Kills everyone in your map. 
 !levelperson [user] [level]    - Set's [user] to level [level].
-!lolhaha [user]                - Switches the gender of [user].
 !mesoperson [user] [mesos]     - Gives [user] [mesos] mesos.
 !mute [person]                 - Mutes the person
 !slap [person] [damage]        - Slaps [person] with [damage] damage. 

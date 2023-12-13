@@ -27,6 +27,6 @@ public class CheaterData implements Serializable, Comparable<CheaterData> {
 	public int compareTo(CheaterData o) {
 		int thisVal = getPoints();
 		int anotherVal = o.getPoints();
-		return (thisVal<anotherVal ? 1 : (thisVal==anotherVal ? 0 : -1));
+		return (Integer.compare(anotherVal, thisVal));
 	}
 }

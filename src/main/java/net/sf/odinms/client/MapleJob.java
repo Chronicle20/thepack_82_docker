@@ -1,5 +1,8 @@
 package net.sf.odinms.client;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum MapleJob {
 	BEGINNER(0),
 	WARRIOR(100),
@@ -49,7 +52,7 @@ public enum MapleJob {
 
 	final int jobid;
 
-	private MapleJob(int id) {
+	MapleJob(int id) {
 		jobid = id;
 	}
 
@@ -57,30 +60,21 @@ public enum MapleJob {
 		return jobid;
 	}
 
-	public static MapleJob getById(int id) {
-		for (MapleJob l : MapleJob.values()) {
-			if (l.getId() == id) {
-				return l;
-			}
-		}
-		return null;
+	public static Optional<MapleJob> getById(int id) {
+		return Arrays.stream(MapleJob.values())
+				.filter(j -> j.getId() == id)
+				.findFirst();
 	}
 	
 	public static MapleJob getBy5ByteEncoding(int encoded) {
-		switch (encoded) {
-			case 2:
-				return WARRIOR;
-			case 4:
-				return MAGICIAN;
-			case 8:
-				return BOWMAN;
-			case 16:
-				return THIEF;
-			case 32:
-				return PIRATE;
-			default:
-				return BEGINNER;
-		}
+        return switch (encoded) {
+            case 2 -> WARRIOR;
+            case 4 -> MAGICIAN;
+            case 8 -> BOWMAN;
+            case 16 -> THIEF;
+            case 32 -> PIRATE;
+            default -> BEGINNER;
+        };
 	}
 	
 	public boolean isA (MapleJob basejob) {		

@@ -8,8 +8,8 @@ public interface ISkill {
 	MapleStatEffect getEffect(int level);
 	int getMaxLevel();
 	int getAnimationTime();
-	public boolean canBeLearnedBy (MapleJob job);
-	public boolean isFourthJob();
-	public Element getElement();
-	public boolean isBeginnerSkill();
+	boolean canBeLearnedBy(MapleJob job);
+	boolean isFourthJob();
+	Element getElement();
+	boolean isBeginnerSkill();
 }

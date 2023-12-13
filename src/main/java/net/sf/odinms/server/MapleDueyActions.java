@@ -18,7 +18,7 @@ public enum MapleDueyActions {
 
 	final byte code;
 
-	private MapleDueyActions(int code) {
+	MapleDueyActions(int code) {
 		this.code = (byte) code;
 	}
 

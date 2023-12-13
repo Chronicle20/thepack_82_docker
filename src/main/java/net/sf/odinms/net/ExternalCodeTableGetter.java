@@ -1,14 +1,14 @@
 package net.sf.odinms.net;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
 import net.sf.odinms.tools.HexTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Properties;
 
 public class ExternalCodeTableGetter {
 
@@ -29,7 +29,7 @@ public class ExternalCodeTableGetter {
 
     private <T extends Enum<? extends IntValueHolder> & IntValueHolder> int getValue(String name, T[] values, int def) {
         String prop = props.getProperty(name);
-        if (prop != null && prop.length() > 0) {
+        if (prop != null && !prop.isEmpty()) {
             String trimmed = prop.trim();
             String[] args = trimmed.split(" ");
             int base = 0;
@@ -54,17 +54,16 @@ public class ExternalCodeTableGetter {
 
     public static <T extends Enum<? extends WritableIntValueHolder> & WritableIntValueHolder> String getOpcodeTable(T[] enumeration) {
         StringBuilder enumVals = new StringBuilder();
-        List<T> all = new ArrayList<T>(); // need a mutable list plawks
-        all.addAll(Arrays.asList(enumeration));
-        Collections.sort(all, new Comparator<IntValueHolder>() {
-
-            @Override
-            public int compare(IntValueHolder o1, IntValueHolder o2) {
-                return Integer.valueOf(o1.getValue()).compareTo(o2.getValue());
-            }
-        });
+        List<T> all = new ArrayList<>(Arrays.asList(enumeration));
+        all.sort(Comparator.comparingInt(IntValueHolder::getValue));
         for (T code : all) {
-            enumVals.append(code.name() + " = " + "0x" + HexTool.toString(code.getValue()) + " (" + code.getValue() + ")\n");
+            enumVals.append(code.name())
+                    .append(" = ")
+                    .append("0x")
+                    .append(HexTool.toString(code.getValue()))
+                    .append(" (")
+                    .append(code.getValue())
+                    .append(")\n");
         }
         return enumVals.toString();
     }

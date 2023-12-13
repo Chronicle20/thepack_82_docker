@@ -1,13 +1,5 @@
 package net.sf.odinms.net.channel.handler;
 
-import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-
 import net.sf.odinms.client.BuddylistEntry;
 import net.sf.odinms.client.CharacterNameAndId;
 import net.sf.odinms.client.MapleCharacter;
@@ -16,8 +8,8 @@ import net.sf.odinms.client.MapleQuestStatus;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.net.MaplePacket;
 import net.sf.odinms.net.channel.ChannelServer;
-import net.sf.odinms.net.world.CharacterIdChannelPair;
 import net.sf.odinms.net.world.MaplePartyCharacter;
 import net.sf.odinms.net.world.PartyOperation;
 import net.sf.odinms.net.world.PlayerBuffValueHolder;
@@ -25,6 +17,15 @@ import net.sf.odinms.net.world.PlayerCoolDownValueHolder;
 import net.sf.odinms.net.world.remote.WorldChannelInterface;
 import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
 
@@ -97,18 +98,23 @@ public class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
         player.getMap().addPlayer(player);
         try {
             Collection<BuddylistEntry> buddies = player.getBuddylist().getBuddies();
-            int buddyIds[] = player.getBuddylist().getBuddyIds();
+            int[] buddyIds = player.getBuddylist().getBuddyIds();
 
             cserv.getWorldInterface().loggedOn(player.getName(), player.getId(), c.getChannel(), buddyIds);
             if (player.getParty() != null) {
                 channelServer.getWorldInterface().updateParty(player.getParty().getId(), PartyOperation.LOG_ONOFF, new MaplePartyCharacter(player));
             }
-            CharacterIdChannelPair[] onlineBuddies = cserv.getWorldInterface().multiBuddyFind(player.getId(), buddyIds);
-            for (CharacterIdChannelPair onlineBuddy : onlineBuddies) {
-                BuddylistEntry ble = player.getBuddylist().get(onlineBuddy.getCharacterId());
-                ble.setChannel(onlineBuddy.getChannel());
-                player.getBuddylist().put(ble);
-            }
+
+            MapleCharacter finalPlayer = player;
+            Arrays.stream(cserv.getWorldInterface().multiBuddyFind(player.getId(), buddyIds))
+                    .filter(buddy -> finalPlayer.getBuddylist().get(buddy.getCharacterId()).isPresent())
+                    .forEach(buddy -> {
+                        BuddylistEntry ble = finalPlayer.getBuddylist().get(buddy.getCharacterId()).orElseThrow();
+                        ble.setChannelId(buddy.getChannel());
+                        finalPlayer.getBuddylist().put(ble);
+                    });
+
+
             c.getSession().write(MaplePacketCreator.updateBuddylist(buddies));
             c.getPlayer().sendMacros();
             try {
@@ -116,10 +122,16 @@ public class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
             } catch (SQLException e) {
                 log.error("LOADING NOTE", e);
             }
-            if (player.getGuildId() > 0) {
-                c.getChannelServer().getWorldInterface().setGuildMemberOnline(player.getMGC(), true, c.getChannel());
-                c.getSession().write(MaplePacketCreator.showGuildInfo(player));
-            }
+
+            MaplePacket guildInfo = MaplePacketCreator.showGuildInfo(player);
+            player.getMGC().ifPresent(g -> {
+                try {
+                    c.getChannelServer().getWorldInterface().setGuildMemberOnline(g, true, c.getChannel());
+                    c.getSession().write(guildInfo);
+                } catch (RemoteException e) {
+                    log.info("REMOTE THROW", e);
+                }
+            });
         } catch (RemoteException e) {
             log.info("REMOTE THROW", e);
             channelServer.reconnectWorld();
@@ -133,8 +145,8 @@ public class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
         }
         CharacterNameAndId pendingBuddyRequest = player.getBuddylist().pollPendingRequest();
         if (pendingBuddyRequest != null) {
-            player.getBuddylist().put(new BuddylistEntry(pendingBuddyRequest.getName(), pendingBuddyRequest.getId(), -1, false));
-            c.getSession().write(MaplePacketCreator.requestBuddylistAdd(pendingBuddyRequest.getId(), pendingBuddyRequest.getName()));
+            player.getBuddylist().put(new BuddylistEntry(pendingBuddyRequest.name(), pendingBuddyRequest.id(), -1, false));
+            c.getSession().write(MaplePacketCreator.requestBuddylistAdd(pendingBuddyRequest.id(), pendingBuddyRequest.name()));
         }
         int petid1 = -1, petid2 = -1, petid3 = -1;
         byte petpos1 = 0, petpos2 = 0, petpos3 = 0;

@@ -130,13 +130,7 @@ public class MapleReactor extends AbstractMapleMapObject {
     }
 
     public void delayedHitReactor(final MapleClient c, long delay) {
-        TimerManager.getInstance().schedule(new Runnable() {
-
-            @Override
-            public void run() {
-                hitReactor(c);
-            }
-        }, delay);
+        TimerManager.getInstance().schedule(() -> hitReactor(c), delay);
     }
 
     //hitReactor command for item-triggered reactors

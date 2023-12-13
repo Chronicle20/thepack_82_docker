@@ -20,12 +20,11 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
 
     private MapleCharacter owner;
     private MapleCharacter[] visitors = new MapleCharacter[3];
-    private List<MaplePlayerShopItem> items = new ArrayList<MaplePlayerShopItem>();
+    private List<MaplePlayerShopItem> items = new ArrayList<>();
     private MapleCharacter slot1 = null;
     private MapleCharacter slot2 = null;
     private MapleCharacter slot3 = null;
     private String description;
-    private List playerSlots = new ArrayList();
 
     public MaplePlayerShop(MapleCharacter owner, String description) {
         this.owner = owner;
@@ -130,7 +129,6 @@ public class MaplePlayerShop extends AbstractMapleMapObject {
                 }
             }
         }
-        return;
     }
 
     public void broadcastToVisitors(MaplePacket packet) {

@@ -25,13 +25,11 @@ public class StorageHandler extends AbstractMaplePacketHandler {
 		if (mode == 4) { // take out
 			byte type = slea.readByte();
 			byte slot = slea.readByte();
-			slot = storage.getSlot(MapleInventoryType.getByType(type), slot);
+			slot = storage.getSlot(MapleInventoryType.getByType(type).orElseThrow(), slot);
 			IItem item = storage.takeOut(slot);
 			if (item != null) {
 				if (MapleInventoryManipulator.checkSpace(c, item.getItemId(), item.getQuantity(), item.getOwner())) {
-					StringBuilder logInfo = new StringBuilder("Taken out from storage by ");
-					logInfo.append(c.getPlayer().getName());
-					MapleInventoryManipulator.addFromDrop(c, item, logInfo.toString(), false);
+					MapleInventoryManipulator.addFromDrop(c, item, "Taken out from storage by " + c.getPlayer().getName(), false);
 				} else {
 					storage.store(item);
 					c.getSession().write(MaplePacketCreator.serverNotice(1, "Your inventory is full"));
@@ -39,8 +37,7 @@ public class StorageHandler extends AbstractMaplePacketHandler {
 				storage.sendTakenOut(c, ii.getInventoryType(item.getItemId()));
 			} else {
 				AutobanManager.getInstance().autoban(c, "Trying to take out item from storage which does not exist.");
-				return;
-			}
+            }
 		} else if (mode == 5) { // store
 			byte slot = (byte) slea.readShort();
 			int itemId = slea.readInt();
@@ -61,9 +58,7 @@ public class StorageHandler extends AbstractMaplePacketHandler {
 				if (item.getItemId() == itemId && (item.getQuantity() >= quantity || ii.isThrowingStar(itemId) || ii.isBullet(itemId))) {
 					if (ii.isThrowingStar(itemId) || ii.isBullet(itemId))
 						quantity = item.getQuantity();
-					StringBuilder logMsg = new StringBuilder("Stored by ");
-					logMsg.append(c.getPlayer().getName());
-					item.log(logMsg.toString(),false);
+					item.log("Stored by " + c.getPlayer().getName(),false);
 					c.getPlayer().gainMeso(-100, false, true, false);
 					MapleInventoryManipulator.removeFromSlot(c, type, slot, quantity, false);
 					item.setQuantity(quantity);

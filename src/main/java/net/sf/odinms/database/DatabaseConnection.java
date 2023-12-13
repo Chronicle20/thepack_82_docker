@@ -22,11 +22,7 @@ public class DatabaseConnection {
 		if (props == null) throw new RuntimeException("DatabaseConnection not initialized");
 		return con.get();
 	}
-	
-	public static boolean isInitialized() {
-		return props != null;
-	}
-	
+
 	public static void setProps(Properties aProps) {
 		props = aProps;
 	}
@@ -38,7 +34,7 @@ public class DatabaseConnection {
 	}
 
 	private static class ThreadLocalConnection extends ThreadLocal<Connection> {
-		public static Collection<Connection> allConnections = new LinkedList<Connection>();
+		public static Collection<Connection> allConnections = new LinkedList<>();
 		
 		@Override
 		protected Connection initialValue() {

@@ -119,7 +119,7 @@ public enum RecvPacketOpcode implements WritableIntValueHolder {
         return code;
     }
 
-    public static Properties getDefaultProperties() throws FileNotFoundException, IOException {
+    public static Properties getDefaultProperties() throws IOException {
         Properties props = new Properties();
         FileInputStream fis = new FileInputStream(System.getProperty("net.sf.odinms.recvops"));
         props.load(fis);

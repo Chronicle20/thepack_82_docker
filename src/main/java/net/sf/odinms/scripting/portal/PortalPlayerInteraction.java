@@ -31,7 +31,7 @@ public class PortalPlayerInteraction extends AbstractPlayerInteraction {
             r.setState((byte) 1);
             c.getChannelServer().getMapFactory().getMap(reactorMap).broadcastMessage(MaplePacketCreator.triggerReactor(r, 1));
         }
-        new MapMonitor(c.getChannelServer().getMapFactory().getMap(mapId), closePortal ? portal : null, c.getChannel(), r);
+        new MapMonitor(c.getChannelServer().getMapFactory().getMap(mapId), closePortal ? portal : null, r);
     }
 
     public MaplePortal getPortal() {

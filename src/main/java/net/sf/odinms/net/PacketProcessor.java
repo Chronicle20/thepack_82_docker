@@ -14,7 +14,8 @@ public final class PacketProcessor {
 
         LOGINSERVER,
         CHANNELSERVER
-    };
+    }
+
     private static PacketProcessor instance;
     private MaplePacketHandler[] handlers;
 

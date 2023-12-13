@@ -3,27 +3,18 @@ package net.sf.odinms.tools;
 public class StringUtil {
 
     public static String getLeftPaddedStr(String in, char padchar, int length) {
-        StringBuilder builder = new StringBuilder(length);
-        for (int x = in.length(); x < length; x++) {
-            builder.append(padchar);
-        }
-        builder.append(in);
-        return builder.toString();
+        return String.valueOf(padchar).repeat(Math.max(0, length - in.length())) + in;
     }
 
     public static String getRightPaddedStr(String in, char padchar, int length) {
-        StringBuilder builder = new StringBuilder(in);
-        for (int x = in.length(); x < length; x++) {
-            builder.append(padchar);
-        }
-        return builder.toString();
+        return in + String.valueOf(padchar).repeat(Math.max(0, length - in.length()));
     }
 
-    public static String joinStringFrom(String arr[], int start) {
+    public static String joinStringFrom(String[] arr, int start) {
         return joinStringFrom(arr, start, " ");
     }
 
-    public static String joinStringFrom(String arr[], int start, String sep) {
+    public static String joinStringFrom(String[] arr, int start, String sep) {
         StringBuilder builder = new StringBuilder();
         for (int i = start; i < arr.length; i++) {
             builder.append(arr[i]);

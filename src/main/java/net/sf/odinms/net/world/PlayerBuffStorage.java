@@ -3,6 +3,8 @@ package net.sf.odinms.net.world;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import net.sf.odinms.tools.Pair;
 
 /**
@@ -10,29 +12,21 @@ import net.sf.odinms.tools.Pair;
  * @author Danny
  */
 public class PlayerBuffStorage implements Serializable {
-	private List<Pair<Integer, List<PlayerBuffValueHolder>>> buffs = new ArrayList<Pair<Integer, List<PlayerBuffValueHolder>>>();
-	private List<Pair<Integer, List<PlayerCoolDownValueHolder>>> coolDowns = new ArrayList<Pair<Integer, List<PlayerCoolDownValueHolder>>>();
+	private List<Pair<Integer, List<PlayerBuffValueHolder>>> buffs = new ArrayList<>();
+	private List<Pair<Integer, List<PlayerCoolDownValueHolder>>> coolDowns = new ArrayList<>();
 	private int id = (int) (Math.random()*100);
 	
 	public PlayerBuffStorage() {
 	}
 	
 	public void addBuffsToStorage(int chrid, List<PlayerBuffValueHolder> toStore) {
-		for (Pair<Integer, List<PlayerBuffValueHolder>> stored : buffs) {
-			if (stored.getLeft() == Integer.valueOf(chrid)) {
-				buffs.remove(stored);
-			}
-		}
-		buffs.add(new Pair<Integer, List<PlayerBuffValueHolder>>(Integer.valueOf(chrid), toStore));
+        buffs.removeIf(stored -> Objects.equals(stored.left(), chrid));
+		buffs.add(new Pair<>(chrid, toStore));
 	}
 	
 	public void addCooldownsToStorage(int chrid, List<PlayerCoolDownValueHolder> toStore) {
-		for (Pair<Integer, List<PlayerCoolDownValueHolder>> stored : coolDowns) {
-			if (stored.getLeft() == Integer.valueOf(chrid)) {
-				coolDowns.remove(stored);
-			}
-		}
-		coolDowns.add(new Pair<Integer, List<PlayerCoolDownValueHolder>>(Integer.valueOf(chrid), toStore));
+        coolDowns.removeIf(stored -> Objects.equals(stored.left(), chrid));
+		coolDowns.add(new Pair<>(chrid, toStore));
 	}
 	
 	public List<PlayerBuffValueHolder> getBuffsFromStorage(int chrid) {
@@ -40,8 +34,8 @@ public class PlayerBuffStorage implements Serializable {
 		Pair<Integer, List<PlayerBuffValueHolder>> stored;
 		for (int i = 0; i < buffs.size(); i++) {
 			stored = buffs.get(i);
-			if (stored.getLeft().equals(Integer.valueOf(chrid))) {
-				ret = stored.getRight();
+			if (stored.left().equals(chrid)) {
+				ret = stored.right();
 				buffs.remove(stored);
 			}
 		}
@@ -53,8 +47,8 @@ public class PlayerBuffStorage implements Serializable {
 		Pair<Integer, List<PlayerCoolDownValueHolder>> stored;
 		for (int i = 0; i < coolDowns.size(); i++) {
 			stored = coolDowns.get(i);
-			if (stored.getLeft().equals(Integer.valueOf(chrid))) {
-				ret = stored.getRight();
+			if (stored.left().equals(chrid)) {
+				ret = stored.right();
 				coolDowns.remove(stored);
 			}
 		}
@@ -78,8 +72,6 @@ public class PlayerBuffStorage implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		final PlayerBuffStorage other = (PlayerBuffStorage) obj;
-		if (id != other.id)
-			return false;
-		return true;
-	}
+        return id == other.id;
+    }
 }

@@ -6,18 +6,9 @@ import java.io.Serializable;
  *
  * @author Danny
  */
-public class PlayerCoolDownValueHolder implements Serializable {
-
-    public int skillId;
-    public long startTime;
-    public long length;
-    private int id;
-
+public record PlayerCoolDownValueHolder(int skillId, long startTime, long length, int id) implements Serializable {
     public PlayerCoolDownValueHolder(int skillId, long startTime, long length) {
-        this.skillId = skillId;
-        this.startTime = startTime;
-        this.length = length;
-        this.id = (int) (Math.random() * 100);
+        this(skillId, startTime, length, (int) (Math.random() * 100));
     }
 
     @Override
@@ -40,9 +31,6 @@ public class PlayerCoolDownValueHolder implements Serializable {
             return false;
         }
         final PlayerCoolDownValueHolder other = (PlayerCoolDownValueHolder) obj;
-        if (id != other.id) {
-            return false;
-        }
-        return true;
+        return id == other.id;
     }
 }

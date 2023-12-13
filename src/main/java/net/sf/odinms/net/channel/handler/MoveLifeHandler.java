@@ -42,8 +42,8 @@ public class MoveLifeHandler extends AbstractMovementPacketHandler {
 		if (skillByte == 1 && monster.getNoSkills() > 0) {
 			int random = rand.nextInt(monster.getNoSkills());
 			Pair<Integer, Integer> skillToUse = monster.getSkills().get(random);
-			toUse = MobSkillFactory.getMobSkill(skillToUse.getLeft(), skillToUse.getRight());
-			int percHpLeft = (int) ((monster.getHp() / monster.getMaxHp()) * 100);
+			toUse = MobSkillFactory.getMobSkill(skillToUse.left(), skillToUse.right());
+			int percHpLeft = (monster.getHp() / monster.getMaxHp()) * 100;
 			if (toUse.getHP() < percHpLeft || !monster.canUseSkill(toUse)) {
 				toUse = null;
 			}

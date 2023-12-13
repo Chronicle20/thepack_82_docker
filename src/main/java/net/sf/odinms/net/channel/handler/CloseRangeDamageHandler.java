@@ -7,7 +7,7 @@ import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleCharacter.CancelCooldownAction;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleJob;
-import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.client.anticheat.CheatingOffense;
 import net.sf.odinms.net.MaplePacket;
@@ -36,7 +36,7 @@ public class CloseRangeDamageHandler extends AbstractDealDamageHandler {
         int energyChargeSkillLevel = player.getSkillLevel(energycharge);
         if (isFinisher(attack.skill)) {
             if (comboBuff != null) {
-                numFinisherOrbs = comboBuff.intValue() - 1;
+                numFinisherOrbs = comboBuff - 1;
             }
             player.handleOrbconsume();
         } else if (attack.numAttacked > 0) {
@@ -53,14 +53,10 @@ public class CloseRangeDamageHandler extends AbstractDealDamageHandler {
         }
         // handle sacrifice hp loss
         if (attack.numAttacked > 0 && attack.skill == 1311005) {
-            int totDamageToOneMonster = attack.allDamage.get(0).getRight().get(0).intValue(); // sacrifice attacks only 1 mob with 1 attack
+            int totDamageToOneMonster = attack.allDamage.get(0).right().get(0); // sacrifice attacks only 1 mob with 1 attack
             int remainingHP = player.getHp() - totDamageToOneMonster * attack.getAttackEffect(player).getX() / 100;
-            if (remainingHP > 1) {
-                player.setHp(remainingHP);
-            } else {
-                player.setHp(1);
-            }
-            player.updateSingleStat(MapleStat.HP, player.getHp());
+            player.setHp(Math.max(remainingHP, 1));
+            player.updateSingleStat(Statistic.HP, player.getHp());
             player.checkBerserk();
         }
         // handle charged blow
@@ -94,7 +90,7 @@ public class CloseRangeDamageHandler extends AbstractDealDamageHandler {
             ISkill combo = SkillFactory.getSkill(1111002);
             int comboLevel = player.getSkillLevel(combo);
             MapleStatEffect comboEffect = combo.getEffect(comboLevel);
-            double comboMod = 1.0 + (comboEffect.getDamage() / 100.0 - 1.0) * (comboBuff.intValue() - 1);
+            double comboMod = 1.0 + (comboEffect.getDamage() / 100.0 - 1.0) * (comboBuff - 1);
             maxdamage *= comboMod;
         }
         if (numFinisherOrbs == 0 && isFinisher(attack.skill)) {

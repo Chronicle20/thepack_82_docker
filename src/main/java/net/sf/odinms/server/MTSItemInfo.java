@@ -13,13 +13,14 @@ import java.util.*;
  * @author Traitor
  */
 public class MTSItemInfo {
-
-    private int price;
-    private IItem item;
-    private String seller;
-    private int id;
-    private int cid;
-    private int year,  month,  day = 1;
+    private final int price;
+    private final IItem item;
+    private final String seller;
+    private final int id;
+    private final int cid;
+    private final int year;
+    private final int month;
+    private final int day;
 
     public MTSItemInfo(IItem item, int price, int id, int cid, String seller, String date) {
         this.item = item;
@@ -40,20 +41,12 @@ public class MTSItemInfo {
         return price;
     }
 
-    public int getRealPrice() {
-        return price + getTaxes();
-    }
-
     public int getTaxes() {
         return 100 + (int) (price * 0.1);
     }
 
     public int getID() {
         return id;
-    }
-
-    public int getCID() {
-        return cid;
     }
 
     public long getEndingDate() {

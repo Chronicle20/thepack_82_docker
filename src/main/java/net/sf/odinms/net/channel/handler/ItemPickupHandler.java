@@ -1,10 +1,9 @@
 package net.sf.odinms.net.channel.handler;
 
-import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.net.channel.ChannelServer;
 import net.sf.odinms.net.world.MaplePartyCharacter;
 import net.sf.odinms.client.MapleClient;
-import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.Pet;
 import net.sf.odinms.client.anticheat.CheatingOffense;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.server.AutobanManager;
@@ -13,6 +12,8 @@ import net.sf.odinms.server.maps.MapleMapItem;
 import net.sf.odinms.server.maps.MapleMapObject;
 import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+import java.util.Optional;
 
 /**
  *
@@ -79,14 +80,13 @@ public class ItemPickupHandler extends AbstractMaplePacketHandler {
                             }
                         }
                         int mesosgain = mesosamm / partynum;
-                        for (MaplePartyCharacter partymem : c.getPlayer().getParty().getMembers()) {
-                            if (partymem.isOnline() && partymem.getMapid() == c.getPlayer().getMap().getId()) {
-                                MapleCharacter somecharacter = cserv.getPlayerStorage().getCharacterById(partymem.getId());
-                                if (somecharacter != null) {
-                                    somecharacter.gainMeso(mesosgain, true, true);
-                                }
-                            }
-                        }
+                        c.getPlayer().getParty().getMembers().stream()
+                                .filter(MaplePartyCharacter::isOnline)
+                                .filter(pc -> pc.getMapid() == c.getPlayer().getMapId())
+                                .map(MaplePartyCharacter::getId)
+                                .map(id -> cserv.getPlayerStorage().getCharacterById(id))
+                                .flatMap(Optional::stream)
+                                .forEach(pc -> pc.gainMeso(mesosgain, true, true));
                     } else {
                         c.getPlayer().gainMeso(mapitem.getMeso(), true, true);
                     }
@@ -95,7 +95,7 @@ public class ItemPickupHandler extends AbstractMaplePacketHandler {
                     c.getPlayer().getMap().removeMapObject(ob);
                 } else {
                     if (mapitem.getItem().getItemId() >= 5000000 && mapitem.getItem().getItemId() <= 5000100) {
-                        int petId = MaplePet.createPet(mapitem.getItem().getItemId());
+                        int petId = Pet.createPet(mapitem.getItem().getItemId());
                         if (petId == -1) {
                             return;
                         }

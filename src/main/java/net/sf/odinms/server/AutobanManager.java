@@ -29,9 +29,9 @@ public class AutobanManager implements Runnable {
             return (int) (time - o.time);
         }
     }
-    private Map<Integer, Integer> points = new HashMap<Integer, Integer>();
-    private Map<Integer, List<String>> reasons = new HashMap<Integer, List<String>>();
-    private Set<ExpirationEntry> expirations = new TreeSet<ExpirationEntry>();
+    private Map<Integer, Integer> points = new HashMap<>();
+    private Map<Integer, List<String>> reasons = new HashMap<>();
+    private Set<ExpirationEntry> expirations = new TreeSet<>();
     private static final int AUTOBAN_POINTS = 2147483647;
     private static AutobanManager instance = null;
 
@@ -64,7 +64,7 @@ public class AutobanManager implements Runnable {
           //  reasonList.add(reason);
         } else {
             this.points.put(acc, points);
-            reasonList = new LinkedList<String>();
+            reasonList = new LinkedList<>();
             reasonList.add(reason);
             this.reasons.put(acc, reasonList);
         }

@@ -16,7 +16,7 @@ public class CheatingOffensePersister {
 
     private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CheatingOffensePersister.class);
     private final static CheatingOffensePersister INSTANCE = new CheatingOffensePersister();
-    private Set<CheatingOffenseEntry> toPersist = new LinkedHashSet<CheatingOffenseEntry>();
+    private Set<CheatingOffenseEntry> toPersist = new LinkedHashSet<>();
 
     private CheatingOffensePersister() {
         TimerManager.getInstance().register(new PersistingTask(), 61000);
@@ -39,7 +39,7 @@ public class CheatingOffensePersister {
         public void run() {
             CheatingOffenseEntry[] offenses;
             synchronized (toPersist) {
-                offenses = toPersist.toArray(new CheatingOffenseEntry[toPersist.size()]);
+                offenses = toPersist.toArray(new CheatingOffenseEntry[0]);
                 toPersist.clear();
             }
 

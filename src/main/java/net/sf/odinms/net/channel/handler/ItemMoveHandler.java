@@ -6,10 +6,6 @@ import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.server.MapleInventoryManipulator;
 import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
 
-/**
- *
- * @author Matze
- */
 public class ItemMoveHandler extends AbstractMaplePacketHandler {
 
     public ItemMoveHandler() {
@@ -17,18 +13,18 @@ public class ItemMoveHandler extends AbstractMaplePacketHandler {
 
     public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
         slea.readInt(); //?
-        MapleInventoryType type = MapleInventoryType.getByType(slea.readByte());
-        byte src = (byte) slea.readShort();
-        byte dst = (byte) slea.readShort();
+        MapleInventoryType type = MapleInventoryType.getByType(slea.readByte()).orElseThrow();
+        byte source = (byte) slea.readShort();
+        byte destination = (byte) slea.readShort();
         short quantity = slea.readShort();
-        if (src < 0 && dst > 0) {
-            MapleInventoryManipulator.unequip(c, src, dst);
-        } else if (dst < 0) {
-            MapleInventoryManipulator.equip(c, src, dst);
-        } else if (dst == 0) {
-            MapleInventoryManipulator.drop(c, type, src, quantity);
+        if (source < 0 && destination > 0) {
+            MapleInventoryManipulator.unequip(c, source, destination);
+        } else if (destination < 0) {
+            MapleInventoryManipulator.equip(c, source, destination);
+        } else if (destination == 0) {
+            MapleInventoryManipulator.drop(c, type, source, quantity);
         } else {
-            MapleInventoryManipulator.move(c, type, src, dst);
+            MapleInventoryManipulator.move(c, type, source, destination);
         }
     }
 }

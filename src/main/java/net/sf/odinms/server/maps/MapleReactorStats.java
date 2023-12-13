@@ -33,7 +33,7 @@ import net.sf.odinms.tools.Pair;
 public class MapleReactorStats {
 	private Point tl;
 	private Point br;
-	private Map<Byte, StateData> stateInfo = new HashMap<Byte, StateData>();
+	private Map<Byte, StateData> stateInfo = new HashMap<>();
 	
 	/*public int getInfoId() {
 	return infoId;

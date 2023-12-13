@@ -1,12 +1,18 @@
 package net.sf.odinms.client.messages;
 
-import java.util.*;
-import net.sf.odinms.client.*;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.Ring;
 import net.sf.odinms.net.channel.ChannelServer;
-import net.sf.odinms.server.life.*;
-import net.sf.odinms.server.maps.*;
+import net.sf.odinms.server.life.MapleLifeFactory;
+import net.sf.odinms.server.life.MapleNPC;
+import net.sf.odinms.server.maps.AbstractMapleMapObject;
+import net.sf.odinms.server.maps.MapleMapObjectType;
 import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.tools.StringUtil;
+
+import java.util.List;
+import java.util.Optional;
 
 public class SuperCommand {
 
@@ -16,129 +22,25 @@ public class SuperCommand {
         ChannelServer cserv = c.getChannelServer();
         String[] splitted = line.split(" ");
         if (splitted[0].equals("!checkkarma")) {
-            MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(splitted[1]);
-            if (splitted.length == 1) {
-                mc.dropMessage(victim + "'s Karma level is at: " + victim.getKarma());
-                if (victim.getKarma() <= -50) {
-                    mc.dropMessage("You may want to ban him/her for low karma.");
-                } else if (victim.getKarma() >= 50) {
-                    mc.dropMessage("You may want to set him/her as an intern for high karma.");
-                }
-            } else if (splitted.length > 1) {
-                if (splitted[2].equals("ban")) {
-                    if (victim.getKarma() < -49) {
-                        victim.ban("Low Karma: " + victim.getKarma());
-                    } else {
-                        mc.dropMessage("Too much karma");
-                    }
-                } else if (splitted[2].equals("intern")) {
-                    if (victim.getKarma() > 49) {
-                        victim.setGMLevel(2);
-                    } else {
-                        mc.dropMessage("Not enough karma");
-                    }
-                    mc.dropMessage("You have set " + victim + " as an intern.");
-                } else {
-                    mc.dropMessage("Syntax: !checkkarma [user] [ban/intern]");
-                }
-            } else {
-                mc.dropMessage("Syntax: !checkkarma [user]");
-            }
+            checkKarma(mc, cserv, splitted);
         } else if (splitted[0].equals("!dcall")) {
-            for (MapleCharacter everyone : cserv.getPlayerStorage().getAllCharacters()) {
-                if (everyone != player) {
-                    everyone.getClient().getSession().close();
-
-                }
-                everyone.saveToDB(true);
-                cserv.removePlayer(everyone);
-            }
+            dcAll(cserv, player);
         } else if (splitted[0].equals("!givedonatorpoint")) {
-            cserv.getPlayerStorage().getCharacterByName(splitted[1]).gainDonatorPoints(Integer.parseInt(splitted[2]));
-            mc.dropMessage("You have given " + splitted[1] + " " + splitted[2] + " donator points.");
+            giveDonatorPoint(mc, cserv, splitted);
         } else if (splitted[0].equals("!horntail")) {
-            for (int i = 8810002; i < 8810010; i++) {
-                player.getMap().spawnMonsterOnGroudBelow(MapleLifeFactory.getMonster(i), player.getPosition());
-            }
+            spawnHorntail(player);
         } else if (splitted[0].equals("!npc")) {
-            int npcId = Integer.parseInt(splitted[1]);
-            MapleNPC npc = MapleLifeFactory.getNPC(npcId);
-            if (npc != null && !npc.getName().equals("MISSINGNO")) {
-                npc.setPosition(player.getPosition());
-                npc.setCy(player.getPosition().y);
-                npc.setRx0(player.getPosition().x + 50);
-                npc.setRx1(player.getPosition().x - 50);
-                npc.setFh(player.getMap().getFootholds().findBelow(c.getPlayer().getPosition()).getId());
-                npc.setCustom(true);
-                player.getMap().addMapObject(npc);
-                player.getMap().broadcastMessage(MaplePacketCreator.spawnNPC(npc));
-            } else {
-                mc.dropMessage("You have entered an invalid Npc-Id");
-            }
+            spawnNpc(c, mc, splitted);
         } else if (splitted[0].equals("!removenpcs")) {
-            List<MapleMapObject> npcs = player.getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.NPC));
-            for (MapleMapObject npcmo : npcs) {
-                MapleNPC npc = (MapleNPC) npcmo;
-                if (npc.isCustom()) {
-                    player.getMap().removeMapObject(npc.getObjectId());
-                }
-            }
+            removeNpcs(c);
         } else if (splitted[0].equals("!ringme")) {
-            int itemId = Integer.parseInt(splitted[1]);
-            if (itemId < 111200 || itemId > 1120000 || (itemId > 1112006 && itemId < 1112800) || itemId == 1112808) {
-                mc.dropMessage("Invalid itemID.");
-            } else {
-                int[] ret = MapleRing.createRing(c, itemId, player.getId(), player.getName(), MapleCharacter.getIdByName(splitted[2], player.getWorld()), splitted[2]);
-                if (ret[0] == -1 || ret[1] == -1) {
-                    mc.dropMessage("Make sure the person you are attempting to create a ring with is online.");
-                }
-            }
-        } else if (splitted[0].equals("!sex")) {
-            MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(splitted[1]);
-            String type = splitted[2], text = StringUtil.joinStringFrom(splitted, 3);
-            int itemID = 5390000;
-            if (type.equals("love")) {
-                itemID += 2;
-            } else if (type.equals("cloud")) {
-                itemID++;
-            }
-            String[] lines = {"", "", "", ""};
-            if (text.length() > 30) {
-                lines[0] = text.substring(0, 10);
-                lines[1] = text.substring(10, 20);
-                lines[2] = text.substring(20, 30);
-                lines[3] = text.substring(30);
-            } else if (text.length() > 20) {
-                lines[0] = text.substring(0, 10);
-                lines[1] = text.substring(10, 20);
-                lines[2] = text.substring(20);
-            } else if (text.length() > 10) {
-                lines[0] = text.substring(0, 10);
-                lines[1] = text.substring(10);
-            } else if (text.length() <= 10) {
-                lines[0] = text;
-            }
-            LinkedList list = new LinkedList();
-            list.add(lines[0]);
-            list.add(lines[1]);
-            list.add(lines[2]);
-            list.add(lines[3]);
-            try {
-                victim.getClient().getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.getAvatarMega(victim, victim.getClient().getChannel(), itemID, list, true).getBytes());
-            } catch (Exception e) {
-            }
+            ringMe(c, mc, splitted);
         } else if (splitted[0].equals("!speak")) {
-            MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(splitted[1]);
-            victim.getMap().broadcastMessage(MaplePacketCreator.getChatText(victim.getId(), StringUtil.joinStringFrom(splitted, 2), victim.isGM() && c.getChannelServer().allowGmWhiteText(), 0));
+            speak(c, mc, cserv, splitted);
         } else if (splitted[0].equals("!unban")) {
-            MapleCharacter.unban(splitted[1], false);
-            MapleCharacter.unbanIP(splitted[1]);
-            mc.dropMessage("Unbanned " + splitted[1]);
+            unban(mc, splitted);
         } else if (splitted[0].equals("!zakum")) {
-            player.getMap().spawnMonsterOnGroudBelow(MapleLifeFactory.getMonster(8800000), player.getPosition());
-            for (int x = 8800003; x <= 8800010; x++) {
-                player.getMap().spawnMonsterOnGroudBelow(MapleLifeFactory.getMonster(x), player.getPosition());
-            }
+            zakum(player);
         } else {
             if (c.getPlayer().gmLevel() == 4) {
                 mc.dropMessage("SuperGM Command " + splitted[0] + " does not exist");
@@ -146,5 +48,155 @@ public class SuperCommand {
             return false;
         }
         return true;
+    }
+
+    private static void zakum(MapleCharacter player) {
+        player.getMap().spawnMonsterOnGroudBelow(MapleLifeFactory.getMonster(8800000), player.getPosition());
+        for (int x = 8800003; x <= 8800010; x++) {
+            player.getMap().spawnMonsterOnGroudBelow(MapleLifeFactory.getMonster(x), player.getPosition());
+        }
+    }
+
+    private static void unban(MessageCallback mc, String[] splitted) {
+        if (splitted.length != 2) {
+            mc.dropMessage("Syntax: !unban [userid]");
+            return;
+        }
+
+        MapleCharacter.unban(splitted[1], false);
+        MapleCharacter.unbanIP(splitted[1]);
+        mc.dropMessage("Unbanned " + splitted[1]);
+    }
+
+    private static void speak(MapleClient c, MessageCallback mc, ChannelServer cserv, String[] splitted) {
+        if (splitted.length != 3) {
+            mc.dropMessage("Syntax: !speak [user] [message]");
+            return;
+        }
+
+        cserv.getPlayerStorage().getCharacterByName(splitted[1])
+                .ifPresent(victim -> victim.getMap().broadcastMessage(MaplePacketCreator.getChatText(victim.getId(), StringUtil.joinStringFrom(splitted, 2), victim.isGM() && c.getChannelServer().allowGmWhiteText(), 0)));
+    }
+
+    private static void ringMe(MapleClient c, MessageCallback mc, String[] splitted) {
+        if (splitted.length != 3) {
+            mc.dropMessage("Syntax: !ringme [ringid] [user]");
+            return;
+        }
+
+        int itemId = Integer.parseInt(splitted[1]);
+        if (itemId < 111200 || itemId > 1120000 || (itemId > 1112006 && itemId < 1112800) || itemId == 1112808) {
+            mc.dropMessage("Invalid itemID.");
+            return;
+        }
+
+        int[] ret = Ring.createRing(c, itemId, c.getPlayer().getId(), c.getPlayer().getName(), MapleCharacter.getIdByName(splitted[2], c.getPlayer().getWorld()), splitted[2]);
+        if (ret[0] == -1 || ret[1] == -1) {
+            mc.dropMessage("Make sure the person you are attempting to create a ring with is online.");
+        }
+    }
+
+    private static void removeNpcs(MapleClient c) {
+        c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.NPC)).stream()
+                .map(mo -> (MapleNPC) mo)
+                .filter(MapleNPC::isCustom)
+                .map(AbstractMapleMapObject::getObjectId)
+                .forEach(id -> c.getPlayer().getMap().removeMapObject(id));
+    }
+
+    private static void spawnNpc(MapleClient c, MessageCallback mc, String[] splitted) {
+        MapleCharacter player = c.getPlayer();
+        int npcId = Integer.parseInt(splitted[1]);
+        MapleNPC npc = MapleLifeFactory.getNPC(npcId);
+        if (npc.getName().equals("MISSINGNO")) {
+            mc.dropMessage("You have entered an invalid Npc-Id");
+            return;
+        }
+
+        npc.setPosition(player.getPosition());
+        npc.setCy(player.getPosition().y);
+        npc.setRx0(player.getPosition().x + 50);
+        npc.setRx1(player.getPosition().x - 50);
+        npc.setFh(player.getMap().getFootholds().findBelow(c.getPlayer().getPosition()).getId());
+        npc.setCustom(true);
+        player.getMap().addMapObject(npc);
+        player.getMap().broadcastMessage(MaplePacketCreator.spawnNPC(npc));
+    }
+
+    private static void spawnHorntail(MapleCharacter player) {
+        for (int i = 8810002; i < 8810010; i++) {
+            player.getMap().spawnMonsterOnGroudBelow(MapleLifeFactory.getMonster(i), player.getPosition());
+        }
+    }
+
+    private static void giveDonatorPoint(MessageCallback mc, ChannelServer cserv, String[] splitted) {
+        if (splitted.length != 3) {
+            mc.dropMessage("Syntax: !givedonatorpoint [user] [num]");
+            return;
+        }
+
+        cserv.getPlayerStorage().getCharacterByName(splitted[1]).ifPresent(target -> {
+            target.gainDonatorPoints(Integer.parseInt(splitted[2]));
+            mc.dropMessage(String.format("You have given %s %s donator points.", splitted[1], splitted[2]));
+        });
+    }
+
+    private static void dcAll(ChannelServer cserv, MapleCharacter player) {
+        for (MapleCharacter everyone : cserv.getPlayerStorage().getAllCharacters()) {
+            if (everyone != player) {
+                everyone.getClient().getSession().close();
+
+            }
+            everyone.saveToDB(true);
+            cserv.removePlayer(everyone);
+        }
+    }
+
+    private static void checkKarma(MessageCallback mc, ChannelServer cserv, String[] splitted) {
+        if (splitted.length <= 1) {
+            mc.dropMessage("Syntax: !checkkarma [user]");
+            return;
+        }
+
+        Optional<MapleCharacter> victim = cserv.getPlayerStorage().getCharacterByName(splitted[1]);
+        if (victim.isEmpty()) {
+            mc.dropMessage(String.format("User [%s] cannot be found.", splitted[1]));
+            return;
+        }
+
+        if (splitted.length == 2) {
+            mc.dropMessage(victim + "'s Karma level is at: " + victim.get().getKarma());
+            if (victim.get().getKarma() <= -50) {
+                mc.dropMessage("You may want to ban him/her for low karma.");
+                return;
+            } else if (victim.get().getKarma() >= 50) {
+                mc.dropMessage("You may want to set him/her as an intern for high karma.");
+                return;
+            }
+            return;
+        }
+
+        if (splitted[2].equals("ban")) {
+            if (victim.get().getKarma() < -49) {
+                victim.get().ban("Low Karma: " + victim.get().getKarma());
+                return;
+            }
+
+            mc.dropMessage("Too much karma");
+            return;
+        }
+
+        if (splitted[2].equals("intern")) {
+            if (victim.get().getKarma() <= 49) {
+                mc.dropMessage("Not enough karma");
+                return;
+            }
+
+            victim.get().setGMLevel(2);
+            mc.dropMessage("You have set " + victim + " as an intern.");
+            return;
+        }
+
+        mc.dropMessage("Syntax: !checkkarma [user] [ban/intern]");
     }
 }

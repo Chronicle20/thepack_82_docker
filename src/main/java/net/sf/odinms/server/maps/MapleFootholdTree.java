@@ -41,12 +41,11 @@ public class MapleFootholdTree {
 	private MapleFootholdTree ne = null;
 	private MapleFootholdTree sw = null;
 	private MapleFootholdTree se = null;
-	private List<MapleFoothold> footholds = new LinkedList<MapleFoothold>();
+	private List<MapleFoothold> footholds = new LinkedList<>();
 	private Point p1;
 	private Point p2;
 	private Point center;
 	private int depth = 0;
-	private static int maxDepth = 8;
 	private int maxDropX;
 	private int minDropX;
 	
@@ -74,7 +73,8 @@ public class MapleFootholdTree {
 			if (f.getX2() < minDropX)
 				minDropX = f.getX2();
 		}
-		if (/*footholds.size() == 0 || */depth == maxDepth || 
+		int maxDepth = 8;
+		if (/*footholds.size() == 0 || */depth == maxDepth ||
 			(f.getX1() >= p1.x && f.getX2() <= p2.x &&
 			f.getY1() >= p1.y && f.getY2() <= p2.y)) {
 			footholds.add(f);
@@ -97,7 +97,7 @@ public class MapleFootholdTree {
 	}
 	
 	private List<MapleFoothold> getRelevants(Point p) {
-		return getRelevants(p, new LinkedList<MapleFoothold>());
+		return getRelevants(p, new LinkedList<>());
 	}
 	
 	private List<MapleFoothold> getRelevants(Point p, List<MapleFoothold> list) {
@@ -138,7 +138,7 @@ public class MapleFootholdTree {
 			}
 			if ((p1.x > center.x || p2.x > center.x) && p1.y > center.y) {
 				ret = se.findWallR(p1, p2);
-				if (ret != null) return ret;
+                return ret;
 			}
 		}		
 		return null;
@@ -153,7 +153,7 @@ public class MapleFootholdTree {
 	public MapleFoothold findBelow(Point p) {
 		List<MapleFoothold> relevants = getRelevants(p);
 		// find fhs with matching x coordinates
-		List<MapleFoothold> xMatches = new LinkedList<MapleFoothold>();
+		List<MapleFoothold> xMatches = new LinkedList<>();
 		for (MapleFoothold fh : relevants) {
 			if (fh.getX1() <= p.x && fh.getX2() >= p.x) xMatches.add(fh);
 		}

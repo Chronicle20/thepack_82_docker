@@ -1,58 +1,59 @@
 package net.sf.odinms.scripting.npc;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
+import net.sf.odinms.client.ExpTable;
 import net.sf.odinms.client.IItem;
-import net.sf.odinms.client.Item;
+import net.sf.odinms.client.ISkill;
+import net.sf.odinms.client.MapleBuffStat;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventory;
 import net.sf.odinms.client.MapleInventoryType;
 import net.sf.odinms.client.MapleJob;
+import net.sf.odinms.client.Pet;
+import net.sf.odinms.client.Ring;
+import net.sf.odinms.client.SkinColor;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.client.SkillFactory;
+import net.sf.odinms.net.channel.ChannelServer;
+import net.sf.odinms.net.world.MapleParty;
+import net.sf.odinms.net.world.MaplePartyCharacter;
+import net.sf.odinms.net.world.guild.MapleGuild;
 import net.sf.odinms.scripting.AbstractPlayerInteraction;
 import net.sf.odinms.scripting.event.EventManager;
 import net.sf.odinms.server.MapleInventoryManipulator;
 import net.sf.odinms.server.MapleItemInformationProvider;
 import net.sf.odinms.server.MapleShopFactory;
-import net.sf.odinms.server.quest.MapleQuest;
-import net.sf.odinms.tools.MaplePacketCreator;
-import net.sf.odinms.client.MapleStat;
-import net.sf.odinms.net.world.guild.MapleGuild;
 import net.sf.odinms.server.MapleSquad;
 import net.sf.odinms.server.MapleSquadType;
-import net.sf.odinms.server.maps.MapleMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import net.sf.odinms.client.ExpTable;
-import net.sf.odinms.client.ISkill;
-import net.sf.odinms.client.MapleBuffStat;
-import net.sf.odinms.client.MaplePet;
-import net.sf.odinms.net.channel.ChannelServer;
-import net.sf.odinms.net.world.MapleParty;
-import net.sf.odinms.net.world.MaplePartyCharacter;
 import net.sf.odinms.server.life.MapleLifeFactory;
 import net.sf.odinms.server.life.MapleMonster;
 import net.sf.odinms.server.life.MapleMonsterStats;
 import net.sf.odinms.server.life.MapleNPC;
+import net.sf.odinms.server.maps.MapleMap;
 import net.sf.odinms.server.maps.MapleMapFactory;
 import net.sf.odinms.server.maps.MapleMapObject;
 import net.sf.odinms.server.maps.MapleMapObjectType;
+import net.sf.odinms.server.quest.MapleQuest;
+import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.tools.Pair;
 
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Random;
+
 /**
- *
  * @author Matze
  */
 public class NPCConversationManager extends AbstractPlayerInteraction {
 
-    private MapleClient c;
-    private int npc;
+    private final MapleClient c;
+    private final int npc;
     private String getText;
     private ChannelServer cserv;
     private MapleCharacter chr;
@@ -102,7 +103,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         getClient().getSession().write(MaplePacketCreator.getNPCTalk(npc, (byte) 4, text, ""));
     }
 
-    public void sendStyle(String text, int styles[]) {
+    public void sendStyle(String text, int[] styles) {
         getClient().getSession().write(MaplePacketCreator.getNPCTalkStyle(npc, text, styles));
     }
 
@@ -131,7 +132,10 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void makeRing(String partner, int ringId) {
-        net.sf.odinms.client.MapleRing.createRing(c, ringId, c.getPlayer().getId(), c.getPlayer().getName(), c.getChannelServer().getPlayerStorage().getCharacterByName(partner).getId(), partner);
+        c.getChannelServer().getPlayerStorage()
+                .getCharacterByName(partner)
+                .map(MapleCharacter::getId)
+                .ifPresent(pid -> Ring.createRing(c, ringId, c.getPlayer().getId(), c.getPlayer().getName(), pid, partner));
     }
 
     public void closeDoor(int mapid) {
@@ -191,6 +195,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     /**
      * use getPlayer().getMeso() instead
+     *
      * @return
      */
     @Deprecated
@@ -212,6 +217,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     /**
      * use getPlayer().getLevel() instead
+     *
      * @return
      */
     @Deprecated
@@ -222,7 +228,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     public void unequipEverything() {
         MapleInventory equipped = getPlayer().getInventory(MapleInventoryType.EQUIPPED);
         MapleInventory equip = getPlayer().getInventory(MapleInventoryType.EQUIP);
-        List<Byte> ids = new LinkedList<Byte>();
+        List<Byte> ids = new LinkedList<>();
         for (IItem item : equipped.list()) {
             ids.add(item.getPosition());
         }
@@ -244,6 +250,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     /**
      * Use getPlayer() instead (for consistency with MapleClient)
+     *
      * @return
      */
     @Deprecated
@@ -260,7 +267,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         IItem stars = getPlayer().getInventory(MapleInventoryType.USE).getItem((byte) 1);
         if (ii.isThrowingStar(stars.getItemId()) || ii.isBullet(stars.getItemId())) {
             stars.setQuantity(ii.getSlotMax(getClient(), stars.getItemId()));
-            getC().getSession().write(MaplePacketCreator.updateInventorySlot(MapleInventoryType.USE, (Item) stars));
+            getC().getSession().write(MaplePacketCreator.updateInventorySlot(MapleInventoryType.USE, stars));
         }
     }
 
@@ -291,30 +298,31 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void setHair(int hair) {
         getPlayer().setHair(hair);
-        getPlayer().updateSingleStat(MapleStat.HAIR, hair);
+        getPlayer().updateSingleStat(Statistic.HAIR, hair);
         getPlayer().equipChanged();
     }
 
     public void setFace(int face) {
         getPlayer().setFace(face);
-        getPlayer().updateSingleStat(MapleStat.FACE, face);
+        getPlayer().updateSingleStat(Statistic.FACE, face);
         getPlayer().equipChanged();
     }
 
     public void setSkin(int color) {
-        getPlayer().setSkinColor(c.getPlayer().getSkinColor().getById(color));
-        getPlayer().updateSingleStat(MapleStat.SKIN, color);
+        getPlayer().setSkinColor(SkinColor.getById(color).orElse(getPlayer().getSkinColor()));
+        getPlayer().updateSingleStat(Statistic.SKIN, color);
         getPlayer().equipChanged();
     }
 
     public void warpParty(int mapId) {
         MapleMap target = getMap(mapId);
-        for (MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
-            MapleCharacter curChar = c.getChannelServer().getPlayerStorage().getCharacterByName(chr.getName());
-            if ((curChar.getEventInstance() == null && c.getPlayer().getEventInstance() == null) || curChar.getEventInstance() == getPlayer().getEventInstance()) {
-                curChar.changeMap(target, target.getPortal(0));
-            }
-        }
+        getPlayer().getParty()
+                .getMembers().stream()
+                .map(MaplePartyCharacter::getName)
+                .map(n -> c.getChannelServer().getPlayerStorage().getCharacterByName(n))
+                .flatMap(Optional::stream)
+                .filter(curChar -> (curChar.getEventInstance() == null && c.getPlayer().getEventInstance() == null) || curChar.getEventInstance() == getPlayer().getEventInstance())
+                .forEach(curChar -> curChar.changeMap(target, target.getPortal(0)));
     }
 
     public void warpPartyWithExp(int mapId, int exp) {
@@ -323,14 +331,17 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void warpPartyWithExpMeso(int mapId, int exp, int meso) {
         MapleMap target = getMap(mapId);
-        for (MaplePartyCharacter chr : getPlayer().getParty().getMembers()) {
-            MapleCharacter curChar = c.getChannelServer().getPlayerStorage().getCharacterByName(chr.getName());
-            if ((curChar.getEventInstance() == null && c.getPlayer().getEventInstance() == null) || curChar.getEventInstance() == getPlayer().getEventInstance()) {
-                curChar.changeMap(target, target.getPortal(0));
-                curChar.gainExp(exp, true, false, true);
-                curChar.gainMeso(meso, false); //which pq has mesos?
-            }
-        }
+        getPlayer().getParty()
+                .getMembers().stream()
+                .map(MaplePartyCharacter::getName)
+                .map(n -> c.getChannelServer().getPlayerStorage().getCharacterByName(n))
+                .flatMap(Optional::stream)
+                .filter(curChar -> (curChar.getEventInstance() == null && c.getPlayer().getEventInstance() == null) || curChar.getEventInstance() == getPlayer().getEventInstance())
+                .forEach(curChar -> {
+                    curChar.changeMap(target, target.getPortal(0));
+                    curChar.gainExp(exp, true, false, true);
+                    curChar.gainMeso(meso, false); //which pq has mesos?
+                });
     }
 
     public void warpRandom(int mapid) {
@@ -363,8 +374,8 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void giveWonkyBuff(MapleCharacter chr) {
-        int Buffs[] = {2022090, 2022091, 2022092, 2022093};
-        MapleItemInformationProvider.getInstance().getItemEffect(Buffs[(int) Math.round(Math.random() * 4)]).applyTo((MapleCharacter) chr);
+        int[] Buffs = {2022090, 2022091, 2022092, 2022093};
+        MapleItemInformationProvider.getInstance().getItemEffect(Buffs[(int) Math.round(Math.random() * 4)]).applyTo(chr);
     }
 
     public int getSquadState(MapleSquadType type) {
@@ -464,13 +475,14 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public static boolean makeRing(MapleClient mc, String partner, int ringId) {
         int partnerId = MapleCharacter.getIdByName(partner, 0);
-        int[] ret = net.sf.odinms.client.MapleRing.createRing(mc, ringId, mc.getPlayer().getId(), mc.getPlayer().getName(), partnerId, partner);
+        int[] ret = Ring.createRing(mc, ringId, mc.getPlayer().getId(), mc.getPlayer().getName(), partnerId, partner);
         return !(ret[0] == -1 || ret[1] == -1);
     }
 
     public void WarpTo(String player) {
-        MapleCharacter victim = c.getChannelServer().getPlayerStorage().getCharacterByName(player);
-        c.getPlayer().changeMap(victim.getMap(), victim.getMap().findClosestSpawnpoint(victim.getPosition()));
+        c.getChannelServer().getPlayerStorage()
+                .getCharacterByName(player)
+                .ifPresent(v -> c.getPlayer().changeMap(v.getMap(), v.getMap().findClosestSpawnpoint(v.getPosition())));
     }
 
     public void displayGuildRanks() {
@@ -492,18 +504,18 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void resetStats() {
-        List<Pair<MapleStat, Integer>> statup = new ArrayList<Pair<MapleStat, Integer>>(5);
+        List<Pair<Statistic, Integer>> statup = new ArrayList<>(5);
         int totAp = getPlayer().getRemainingAp() + getPlayer().getStr() + getPlayer().getDex() + getPlayer().getInt() + getPlayer().getLuk();
         getPlayer().setStr(4);
         getPlayer().setDex(4);
         getPlayer().setInt(4);
         getPlayer().setLuk(4);
         getPlayer().setRemainingAp(totAp - 16);
-        statup.add(new Pair<MapleStat, Integer>(MapleStat.STR, Integer.valueOf(4)));
-        statup.add(new Pair<MapleStat, Integer>(MapleStat.DEX, Integer.valueOf(4)));
-        statup.add(new Pair<MapleStat, Integer>(MapleStat.LUK, Integer.valueOf(4)));
-        statup.add(new Pair<MapleStat, Integer>(MapleStat.INT, Integer.valueOf(4)));
-        statup.add(new Pair<MapleStat, Integer>(MapleStat.AVAILABLEAP, Integer.valueOf(getPlayer().getRemainingAp())));
+        statup.add(new Pair<>(Statistic.STR, 4));
+        statup.add(new Pair<>(Statistic.DEX, 4));
+        statup.add(new Pair<>(Statistic.LUK, 4));
+        statup.add(new Pair<>(Statistic.INT, 4));
+        statup.add(new Pair<>(Statistic.AVAILABLEAP, getPlayer().getRemainingAp()));
         getClient().getSession().write(MaplePacketCreator.updatePlayerStats(statup));
     }
 
@@ -524,28 +536,28 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public int getPetLevel() {
-        for (MaplePet pet : getPlayer().getPets()) {
+        for (Pet pet : getPlayer().getPets()) {
             return pet.getLevel();
         }
         return 0;
     }
 
     public int getFullness() {
-        for (MaplePet pet : getPlayer().getPets()) {
+        for (Pet pet : getPlayer().getPets()) {
             return pet.getFullness();
         }
         return 0;
     }
 
     public String getPetName() {
-        for (MaplePet pet : getPlayer().getPets()) {
+        for (Pet pet : getPlayer().getPets()) {
             return pet.getName();
         }
         return "";
     }
 
     public void setPetName(String petname) {
-        for (MaplePet pet : getPlayer().getPets()) {
+        for (Pet pet : getPlayer().getPets()) {
             pet.setName(petname);
         }
     }
@@ -577,7 +589,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void setLevel(int level) {
         getPlayer().setLevel(level);
-        getPlayer().updateSingleStat(MapleStat.LEVEL, Integer.valueOf(level));
+        getPlayer().updateSingleStat(Statistic.LEVEL, level);
     }
 
     public void spawnMonster(int mobid, int HP, int MP, int level, int EXP, int boss, int undead, int amount, int x, int y) {
@@ -649,15 +661,10 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     public void killAllMobs() {
         MapleMap map = getPlayer().getMap();
         double range = Double.POSITIVE_INFINITY;
-        List<MapleMapObject> monsters = map.getMapObjectsInRange(getPlayer().getPosition(), range, Arrays.asList(MapleMapObjectType.MONSTER));
+        List<MapleMapObject> monsters = map.getMapObjectsInRange(getPlayer().getPosition(), range, List.of(MapleMapObjectType.MONSTER));
         for (MapleMapObject monstermo : monsters) {
             map.killMonster((MapleMonster) monstermo, getPlayer(), false);
         }
-    }
-
-    @Override
-    public void changeMusic(String songName) {
-        getPlayer().getMap().broadcastMessage(MaplePacketCreator.musicChange(songName));
     }
 
     public void levelUp() {
@@ -667,12 +674,12 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void setAP(int AP) {
         getPlayer().setRemainingAp(AP);
-        getPlayer().updateSingleStat(MapleStat.AVAILABLEAP, Integer.valueOf(AP));
+        getPlayer().updateSingleStat(Statistic.AVAILABLEAP, AP);
     }
 
     public void gainAP(int g) {
         getPlayer().setRemainingAp(g + getPlayer().getRemainingAp());
-        getPlayer().updateSingleStat(MapleStat.AVAILABLEAP, Integer.valueOf(g + getPlayer().getRemainingAp()));
+        getPlayer().updateSingleStat(Statistic.AVAILABLEAP, g + getPlayer().getRemainingAp());
     }
 
     public void gainReborns(int reborns) {
@@ -681,27 +688,27 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void setSP(int SP) {
         getPlayer().setRemainingSp(SP);
-        getPlayer().updateSingleStat(MapleStat.AVAILABLESP, Integer.valueOf(SP));
+        getPlayer().updateSingleStat(Statistic.AVAILABLESP, SP);
     }
 
     public void setStr(int str) {
         getPlayer().setStr(str);
-        getPlayer().updateSingleStat(MapleStat.STR, Integer.valueOf(str));
+        getPlayer().updateSingleStat(Statistic.STR, str);
     }
 
     public void setDex(int dex) {
         getPlayer().setDex(dex);
-        getPlayer().updateSingleStat(MapleStat.DEX, Integer.valueOf(dex));
+        getPlayer().updateSingleStat(Statistic.DEX, dex);
     }
 
     public void setInt(int inte) {
         getPlayer().setInt(inte);
-        getPlayer().updateSingleStat(MapleStat.INT, Integer.valueOf(inte));
+        getPlayer().updateSingleStat(Statistic.INT, inte);
     }
 
     public void setLuk(int luk) {
         getPlayer().setLuk(luk);
-        getPlayer().updateSingleStat(MapleStat.LUK, Integer.valueOf(luk));
+        getPlayer().updateSingleStat(Statistic.LUK, luk);
     }
 
     public void spawnMob(int mapid, int mid, int xpos, int ypos) {
@@ -714,7 +721,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void setFame(int fame) {
         getPlayer().setFame(fame);
-        getPlayer().updateSingleStat(MapleStat.FAME, Integer.valueOf(fame));
+        getPlayer().updateSingleStat(Statistic.FAME, fame);
     }
 
     public void gainFame(int fame) {
@@ -724,11 +731,11 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
             getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(6, "You have lost fame. (" + fame + ")"));
         }
         getPlayer().gainFame(fame);
-        getPlayer().updateSingleStat(MapleStat.FAME, Integer.valueOf(getPlayer().getFame()));
+        getPlayer().updateSingleStat(Statistic.FAME, getPlayer().getFame());
     }
 
     public void setExp(int exp) {
-        getPlayer().updateSingleStat(MapleStat.EXP, Integer.valueOf(exp));
+        getPlayer().updateSingleStat(Statistic.EXP, exp);
     }
 
     @Override
@@ -796,13 +803,9 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void gainCloseness(int closeness) {
-        for (MaplePet pet : getPlayer().getPets()) {
+        for (Pet pet : getPlayer().getPets()) {
             if (pet.getCloseness() < 30000 || pet.getLevel() < 30) {
-                if ((pet.getCloseness() + closeness) > 30000) {
-                    pet.setCloseness(30000);
-                } else {
-                    pet.setCloseness(pet.getCloseness() + closeness);
-                }
+                pet.setCloseness(Math.min((pet.getCloseness() + closeness), 30000));
                 while (pet.getCloseness() > ExpTable.getClosenessNeededForLevel(pet.getLevel() + 1)) {
                     pet.setLevel(pet.getLevel() + 1);
                     getClient().getSession().write(MaplePacketCreator.showOwnPetLevelUp(getPlayer().getPetIndex(pet)));
@@ -818,13 +821,11 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public Point getNPCPosition() {
         MapleNPC thenpc = MapleLifeFactory.getNPC(this.npc);
-        Point pos = thenpc.getPosition();
-        return pos;
+        return thenpc.getPosition();
     }
 
     public Point getPosition() {
-        Point pos = getPlayer().getPosition();
-        return pos;
+        return getPlayer().getPosition();
     }
 
     public void giveItemBuff(int itemId) {
@@ -842,8 +843,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public int getMorphValue() { // 1= mushroom, 2= pig, 3= alien, 4= cornian, 5= arab retard
         try {
-            int morphid = getPlayer().getBuffedValue(MapleBuffStat.MORPH).intValue();
-            return morphid;
+            return getPlayer().getBuffedValue(MapleBuffStat.MORPH);
         } catch (NullPointerException n) {
             return -1;
         }
@@ -887,7 +887,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public void addCloseness(int increase) {
-        MaplePet pet = c.getPlayer().getPet(0);
+        Pet pet = c.getPlayer().getPet(0);
         if (pet.getCloseness() < 30000) {
             int newCloseness = pet.getCloseness() + increase;
             if (newCloseness > 30000) {
@@ -911,11 +911,11 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
     }
 
     public int countMonster() {
-        return c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.MONSTER)).size();
+        return c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.MONSTER)).size();
     }
 
     public int countReactor() {
-        return c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.REACTOR)).size();
+        return c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.REACTOR)).size();
     }
 
     public int getDayOfWeek() {
@@ -937,12 +937,8 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         }
     }
 
-    public MapleCharacter getCharByName(String namee) {
-        try {
-            return getClient().getChannelServer().getPlayerStorage().getCharacterByName(namee);
-        } catch (Exception e) {
-            return null;
-        }
+    public Optional<MapleCharacter> getCharByName(String name) {
+        return getClient().getChannelServer().getPlayerStorage().getCharacterByName(name);
     }
 
     public int getKarma() {

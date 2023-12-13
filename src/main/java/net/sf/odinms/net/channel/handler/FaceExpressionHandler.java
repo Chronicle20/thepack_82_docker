@@ -15,7 +15,7 @@ public class FaceExpressionHandler extends AbstractMaplePacketHandler {
         int emote = slea.readInt();
         if (emote > 7) {
             int emoteid = 5159992 + emote;
-            if (c.getPlayer().getInventory(MapleItemInformationProvider.getInstance().getInventoryType(emoteid)).findById(emoteid) == null) {
+            if (c.getPlayer().getInventory(MapleItemInformationProvider.getInstance().getInventoryType(emoteid)).findById(emoteid).isEmpty()) {
                 c.getPlayer().getCheatTracker().registerOffense(CheatingOffense.USING_UNAVAILABLE_ITEM, Integer.toString(emoteid));
                 return;
             }

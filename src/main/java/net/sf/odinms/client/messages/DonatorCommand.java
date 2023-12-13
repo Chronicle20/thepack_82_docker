@@ -1,11 +1,12 @@
 package net.sf.odinms.client.messages;
 
-import java.util.HashMap;
 import net.sf.odinms.client.MapleCharacter;
-import net.sf.odinms.client.MapleCharacterUtil;
+import net.sf.odinms.client.CharacterUtil;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.net.channel.ChannelServer;
+
+import java.util.HashMap;
 
 /**
  * @author Moogra
@@ -18,11 +19,11 @@ public class DonatorCommand {
         String[] splitted = line.split(" ");
         if (splitted[0].equals("!buffme")) {
             int[] array = {9001000, 9101002, 9101003, 9101004, 9101008, 2001002, 1101007, 1005, 2301003, 5121009, 1111002, 4111001, 4111002, 4211003, 4211005, 1321000, 2321004, 3121002};
-            for (int i = 0; i < array.length; i++) {
-                SkillFactory.getSkill(array[i]).getEffect(SkillFactory.getSkill(array[i]).getMaxLevel()).applyTo(player);
+            for (int j : array) {
+                SkillFactory.getSkill(j).getEffect(SkillFactory.getSkill(j).getMaxLevel()).applyTo(player);
             }
         } else if (splitted[0].equals("!goto")) {
-            HashMap<String, Integer> maps = new HashMap<String, Integer>();
+            HashMap<String, Integer> maps = new HashMap<>();
             maps.put("southperry", 60000);
             maps.put("amherst", 1010000);
             maps.put("henesys", 100000000);
@@ -52,9 +53,12 @@ public class DonatorCommand {
             }
         } else if (splitted[0].equals("!online")) {
             StringBuilder builder = new StringBuilder("Characters online: ");
-            for (MapleCharacter chr : c.getChannelServer().getPlayerStorage().getAllCharacters()) {
-                builder.append(MapleCharacterUtil.makeMapleReadable(chr.getName()) + ", ");
-            }
+            c.getChannelServer()
+                    .getPlayerStorage()
+                    .getAllCharacters().stream()
+                    .map(MapleCharacter::getName)
+                    .map(CharacterUtil::makeMapleReadable)
+                    .forEach(n -> builder.append(n).append(", "));
             builder.setLength(builder.length() - 2);
             mc.dropMessage(builder.toString());
         } else if (splitted[0].equals("!unlog")) {

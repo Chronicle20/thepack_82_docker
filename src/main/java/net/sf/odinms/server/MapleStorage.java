@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,13 +34,13 @@ public class MapleStorage {
     private int meso;
     private byte slots;
     //private Set<MapleInventoryType> updatedTypes = new HashSet<MapleInventoryType>();
-    private Map<MapleInventoryType, List<IItem>> typeItems = new HashMap<MapleInventoryType, List<IItem>>();
+    private Map<MapleInventoryType, List<IItem>> typeItems = new HashMap<>();
     private static Logger log = LoggerFactory.getLogger(MapleStorage.class);
 
     private MapleStorage(int id, byte slots, int meso) {
         this.id = id;
         this.slots = slots;
-        this.items = new LinkedList<IItem>();
+        this.items = new LinkedList<>();
         this.meso = meso;
     }
 
@@ -82,7 +81,7 @@ public class MapleStorage {
                 ps.setInt(1, storeId);
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    MapleInventoryType type = MapleInventoryType.getByType((byte) rs.getInt("inventorytype"));
+                    MapleInventoryType type = MapleInventoryType.getByType((byte) rs.getInt("inventorytype")).orElseThrow();
                     if (type.equals(MapleInventoryType.EQUIP) || type.equals(MapleInventoryType.EQUIPPED)) {
                         int itemid = rs.getInt("itemid");
                         Equip equip = new Equip(itemid, (byte) rs.getInt("position"), rs.getInt("ringid"));
@@ -191,7 +190,7 @@ public class MapleStorage {
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         IItem ret = items.remove(slot);
         MapleInventoryType type = ii.getInventoryType(ret.getItemId());
-        typeItems.put(type, new ArrayList<IItem>(filterItems(type)));
+        typeItems.put(type, new ArrayList<>(filterItems(type)));
         return ret;
     }
 
@@ -199,7 +198,7 @@ public class MapleStorage {
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         items.add(item);
         MapleInventoryType type = ii.getInventoryType(item.getItemId());
-        typeItems.put(type, new ArrayList<IItem>(filterItems(type)));
+        typeItems.put(type, new ArrayList<>(filterItems(type)));
     }
 
     public List<IItem> getItems() {
@@ -207,7 +206,7 @@ public class MapleStorage {
     }
 
     private List<IItem> filterItems(MapleInventoryType type) {
-        List<IItem> ret = new LinkedList<IItem>();
+        List<IItem> ret = new LinkedList<>();
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         for (IItem item : items) {
             if (ii.getInventoryType(item.getItemId()) == type) {
@@ -232,20 +231,17 @@ public class MapleStorage {
     public void sendStorage(MapleClient c, int npcId) {
         final MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
         // sort by inventorytype to avoid confusion
-        Collections.sort(items, new Comparator<IItem>() {
-
-            public int compare(IItem o1, IItem o2) {
-                if (ii.getInventoryType(o1.getItemId()).getType() < ii.getInventoryType(o2.getItemId()).getType()) {
-                    return -1;
-                } else if (ii.getInventoryType(o1.getItemId()) == ii.getInventoryType(o2.getItemId())) {
-                    return 0;
-                } else {
-                    return 1;
-                }
+        items.sort((o1, o2) -> {
+            if (ii.getInventoryType(o1.getItemId()).getType() < ii.getInventoryType(o2.getItemId()).getType()) {
+                return -1;
+            } else if (ii.getInventoryType(o1.getItemId()) == ii.getInventoryType(o2.getItemId())) {
+                return 0;
+            } else {
+                return 1;
             }
         });
         for (MapleInventoryType type : MapleInventoryType.values()) {
-            typeItems.put(type, new ArrayList<IItem>(items));
+            typeItems.put(type, new ArrayList<>(items));
         }
         c.getSession().write(MaplePacketCreator.getStorage(npcId, slots, items, meso));
     }

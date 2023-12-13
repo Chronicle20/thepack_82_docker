@@ -1,5 +1,8 @@
 package net.sf.odinms.client;
 
+import net.sf.odinms.database.DatabaseConnection;
+import net.sf.odinms.tools.MaplePacketCreator;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,32 +12,20 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import net.sf.odinms.database.DatabaseConnection;
-import net.sf.odinms.tools.MaplePacketCreator;
+import java.util.Optional;
 
 public class BuddyList {
 
-    public enum BuddyOperation {
-
-        ADDED, DELETED
-    }
-
-    public enum BuddyAddResult {
-
-        BUDDYLIST_FULL, ALREADY_ON_LIST, OK
-    }
-    private Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<Integer, BuddylistEntry>();
+    private final Map<Integer, BuddylistEntry> buddies = new LinkedHashMap<>();
     private int capacity;
-    private Deque<CharacterNameAndId> pendingRequests = new LinkedList<CharacterNameAndId>();
-
+    private final Deque<CharacterNameAndId> pendingRequests = new LinkedList<>();
     public BuddyList(int capacity) {
         super();
         this.capacity = capacity;
     }
 
     public boolean contains(int characterId) {
-        return buddies.containsKey(Integer.valueOf(characterId));
+        return buddies.containsKey(characterId);
     }
 
     public boolean containsVisible(int characterId) {
@@ -53,26 +44,22 @@ public class BuddyList {
         this.capacity = capacity;
     }
 
-    public BuddylistEntry get(int characterId) {
-        return buddies.get(Integer.valueOf(characterId));
+    public Optional<BuddylistEntry> get(int characterId) {
+        return Optional.ofNullable(buddies.get(characterId));
     }
 
-    public BuddylistEntry get(String characterName) {
-        String lowerCaseName = characterName.toLowerCase();
-        for (BuddylistEntry ble : buddies.values()) {
-            if (ble.getName().toLowerCase().equals(lowerCaseName)) {
-                return ble;
-            }
-        }
-        return null;
+    public Optional<BuddylistEntry> get(String characterName) {
+        return buddies.values().stream()
+                .filter(n -> n.getName().equalsIgnoreCase(characterName))
+                .findFirst();
     }
 
     public void put(BuddylistEntry entry) {
-        buddies.put(Integer.valueOf(entry.getCharacterId()), entry);
+        buddies.put(entry.getCharacterId(), entry);
     }
 
     public void remove(int characterId) {
-        buddies.remove(Integer.valueOf(characterId));
+        buddies.remove(characterId);
     }
 
     public Collection<BuddylistEntry> getBuddies() {
@@ -84,7 +71,7 @@ public class BuddyList {
     }
 
     public int[] getBuddyIds() {
-        int buddyIds[] = new int[buddies.size()];
+        int[] buddyIds = new int[buddies.size()];
         int i = 0;
         for (BuddylistEntry ble : buddies.values()) {
             buddyIds[i++] = ble.getCharacterId();
@@ -124,5 +111,15 @@ public class BuddyList {
         } else {
             pendingRequests.push(new CharacterNameAndId(cidFrom, nameFrom));
         }
+    }
+
+    public enum BuddyOperation {
+
+        ADDED, DELETED
+    }
+
+    public enum BuddyAddResult {
+
+        BUDDYLIST_FULL, ALREADY_ON_LIST, OK
     }
 }

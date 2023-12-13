@@ -3,7 +3,7 @@ package net.sf.odinms.net.channel.handler;
 import net.sf.odinms.client.ISkill;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
-import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
@@ -55,10 +55,10 @@ public class DistributeSPHandler extends AbstractMaplePacketHandler {
             if (!isBeginnerSkill) {
                 player.setRemainingSp(player.getRemainingSp() - 1);
             }
-            player.updateSingleStat(MapleStat.AVAILABLESP, player.getRemainingSp());
+            player.updateSingleStat(Statistic.AVAILABLESP, player.getRemainingSp());
             player.changeSkillLevel(skill, curLevel + 1, player.getMasterLevel(skill));
         } else if (!(remainingSp > 0 && curLevel + 1 <= maxlevel)) {
-            log.info("[h4x] Player {} is distributing SP to {} without having any", player.getName(), Integer.valueOf(skillid));
+            log.info("[h4x] Player {} is distributing SP to {} without having any", player.getName(), skillid);
         }
     }
 

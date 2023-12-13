@@ -1,22 +1,13 @@
 package net.sf.odinms.net.channel;
 
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
-import javax.rmi.ssl.SslRMIServerSocketFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import net.sf.odinms.client.BuddyList;
-import net.sf.odinms.client.BuddylistEntry;
-import net.sf.odinms.client.MapleCharacter;
-import net.sf.odinms.client.MapleCharacterUtil;
 import net.sf.odinms.client.BuddyList.BuddyAddResult;
 import net.sf.odinms.client.BuddyList.BuddyOperation;
-import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.BuddylistEntry;
+import net.sf.odinms.client.CharacterUtil;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.Pet;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.net.ByteArrayMaplePacket;
 import net.sf.odinms.net.MaplePacket;
@@ -32,9 +23,23 @@ import net.sf.odinms.server.ShutdownServer;
 import net.sf.odinms.server.TimerManager;
 import net.sf.odinms.tools.CollectionUtil;
 import net.sf.odinms.tools.MaplePacketCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
- *
  * @author Matze
  */
 public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements ChannelWorldInterface {
@@ -51,12 +56,12 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
         this.server = server;
     }
 
-    public void setChannelId(int id) throws RemoteException {
-        server.setChannel(id);
-    }
-
     public int getChannelId() throws RemoteException {
         return server.getChannel();
+    }
+
+    public void setChannelId(int id) throws RemoteException {
+        server.setChannel(id);
     }
 
     public String getIP() throws RemoteException {
@@ -70,18 +75,19 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
 
     public void whisper(String sender, String target, int channel, String message) throws RemoteException {
         if (isConnected(target)) {
-            server.getPlayerStorage().getCharacterByName(target).getClient().getSession().write(
-                    MaplePacketCreator.getWhisper(sender, channel, message));
+            server.getPlayerStorage().getCharacterByName(target)
+                    .map(MapleCharacter::getClient)
+                    .map(MapleClient::getSession)
+                    .ifPresent(s -> s.write(MaplePacketCreator.getWhisper(sender, channel, message)));
         }
     }
 
     public boolean isConnected(String charName) throws RemoteException {
-        return server.getPlayerStorage().getCharacterByName(charName) != null;
+        return server.getPlayerStorage().getCharacterByName(charName).isPresent();
     }
 
     public void shutdown(int time) throws RemoteException {
-        server.broadcastPacket(
-                MaplePacketCreator.serverNotice(0, "The world will be shut down in " + (time / 60000) + " minutes, please log off safely"));
+        server.broadcastPacket(MaplePacketCreator.serverNotice(0, "The world will be shut down in " + (time / 60000) + " minutes, please log off safely"));
         TimerManager.getInstance().schedule(new ShutdownServer(server.getChannel()), time);
     }
 
@@ -95,70 +101,73 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
     }
 
     @Override
-    public void loggedOn(String name, int characterId, int channel, int buddies[]) throws RemoteException {
+    public void loggedOn(String name, int characterId, int channel, int[] buddies) throws RemoteException {
         updateBuddies(characterId, channel, buddies, false);
     }
 
-    private void updateBuddies(int characterId, int channel, int[] buddies, boolean offline) {
-        IPlayerStorage playerStorage = server.getPlayerStorage();
-        for (int buddy : buddies) {
-            MapleCharacter chr = playerStorage.getCharacterById(buddy);
-            if (chr != null) {
-                BuddylistEntry ble = chr.getBuddylist().get(characterId);
-                if (ble != null && ble.isVisible()) {
-                    int mcChannel;
-                    if (offline) {
-                        ble.setChannel(-1);
-                        mcChannel = -1;
-                    } else {
-                        ble.setChannel(channel);
-                        mcChannel = channel - 1;
-                    }
-                    chr.getBuddylist().put(ble);
-                    chr.getClient().getSession().write(MaplePacketCreator.updateBuddyChannel(ble.getCharacterId(), mcChannel));
-                }
-            }
+    private void updateBuddies(int buddyId, int channel, int[] buddies, boolean offline) {
+        Arrays.stream(buddies)
+                .mapToObj(id -> server.getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(c -> c.getBuddylist().get(buddyId).isPresent())
+                .forEach(c -> updateBuddy(c, buddyId, channel, offline));
+    }
+
+    private void updateBuddy(MapleCharacter character, int buddyId, int channelId, boolean offline) {
+        if (offline) {
+            updateBuddyOffline(character, character.getBuddylist().get(buddyId).orElseThrow());
+        } else {
+            updateBuddy(character, character.getBuddylist().get(buddyId).orElseThrow(), channelId);
         }
+    }
+
+    private void updateBuddy(MapleCharacter character, BuddylistEntry entry, int channel) {
+        entry.setChannelId(channel);
+        character.getBuddylist().put(entry);
+        character.getClient().getSession().write(MaplePacketCreator.updateBuddyChannel(entry.getCharacterId(), channel));
+    }
+
+    private void updateBuddyOffline(MapleCharacter character, BuddylistEntry entry) {
+        updateBuddy(character, entry, -1);
     }
 
     @Override
     public void updateParty(MapleParty party, PartyOperation operation, MaplePartyCharacter target) throws RemoteException {
         for (MaplePartyCharacter partychar : party.getMembers()) {
             if (partychar.getChannel() == server.getChannel()) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(partychar.getName());
-                if (chr != null) {
+                server.getPlayerStorage().getCharacterByName(partychar.getName()).ifPresent(chr -> {
                     if (operation == PartyOperation.DISBAND) {
                         chr.setParty(null);
                     } else {
                         chr.setParty(party);
                     }
                     chr.getClient().getSession().write(MaplePacketCreator.updateParty(chr.getClient().getChannel(), party, operation, target));
-                }
+                });
             }
         }
         switch (operation) {
             case LEAVE:
             case EXPEL:
                 if (target.getChannel() == server.getChannel()) {
-                    MapleCharacter chr = server.getPlayerStorage().getCharacterByName(target.getName());
-                    if (chr != null) {
+                    server.getPlayerStorage().getCharacterByName(target.getName()).ifPresent(chr -> {
                         chr.getClient().getSession().write(MaplePacketCreator.updateParty(chr.getClient().getChannel(), party, operation, target));
                         chr.setParty(null);
-                    }
+                    });
                 }
         }
     }
 
     @Override
-    public void partyChat(MapleParty party, String chattext, String namefrom) throws RemoteException {
-        for (MaplePartyCharacter partychar : party.getMembers()) {
-            if (partychar.getChannel() == server.getChannel() && !(partychar.getName().equals(namefrom))) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(partychar.getName());
-                if (chr != null) {
-                    chr.getClient().getSession().write(MaplePacketCreator.multiChat(namefrom, chattext, 1));
-                }
-            }
-        }
+    public void partyChat(MapleParty party, String text, String nameFrom) throws RemoteException {
+        party.getMembers().stream()
+                .filter(p -> p.getChannel() == server.getChannel())
+                .map(MaplePartyCharacter::getName)
+                .filter(n -> !(n.equals(nameFrom)))
+                .map(n -> server.getPlayerStorage().getCharacterByName(n))
+                .flatMap(Optional::stream)
+                .map(MapleCharacter::getClient)
+                .map(MapleClient::getSession)
+                .forEach(s -> s.write(MaplePacketCreator.multiChat(nameFrom, text, 1)));
     }
 
     public boolean isAvailable() throws RemoteException {
@@ -166,20 +175,16 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
     }
 
     public int getLocation(String name) throws RemoteException {
-        MapleCharacter chr = server.getPlayerStorage().getCharacterByName(name);
-        if (chr != null) {
-            return server.getPlayerStorage().getCharacterByName(name).getMapId();
-        }
-        return -1;
+        return server.getPlayerStorage().getCharacterByName(name).map(MapleCharacter::getMapId).orElse(-1);
     }
 
     public List<CheaterData> getCheaters() throws RemoteException {
-        List<CheaterData> cheaters = new ArrayList<CheaterData>();
-        List<MapleCharacter> allplayers = new ArrayList<MapleCharacter>(server.getPlayerStorage().getAllCharacters());
+        List<CheaterData> cheaters = new ArrayList<>();
+        List<MapleCharacter> allplayers = new ArrayList<>(server.getPlayerStorage().getAllCharacters());
         for (int x = allplayers.size() - 1; x >= 0; x--) {
             MapleCharacter cheater = allplayers.get(x);
             if (cheater.getCheatTracker().getPoints() > 0) {
-                cheaters.add(new CheaterData(cheater.getCheatTracker().getPoints(), MapleCharacterUtil.makeMapleReadable(cheater.getName()) + " (" + cheater.getCheatTracker().getPoints() + ") " + cheater.getCheatTracker().getSummary()));
+                cheaters.add(new CheaterData(cheater.getCheatTracker().getPoints(), CharacterUtil.makeMapleReadable(cheater.getName()) + " (" + cheater.getCheatTracker().getPoints() + ") " + cheater.getCheatTracker().getSummary()));
             }
         }
         Collections.sort(cheaters);
@@ -188,32 +193,39 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
 
     @Override
     public BuddyAddResult requestBuddyAdd(String addName, int channelFrom, int cidFrom, String nameFrom) {
-        MapleCharacter addChar = server.getPlayerStorage().getCharacterByName(addName);
-        if (addChar != null) {
-            BuddyList buddylist = addChar.getBuddylist();
-            if (buddylist.isFull()) {
-                return BuddyAddResult.BUDDYLIST_FULL;
-            }
-            if (!buddylist.contains(cidFrom)) {
-                buddylist.addBuddyRequest(addChar.getClient(), cidFrom, nameFrom, channelFrom);
-            } else {
-                if (buddylist.containsVisible(cidFrom)) {
-                    return BuddyAddResult.ALREADY_ON_LIST;
-                }
-            }
+        Optional<MapleCharacter> addChar = server.getPlayerStorage().getCharacterByName(addName);
+        if (addChar.isEmpty()) {
+            return BuddyAddResult.OK;
+        }
+
+        BuddyList buddylist = addChar.get().getBuddylist();
+        if (buddylist.isFull()) {
+            return BuddyAddResult.BUDDYLIST_FULL;
+        }
+
+        if (!buddylist.contains(cidFrom)) {
+            buddylist.addBuddyRequest(addChar.get().getClient(), cidFrom, nameFrom, channelFrom);
+            return BuddyAddResult.OK;
+        }
+
+        if (buddylist.containsVisible(cidFrom)) {
+            return BuddyAddResult.ALREADY_ON_LIST;
         }
         return BuddyAddResult.OK;
     }
 
     @Override
     public boolean isConnected(int characterId) throws RemoteException {
-        return server.getPlayerStorage().getCharacterById(characterId) != null;
+        return server.getPlayerStorage().getCharacterById(characterId).isPresent();
     }
 
     @Override
     public void buddyChanged(int cid, int cidFrom, String name, int channel, BuddyOperation operation) {
-        MapleCharacter addChar = server.getPlayerStorage().getCharacterById(cid);
-        if (addChar != null) {
+        server.getPlayerStorage().getCharacterById(cid).ifPresent(buddyChanged(cidFrom, name, channel, operation));
+    }
+
+    private Consumer<MapleCharacter> buddyChanged(int cidFrom, String name, int channel, BuddyOperation operation) {
+        return (addChar) -> {
             BuddyList buddylist = addChar.getBuddylist();
             switch (operation) {
                 case ADDED:
@@ -224,66 +236,50 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
                     break;
                 case DELETED:
                     if (buddylist.contains(cidFrom)) {
-                        buddylist.put(new BuddylistEntry(name, cidFrom, -1, buddylist.get(cidFrom).isVisible()));
+                        buddylist.put(new BuddylistEntry(name, cidFrom, -1, buddylist.get(cidFrom).map(BuddylistEntry::isVisible).orElse(false)));
                         addChar.getClient().getSession().write(MaplePacketCreator.updateBuddyChannel(cidFrom, -1));
                     }
                     break;
             }
-        }
+        };
     }
 
     @Override
     public void buddyChat(int[] recipientCharacterIds, int cidFrom, String nameFrom, String chattext) throws RemoteException {
-        IPlayerStorage playerStorage = server.getPlayerStorage();
-        for (int characterId : recipientCharacterIds) {
-            MapleCharacter chr = playerStorage.getCharacterById(characterId);
-            if (chr != null) {
-                if (chr.getBuddylist().containsVisible(cidFrom)) {
-                    chr.getClient().getSession().write(MaplePacketCreator.multiChat(nameFrom, chattext, 0));
-                }
-            }
-        }
+        Arrays.stream(recipientCharacterIds)
+                .mapToObj(id -> server.getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(c -> c.getBuddylist().containsVisible(cidFrom))
+                .forEach(c -> c.getClient().getSession().write(MaplePacketCreator.multiChat(nameFrom, chattext, 0)));
     }
 
     @Override
     public int[] multiBuddyFind(int charIdFrom, int[] characterIds) throws RemoteException {
-        List<Integer> ret = new ArrayList<Integer>(characterIds.length);
-        IPlayerStorage playerStorage = server.getPlayerStorage();
-        for (int characterId : characterIds) {
-            MapleCharacter chr = playerStorage.getCharacterById(characterId);
-            if (chr != null) {
-                if (chr.getBuddylist().containsVisible(charIdFrom)) {
-                    ret.add(characterId);
-                }
-            }
-        }
+        List<Integer> ret = Arrays.stream(characterIds)
+                .mapToObj(id -> server.getPlayerStorage().getCharacterById(id))
+                .flatMap(Optional::stream)
+                .filter(c -> c.getBuddylist().containsVisible(charIdFrom))
+                .map(MapleCharacter::getId)
+                .toList();
         int[] retArr = new int[ret.size()];
         int pos = 0;
         for (Integer i : ret) {
-            retArr[pos++] = i.intValue();
+            retArr[pos++] = i;
         }
         return retArr;
     }
 
     @Override
-    public void sendPacket(List<Integer> targetIds, MaplePacket packet,
-            int exception)
-            throws RemoteException {
-        MapleCharacter c;
-        for (int i : targetIds) {
-            if (i == exception) {
-                continue;
-            }
-            c = server.getPlayerStorage().getCharacterById(i);
-            if (c != null) {
-                c.getClient().getSession().write(packet);
-            }
-        }
+    public void sendPacket(List<Integer> targetIds, MaplePacket packet, int exception) throws RemoteException {
+        targetIds.stream()
+                .filter(i -> i != exception)
+                .map(i -> server.getPlayerStorage().getCharacterById(i))
+                .flatMap(Optional::stream)
+                .forEach(c -> c.getClient().getSession().write(packet));
     }
 
     @Override
-    public void setGuildAndRank(List<Integer> cids, int guildid, int rank,
-            int exception) throws RemoteException {
+    public void setGuildAndRank(List<Integer> cids, int guildid, int rank, int exception) throws RemoteException {
         for (int cid : cids) {
             if (cid != exception) {
                 setGuildAndRank(cid, guildid, rank);
@@ -292,27 +288,27 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
     }
 
     @Override
-    public void setGuildAndRank(int cid, int guildid, int rank) throws RemoteException {
-        MapleCharacter mc = server.getPlayerStorage().getCharacterById(cid);
-        if (mc == null) {
-            return;
-        }
+    public void setGuildAndRank(int cid, int guildId, int rank) throws RemoteException {
+        server.getPlayerStorage().getCharacterById(cid).ifPresent(c -> setGuildAndRank(c, guildId, rank));
+    }
+
+    private void setGuildAndRank(MapleCharacter mc, int guildId, int rank) {
         boolean bDifferentGuild;
-        if (guildid == -1 && rank == -1) //just need a respawn
+        if (guildId == -1 && rank == -1) //just need a respawn
         {
             bDifferentGuild = true;
         } else {
-            bDifferentGuild = guildid != mc.getGuildId();
-            mc.setGuildId(guildid);
+            bDifferentGuild = guildId != mc.getGuildId();
+            mc.setGuildId(guildId);
             mc.setGuildRank(rank);
             mc.saveGuildStatus();
         }
         if (bDifferentGuild) {
             mc.getMap().broadcastMessage(mc,
-                    MaplePacketCreator.removePlayerFromMap(cid), false);
+                    MaplePacketCreator.removePlayerFromMap(mc.getId()), false);
             mc.getMap().broadcastMessage(mc,
                     MaplePacketCreator.spawnPlayerMapobject(mc), false);
-            MaplePet[] pets = mc.getPets();
+            Pet[] pets = mc.getPets();
             for (int i = 0; i < 3; i++) {
                 if (pets[i] != null) {
                     mc.getMap().broadcastMessage(mc, MaplePacketCreator.showPet(mc, pets[i], false, false), false);
@@ -339,102 +335,151 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
 
     @Override
     public void reloadGuildCharacters() throws RemoteException {
-        for (MapleCharacter mc : server.getPlayerStorage().getAllCharacters()) {
-            if (mc.getGuildId() > 0) {
-                server.getWorldInterface().setGuildMemberOnline(mc.getMGC(), true, server.getChannel());
-                server.getWorldInterface().memberLevelJobUpdate(mc.getMGC());
-            }
-        }
+        server.getPlayerStorage().getAllCharacters().stream()
+                .filter(MapleCharacter::hasGuild)
+                .forEach(reloadGuildCharacter());
         ChannelServer.getInstance(this.getChannelId()).reloadGuildSummary();
+    }
+
+    private Consumer<? super MapleCharacter> reloadGuildCharacter() {
+        return (target) -> {
+            try {
+                server.getWorldInterface().setGuildMemberOnline(target.getMGC().orElseThrow(), true, server.getChannel());
+                server.getWorldInterface().memberLevelJobUpdate(target.getMGC().orElseThrow());
+            } catch (RemoteException e) {
+                //TODO
+            }
+        };
     }
 
     @Override
     public void changeEmblem(int gid, List<Integer> affectedPlayers, MapleGuildSummary mgs) throws RemoteException {
         ChannelServer.getInstance(this.getChannelId()).updateGuildSummary(gid, mgs);
-        this.sendPacket(affectedPlayers, MaplePacketCreator.guildEmblemChange(gid, mgs.getLogoBG(), mgs.getLogoBGColor(), mgs.getLogo(), mgs.getLogoColor()), -1);
-        this.setGuildAndRank(affectedPlayers, -1, -1, -1);	//respawn player
+        this.sendPacket(affectedPlayers, MaplePacketCreator.guildEmblemChange(gid, mgs.logoBG(), mgs.logoBGColor(), mgs.logo(), mgs.logoColor()), -1);
+        this.setGuildAndRank(affectedPlayers, -1, -1, -1);    //respawn player
     }
 
-    public void messengerInvite(String sender, int messengerid, String target, int fromchannel) throws RemoteException {
-        if (isConnected(target)) {
-            MapleMessenger messenger = server.getPlayerStorage().getCharacterByName(target).getMessenger();
-            if (messenger == null) {
-                server.getPlayerStorage().getCharacterByName(target).getClient().getSession().write(MaplePacketCreator.messengerInvite(sender, messengerid));
-                MapleCharacter from = ChannelServer.getInstance(fromchannel).getPlayerStorage().getCharacterByName(sender);
-                from.getClient().getSession().write(MaplePacketCreator.messengerNote(target, 4, 1));
-            } else {
-                MapleCharacter from = ChannelServer.getInstance(fromchannel).getPlayerStorage().getCharacterByName(sender);
-                from.getClient().getSession().write(MaplePacketCreator.messengerChat(sender + " : " + target + " is already using Maple Messenger"));
-            }
+    public void messengerInvite(String senderName, int messengerId, String targetName, int fromChannel) throws RemoteException {
+        if (isConnected(targetName)) {
+            server.getPlayerStorage().getCharacterByName(targetName).ifPresent(messengerInvite(senderName, messengerId, fromChannel));
         }
+    }
+
+    private Consumer<MapleCharacter> messengerInvite(String senderName, int messengerId, int fromChannel) {
+        return (target) -> ChannelServer.getInstance(fromChannel).getPlayerStorage().getCharacterByName(senderName).ifPresent(sender -> messengerInvite(messengerId).apply(target));
+
+    }
+
+    private Function<MapleCharacter, Consumer<MapleCharacter>> messengerInvite(int messengerId) {
+        return (sender) -> (target) -> {
+            MapleMessenger messenger = target.getMessenger();
+            if (messenger != null) {
+                sender.getClient().getSession().write(MaplePacketCreator.messengerChat(sender + " : " + target.getName() + " is already using Maple Messenger"));
+                return;
+            }
+
+            target.getClient().getSession().write(MaplePacketCreator.messengerInvite(sender.getName(), messengerId));
+            sender.getClient().getSession().write(MaplePacketCreator.messengerNote(target.getName(), 4, 1));
+        };
     }
 
     public void addMessengerPlayer(MapleMessenger messenger, String namefrom, int fromchannel, int position) throws RemoteException {
-        for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            if (messengerchar.getChannel() == server.getChannel() && !(messengerchar.getName().equals(namefrom))) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(messengerchar.getName());
-                if (chr != null) {
-                    MapleCharacter from = ChannelServer.getInstance(fromchannel).getPlayerStorage().getCharacterByName(namefrom);
-                    chr.getClient().getSession().write(MaplePacketCreator.addMessengerPlayer(namefrom, from, position, fromchannel - 1));
-                    from.getClient().getSession().write(MaplePacketCreator.addMessengerPlayer(chr.getName(), chr, messengerchar.getPosition(), messengerchar.getChannel() - 1));
-                }
-            } else if (messengerchar.getChannel() == server.getChannel() && (messengerchar.getName().equals(namefrom))) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(messengerchar.getName());
-                if (chr != null) {
-                    chr.getClient().getSession().write(MaplePacketCreator.joinMessenger(messengerchar.getPosition()));
-                }
-            }
+        Optional<MapleCharacter> from = ChannelServer.getInstance(fromchannel).getPlayerStorage().getCharacterByName(namefrom);
+        if (from.isEmpty()) {
+            return;
         }
+        messenger.getMembers().stream()
+                .filter(m -> m.getChannel() == server.getChannel())
+                .forEach(addMessengerPlayer(from.get(), position));
+    }
+
+    private Consumer<MapleMessengerCharacter> addMessengerPlayer(MapleCharacter from, int position) {
+        return (existing) -> {
+            Consumer<MapleCharacter> joinFunc = existing.getName().equals(from.getName()) ? joinMessenger(existing.getPosition()) : joinMessenger(from, position);
+            server.getPlayerStorage().getCharacterByName(existing.getName()).ifPresent(joinFunc);
+        };
+    }
+
+    private Consumer<MapleCharacter> joinMessenger(MapleCharacter from, int position) {
+        return (existing) -> {
+            existing.getClient().getSession().write(MaplePacketCreator.addMessengerPlayer(from.getName(), from, position, from.getClient().getChannel() - 1));
+            from.getClient().getSession().write(MaplePacketCreator.addMessengerPlayer(existing.getName(), existing, existing.getMessengerPosition(), existing.getClient().getChannel() - 1));
+        };
+    }
+
+    private Consumer<MapleCharacter> joinMessenger(int position) {
+        return (target) -> target.getClient().getSession().write(MaplePacketCreator.joinMessenger(position));
     }
 
     public void removeMessengerPlayer(MapleMessenger messenger, int position) throws RemoteException {
-        for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            if (messengerchar.getChannel() == server.getChannel()) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(messengerchar.getName());
-                if (chr != null) {
-                    chr.getClient().getSession().write(MaplePacketCreator.removeMessengerPlayer(position));
-                }
-            }
-        }
+        messenger.getMembers().stream()
+                .filter(c -> c.getChannel() == server.getChannel())
+                .map(MapleMessengerCharacter::getName)
+                .map(n -> server.getPlayerStorage().getCharacterByName(n))
+                .flatMap(Optional::stream)
+                .forEach(removeMessengerPlayer(position));
     }
 
-    public void messengerChat(MapleMessenger messenger, String chattext, String namefrom) throws RemoteException {
-        for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            if (messengerchar.getChannel() == server.getChannel() && !(messengerchar.getName().equals(namefrom))) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(messengerchar.getName());
-                if (chr != null) {
-                    chr.getClient().getSession().write(MaplePacketCreator.messengerChat(chattext));
-                }
-            }
-        }
+    private Consumer<MapleCharacter> removeMessengerPlayer(int position) {
+        return (target) -> target.getClient().getSession().write(MaplePacketCreator.removeMessengerPlayer(position));
     }
 
-    public void declineChat(String target, String namefrom) throws RemoteException {
+    public void messengerChat(MapleMessenger messenger, String text, String nameFrom) throws RemoteException {
+        messenger.getMembers().stream()
+                .filter(c -> c.getChannel() == server.getChannel())
+                .map(MapleMessengerCharacter::getName)
+                .filter(n -> !(n.equals(nameFrom)))
+                .map(n -> server.getPlayerStorage().getCharacterByName(n))
+                .flatMap(Optional::stream)
+                .forEach(sendMessage(text));
+    }
+
+    private Consumer<MapleCharacter> sendMessage(String text) {
+        return (target) -> target.getClient().getSession().write(MaplePacketCreator.messengerChat(text));
+    }
+
+    public void declineChat(String target, String nameFrom) throws RemoteException {
         if (isConnected(target)) {
-            MapleMessenger messenger = server.getPlayerStorage().getCharacterByName(target).getMessenger();
-            if (messenger != null) {
-                server.getPlayerStorage().getCharacterByName(target).getClient().getSession().write(
-                        MaplePacketCreator.messengerNote(namefrom, 5, 0));
-            }
+            server.getPlayerStorage().getCharacterByName(target).ifPresent(declineChat(nameFrom));
         }
     }
 
-    public void updateMessenger(MapleMessenger messenger, String namefrom, int position, int fromchannel) throws RemoteException {
-        for (MapleMessengerCharacter messengerchar : messenger.getMembers()) {
-            if (messengerchar.getChannel() == server.getChannel() && !(messengerchar.getName().equals(namefrom))) {
-                MapleCharacter chr = server.getPlayerStorage().getCharacterByName(messengerchar.getName());
-                if (chr != null) {
-                    MapleCharacter from = ChannelServer.getInstance(fromchannel).getPlayerStorage().getCharacterByName(namefrom);
-                    chr.getClient().getSession().write(MaplePacketCreator.updateMessengerPlayer(namefrom, from, position, fromchannel - 1));
-                }
+    private Consumer<MapleCharacter> declineChat(String nameFrom) {
+        return (target) -> {
+            if (target.getMessenger() != null) {
+                target.getClient().getSession().write(MaplePacketCreator.messengerNote(nameFrom, 5, 0));
             }
-        }
+        };
+    }
+
+    public void updateMessenger(MapleMessenger messenger, String nameFrom, int position, int fromChannel) throws RemoteException {
+        ChannelServer.getInstance(fromChannel).getPlayerStorage().getCharacterByName(nameFrom).ifPresent(updateMessenger(messenger, position));
+
+    }
+
+    private Consumer<MapleCharacter> updateMessenger(MapleMessenger messenger, int position) {
+        return (from) -> messenger.getMembers().stream()
+                .filter(m -> m.getChannel() == server.getChannel())
+                .map(MapleMessengerCharacter::getName)
+                .filter(n -> !n.equals(from.getName()))
+                .map(n -> server.getPlayerStorage().getCharacterByName(n))
+                .flatMap(Optional::stream)
+                .map(MapleCharacter::getClient)
+                .map(MapleClient::getSession)
+                .forEach(s -> s.write(MaplePacketCreator.updateMessengerPlayer(from.getName(), from, position, from.getClient().getChannel() - 1)));
     }
 
     public void sendSpouseChat(String sender, String target, String message) throws RemoteException {
         if (isConnected(target)) {
-            server.getPlayerStorage().getCharacterByName(target).getClient().getSession().write(
-                    MaplePacketCreator.sendSpouseChat(server.getPlayerStorage().getCharacterByName(sender), message));
+            server.getPlayerStorage().getCharacterByName(target).ifPresent(sendSpouseChat(sender, message));
         }
+    }
+
+    private Consumer<MapleCharacter> sendSpouseChat(String sender, String message) {
+        return (target) -> server.getPlayerStorage().getCharacterByName(sender).ifPresent(sendSpouseChat(message).apply(target));
+    }
+
+    private Function<MapleCharacter, Consumer<MapleCharacter>> sendSpouseChat(String message) {
+        return (target) -> (sender) -> target.getClient().getSession().write(MaplePacketCreator.sendSpouseChat(sender, message));
     }
 }

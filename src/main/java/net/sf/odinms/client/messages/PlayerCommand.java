@@ -2,11 +2,13 @@ package net.sf.odinms.client.messages;
 
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
-import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.net.channel.ChannelServer;
 import net.sf.odinms.net.login.LoginServer;
 import net.sf.odinms.scripting.npc.NPCScriptManager;
 import net.sf.odinms.tools.MaplePacketCreator;
+
+import java.util.Optional;
 
 public class PlayerCommand {
 
@@ -40,26 +42,15 @@ public class PlayerCommand {
             c.getSession().write(MaplePacketCreator.enableActions());
         } else if (splitted[0].equals("@emo") && !player.inBlockedMap()) {
             player.setHp(0);
-            player.updateSingleStat(MapleStat.HP, 0);
+            player.updateSingleStat(Statistic.HP, 0);
         } else if (splitted[0].equals("@expfix")) {
             player.setExp(0);
-            player.updateSingleStat(MapleStat.EXP, Integer.valueOf(0));
+            player.updateSingleStat(Statistic.EXP, 0);
             mc.dropMessage("Your exp has been reset.");
         } else if (splitted[0].equals("@fmnpc") && !player.inBlockedMap()) {
             NPCScriptManager.getInstance().start(c, 22000, null, null);
         } else if (splitted[0].equals("@karma") && player.getKarma() > 39) {
-            MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(splitted[2]);
-            if (splitted[1].equals("raise") && victim.getKarma() < 25) {
-                player.downKarma();
-                victim.upKarma();
-                mc.dropMessage("You have raised " + victim + "'s karma.");
-            } else if (splitted[1].equals("drop") && victim.getKarma() > -25) {
-                player.downKarma();
-                victim.downKarma();
-                mc.dropMessage("You have dropped " + victim + "'s karma.");
-            } else {
-                mc.dropMessage("Either you didn't use the correct syntax or " + victim + "'s karma is too high or too low.");
-            }
+            karma(mc, cserv, splitted, player);
         } else if (splitted[0].equals("@rebirth")) {
             if (player.getLevel() > 199) {
                 player.doReborn();
@@ -77,35 +68,66 @@ public class PlayerCommand {
             if (amount > 0 && amount <= player.getRemainingAp() && amount < 31997) {
                 if (splitted[0].equals("@str") && amount + player.getStr() < 32001) {
                     player.setStr(player.getStr() + amount);
-                    player.updateSingleStat(MapleStat.STR, player.getStr());
+                    player.updateSingleStat(Statistic.STR, player.getStr());
                 } else if (splitted[0].equals("@int") && amount + player.getInt() < 32001) {
                     player.setInt(player.getInt() + amount);
-                    player.updateSingleStat(MapleStat.INT, player.getInt());
+                    player.updateSingleStat(Statistic.INT, player.getInt());
                 } else if (splitted[0].equals("@luk") && amount + player.getLuk() < 32001) {
                     player.setLuk(player.getLuk() + amount);
-                    player.updateSingleStat(MapleStat.LUK, player.getLuk());
+                    player.updateSingleStat(Statistic.LUK, player.getLuk());
                 } else if (splitted[0].equals("@dex") && amount + player.getDex() < 32001) {
                     player.setDex(player.getDex() + amount);
-                    player.updateSingleStat(MapleStat.DEX, player.getDex());
+                    player.updateSingleStat(Statistic.DEX, player.getDex());
                 } else {
                     mc.dropMessage("Make sure the stat you are trying to raise will not be over 32000.");
                 }
                 player.setRemainingAp(player.getRemainingAp() - amount);
-                player.updateSingleStat(MapleStat.AVAILABLEAP, player.getRemainingAp());
+                player.updateSingleStat(Statistic.AVAILABLEAP, player.getRemainingAp());
             } else {
                 mc.dropMessage("Please make sure your AP is not over 32000 and you have enough to distribute.");
             }
         } else if (splitted[0].equals("@warphere") && player.getKarma() > 4) {
-            MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(splitted[1]);
-            if (player.isBuddy(MapleCharacter.getIdByName(splitted[1], victim.getWorld())) && !victim.isGM()) {
-                victim.changeMap(player.getMap(), player.getMap().findClosestSpawnpoint(player.getPosition()));
-            } else {
-                mc.dropMessage("Either " + victim + " is not your buddy, or " + victim + " is a GM.");
-            }
+            warpHere(mc, cserv, splitted, player);
         } else {
             mc.dropMessage("Player Command " + splitted[0] + " does not exist.");
             return false;
         }
         return true;
+    }
+
+    private static void karma(MessageCallback mc, ChannelServer cserv, String[] splitted, MapleCharacter player) {
+        Optional<MapleCharacter> victim = cserv.getPlayerStorage().getCharacterByName(splitted[2]);
+        if (victim.isEmpty()) {
+            return;
+        }
+
+        if (splitted[1].equals("raise") && victim.get().getKarma() < 25) {
+            player.downKarma();
+            victim.get().upKarma();
+            mc.dropMessage("You have raised " + victim.get().getName() + "'s karma.");
+        } else if (splitted[1].equals("drop") && victim.get().getKarma() > -25) {
+            player.downKarma();
+            victim.get().downKarma();
+            mc.dropMessage("You have dropped " + victim.get().getName() + "'s karma.");
+        } else {
+            mc.dropMessage("Either you didn't use the correct syntax or " + victim.get().getName() + "'s karma is too high or too low.");
+        }
+    }
+
+    private static void warpHere(MessageCallback mc, ChannelServer cserv, String[] splitted, MapleCharacter player) {
+        if (splitted.length != 2) {
+            mc.dropMessage("Syntax: @warphere [player]");
+            return;
+        }
+
+        cserv.getPlayerStorage().getCharacterByName(splitted[1]).ifPresent(v -> warpHere(mc, player, v));
+    }
+
+    private static void warpHere(MessageCallback mc, MapleCharacter player, MapleCharacter target) {
+        if (!player.isBuddy(MapleCharacter.getIdByName(target.getName(), target.getWorld())) || target.isGM()) {
+            mc.dropMessage("Either " + target.getMap() + " is not your buddy, or " + target.getName() + " is a GM.");
+            return;
+        }
+        target.changeMap(player.getMap(), player.getMap().findClosestSpawnpoint(player.getPosition()));
     }
 }

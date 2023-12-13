@@ -1,7 +1,6 @@
 package net.sf.odinms.scripting.reactor;
 
 import java.awt.Point;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import net.sf.odinms.client.Equip;
@@ -47,14 +46,12 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
 
     public void dropItems(boolean meso, int mesoChance, int minMeso, int maxMeso, int minItems) {
         List<DropEntry> chances = getDropChances();
-        List<DropEntry> items = new LinkedList<DropEntry>();
+        List<DropEntry> items = new LinkedList<>();
         int numItems = 0;
         if (meso && Math.random() < (1 / (double) mesoChance)) {
             items.add(new DropEntry(0, mesoChance));
         }
-        Iterator<DropEntry> iter = chances.iterator();
-        while (iter.hasNext()) {
-            DropEntry d = (DropEntry) iter.next();
+        for (DropEntry d : chances) {
             if (Math.random() < (1 / (double) d.chance)) {
                 numItems++;
                 items.add(d);
@@ -71,7 +68,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
             if (d.itemId == 0) {
                 int range = maxMeso - minMeso;
                 int displayDrop = (int) (Math.random() * range) + minMeso;
-                int mesoDrop = (int) (displayDrop * ChannelServer.getInstance(getClient().getChannel()).getMesoRate());
+                int mesoDrop = displayDrop * ChannelServer.getInstance(getClient().getChannel()).getMesoRate();
                 reactor.getMap().spawnMesoDrop(mesoDrop, displayDrop, dropPos, reactor, getPlayer(), meso);
             } else {
                 IItem drop;
@@ -112,7 +109,7 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
             r.setState((byte) 1);
             c.getChannelServer().getMapFactory().getMap(reactorMap).broadcastMessage(MaplePacketCreator.triggerReactor(r, 1));
         }
-        new MapMonitor(c.getChannelServer().getMapFactory().getMap(mapId), closePortal ? portal : null, c.getChannel(), r);
+        new MapMonitor(c.getChannelServer().getMapFactory().getMap(mapId), closePortal ? portal : null, r);
     }
 
     public void spawnMonster(int id, int qty) {

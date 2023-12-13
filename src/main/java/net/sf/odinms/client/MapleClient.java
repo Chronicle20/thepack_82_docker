@@ -67,9 +67,8 @@ public class MapleClient {
     private boolean gm;
     private int gmlevel;
     private byte greason = 1;
-    private Map<Pair<MapleCharacter, Integer>, Integer> timesTalked = new HashMap<Pair<MapleCharacter, Integer>, Integer>(); //npcid, times
-    private Set<String> macs = new HashSet<String>();
-    private Map<String, ScriptEngine> engines = new HashMap<String, ScriptEngine>();
+    private Set<String> macs = new HashSet<>();
+    private Map<String, ScriptEngine> engines = new HashMap<>();
     private ScheduledFuture<?> idleTask = null;
 
     public MapleClient(MapleAESOFB send, MapleAESOFB receive, IoSession session) {
@@ -103,7 +102,7 @@ public class MapleClient {
     }
 
     public List<MapleCharacter> loadCharacters(int serverId) {
-        List<MapleCharacter> chars = new LinkedList<MapleCharacter>();
+        List<MapleCharacter> chars = new LinkedList<>();
         for (CharNameAndId cni : loadCharactersInternal(serverId)) {
             try {
                 chars.add(MapleCharacter.loadCharFromDB(cni.id, this, false));
@@ -115,7 +114,7 @@ public class MapleClient {
     }
 
     public List<String> loadCharacterNames(int serverId) {
-        List<String> chars = new LinkedList<String>();
+        List<String> chars = new LinkedList<>();
         for (CharNameAndId cni : loadCharactersInternal(serverId)) {
             chars.add(cni.name);
         }
@@ -125,7 +124,7 @@ public class MapleClient {
     private List<CharNameAndId> loadCharactersInternal(int serverId) {
         Connection con = DatabaseConnection.getConnection();
         PreparedStatement ps;
-        List<CharNameAndId> chars = new LinkedList<CharNameAndId>();
+        List<CharNameAndId> chars = new LinkedList<>();
         try {
             ps = con.prepareStatement("SELECT id, name FROM characters WHERE accountid = ? AND world = ?");
             ps.setInt(1, this.accId);
@@ -228,7 +227,7 @@ public class MapleClient {
             if (rs.next()) {
                 String[] macData = rs.getString("macs").split(", ");
                 for (String mac : macData) {
-                    if (!mac.equals("")) {
+                    if (!mac.isEmpty()) {
                         macs.add(mac);
                     }
                 }
@@ -244,7 +243,7 @@ public class MapleClient {
         Connection con = DatabaseConnection.getConnection();
         try {
             loadMacsIfNescessary();
-            List<String> filtered = new LinkedList<String>();
+            List<String> filtered = new LinkedList<>();
             PreparedStatement ps = con.prepareStatement("SELECT filter FROM macfilters");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -346,15 +345,12 @@ public class MapleClient {
                             loginok = 4;
                         }
                         if (updatePasswordHash) {
-                            PreparedStatement pss = con.prepareStatement("UPDATE `accounts` SET `password` = ?, `salt` = ? WHERE id = ?");
-                            try {
+                            try (PreparedStatement pss = con.prepareStatement("UPDATE `accounts` SET `password` = ?, `salt` = ? WHERE id = ?")) {
                                 String newSalt = LoginCrypto.makeSalt();
                                 pss.setString(1, LoginCrypto.makeSaltedSha512Hash(pwd, newSalt));
                                 pss.setString(2, newSalt);
                                 pss.setInt(3, accId);
                                 pss.executeUpdate();
-                            } finally {
-                                pss.close();
                             }
                         }
                     }
@@ -422,9 +418,7 @@ public class MapleClient {
     }
 
     public void updateMacs(String macData) {
-        for (String mac : macData.split(", ")) {
-            macs.add(mac);
-        }
+        Collections.addAll(macs, macData.split(", "));
         StringBuilder newMacData = new StringBuilder();
         Iterator<String> iter = macs.iterator();
         while (iter.hasNext()) {
@@ -507,11 +501,7 @@ public class MapleClient {
             }
             rs.close();
             ps.close();
-            if (state == MapleClient.LOGIN_LOGGEDIN) {
-                loggedIn = true;
-            } else {
-                loggedIn = false;
-            }
+            loggedIn = state == MapleClient.LOGIN_LOGGEDIN;
             return state;
         } catch (SQLException e) {
             loggedIn = false;
@@ -576,8 +566,9 @@ public class MapleClient {
                 } else {
                     wci.loggedOn(chr.getName(), chr.getId(), channel, chr.getBuddylist().getBuddyIds());
                 }
+
                 if (chr.getGuildId() > 0) {
-                    wci.setGuildMemberOnline(chr.getMGC(), false, -1);
+                    wci.setGuildMemberOnline(chr.getMGC().orElseThrow(), false, -1);
                 }
             } catch (RemoteException e) {
                 getChannelServer().reconnectWorld();
@@ -679,19 +670,15 @@ public class MapleClient {
     public void sendPing() {
         final long then = System.currentTimeMillis();
         getSession().write(MaplePacketCreator.getPing());
-        TimerManager.getInstance().schedule(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    if (lastPong - then < 0) {
-                        if (getSession().isConnected()) {
-                            log.info(getLogMessage(MapleClient.this, "\r\nAuto DC : Ping Timeout"));
-                            getSession().close();
-                        }
+        TimerManager.getInstance().schedule(() -> {
+            try {
+                if (lastPong - then < 0) {
+                    if (getSession().isConnected()) {
+                        log.info(getLogMessage(MapleClient.this, "\r\nAuto DC : Ping Timeout"));
+                        getSession().close();
                     }
-                } catch (NullPointerException e) {
                 }
+            } catch (NullPointerException e) {
             }
         }, 15000);
     }
@@ -712,10 +699,10 @@ public class MapleClient {
         StringBuilder builder = new StringBuilder();
         if (cfor != null) {
             if (cfor.getPlayer() != null) {
-                builder.append("<"+MapleCharacterUtil.makeMapleReadable(cfor.getPlayer().getName())+" (cid: "+cfor.getPlayer().getId()+")> ");
+                builder.append("<").append(CharacterUtil.makeMapleReadable(cfor.getPlayer().getName())).append(" (cid: ").append(cfor.getPlayer().getId()).append(")> ");
             }
             if (cfor.getAccountName() != null) {
-                builder.append("(Account: "+MapleCharacterUtil.makeMapleReadable(cfor.getAccountName())+") ");
+                builder.append("(Account: ").append(CharacterUtil.makeMapleReadable(cfor.getAccountName())).append(") ");
             }
         }
         builder.append(message);
@@ -724,23 +711,6 @@ public class MapleClient {
             builder.replace(start, start + 2, parm.toString());
         }
         return builder.toString();
-    }
-
-    public static int findAccIdForCharacterName(String charName) {
-        Connection con = DatabaseConnection.getConnection();
-        try {
-            PreparedStatement ps = con.prepareStatement("SELECT accountid FROM characters WHERE name = ?");
-            ps.setString(1, charName);
-            ResultSet rs = ps.executeQuery();
-            int ret = -1;
-            if (rs.next()) {
-                ret = rs.getInt("accountid");
-            }
-            return ret;
-        } catch (SQLException e) {
-            log.error("SQL THROW");
-        }
-        return -1;
     }
 
     public Set<String> getMacs() {
@@ -777,18 +747,6 @@ public class MapleClient {
 
     public QuestActionManager getQM() {
         return QuestScriptManager.getInstance().getQM(this);
-    }
-
-    public void setTimesTalked(int n, int t) {
-        timesTalked.remove(new Pair<MapleCharacter, Integer>(getPlayer(), n));
-        timesTalked.put(new Pair<MapleCharacter, Integer>(getPlayer(), n), t);
-    }
-
-    public int getTimesTalked(int n) {
-        if (timesTalked.get(new Pair<MapleCharacter, Integer>(getPlayer(), n)) == null) {
-            setTimesTalked(n, 0);
-        }
-        return timesTalked.get(new Pair<MapleCharacter, Integer>(getPlayer(), n));
     }
 
     private static class CharNameAndId {

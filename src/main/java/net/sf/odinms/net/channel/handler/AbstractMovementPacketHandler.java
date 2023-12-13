@@ -18,7 +18,7 @@ import net.sf.odinms.tools.data.input.LittleEndianAccessor;
 public abstract class AbstractMovementPacketHandler extends AbstractMaplePacketHandler {
 
     protected List<LifeMovementFragment> parseMovement(LittleEndianAccessor lea) {
-        List<LifeMovementFragment> res = new ArrayList<LifeMovementFragment>();
+        List<LifeMovementFragment> res = new ArrayList<>();
         int numCommands = lea.readByte();
         for (int i = 0; i < numCommands; i++) {
             int command = lea.readByte();
@@ -115,7 +115,7 @@ public abstract class AbstractMovementPacketHandler extends AbstractMaplePacketH
         for (LifeMovementFragment move : movement) {
             if (move instanceof LifeMovement) {
                 if (move instanceof AbsoluteLifeMovement) {
-                    Point position = ((LifeMovement) move).getPosition();
+                    Point position = move.getPosition();
                     position.y += yoffset;
                     target.setPosition(position);
                 }

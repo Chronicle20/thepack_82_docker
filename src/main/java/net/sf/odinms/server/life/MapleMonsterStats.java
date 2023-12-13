@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import net.sf.odinms.tools.Pair;
 
 /**
@@ -21,12 +23,12 @@ public class MapleMonsterStats {
 	private boolean undead;
 	private boolean ffaLoot;
 	private String name;
-	private Map<String, Integer> animationTimes = new HashMap<String, Integer>();
-	private Map<Element, ElementalEffectiveness> resistance = new HashMap<Element, ElementalEffectiveness>();
+	private Map<String, Integer> animationTimes = new HashMap<>();
+	private Map<Element, ElementalEffectiveness> resistance = new HashMap<>();
 	private List<Integer> revives = Collections.emptyList();
 	private byte tagColor;
 	private byte tagBgColor;
-	private List<Pair<Integer, Integer>> skills = new ArrayList<Pair<Integer, Integer>>();
+	private List<Pair<Integer, Integer>> skills = new ArrayList<>();
 	private boolean firstAttack;
 	private int buffToGive;
 
@@ -95,7 +97,7 @@ public class MapleMonsterStats {
 		if (ret == null) {
 			return 500;
 		}
-		return ret.intValue();
+		return ret;
 	}
 	
 	public boolean isMobile() {
@@ -124,11 +126,7 @@ public class MapleMonsterStats {
 	
 	public ElementalEffectiveness getEffectiveness (Element e) {
 		ElementalEffectiveness elementalEffectiveness = resistance.get(e);
-		if (elementalEffectiveness == null) {
-			return ElementalEffectiveness.NORMAL;
-		} else {
-			return elementalEffectiveness;
-		}
+        return Objects.requireNonNullElse(elementalEffectiveness, ElementalEffectiveness.NORMAL);
 	}
 
 	public String getName() {
@@ -171,7 +169,7 @@ public class MapleMonsterStats {
 	
 	public boolean hasSkill(int skillId, int level) {
 		for (Pair<Integer, Integer> skill : skills) {
-			if (skill.getLeft() == skillId && skill.getRight() == level) {
+			if (skill.left() == skillId && skill.right() == level) {
 				return true;
 			}
 		}

@@ -1,8 +1,5 @@
 package net.sf.odinms.server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import net.sf.odinms.client.IItem;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
@@ -11,21 +8,26 @@ import net.sf.odinms.server.maps.AbstractMapleMapObject;
 import net.sf.odinms.server.maps.MapleMapObjectType;
 import net.sf.odinms.tools.MaplePacketCreator;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
- *
  * @author Matze
  */
 public class MapleMiniGame extends AbstractMapleMapObject {
 
     private MapleCharacter owner;
     private MapleCharacter visitor;
-    private String GameType = null;
-    private int[] piece = new int[225];
-    private List<Integer> list4x3 = new ArrayList<Integer>();
-    private List<Integer> list5x4 = new ArrayList<Integer>();
-    private List<Integer> list6x5 = new ArrayList<Integer>();
-    private List<MaplePlayerShopItem> items = new ArrayList<MaplePlayerShopItem>();
-    private MapleCharacter slot1 = null, slot2 = null, slot3 = null;
+    private final MiniGameType gameType;
+    private final int[] piece = new int[225];
+    private final List<Integer> list4x3 = new ArrayList<>();
+    private final List<Integer> list5x4 = new ArrayList<>();
+    private final List<Integer> list6x5 = new ArrayList<>();
+    private final List<MaplePlayerShopItem> items = new ArrayList<>();
+    private final MapleCharacter slot1 = null;
+    private final MapleCharacter slot2 = null;
+    private final MapleCharacter slot3 = null;
     private String description;
     boolean ready = false;
     int loser = 1;
@@ -36,9 +38,23 @@ public class MapleMiniGame extends AbstractMapleMapObject {
     int ownerpoints = 0;
     int matchestowin = 0;
 
-    public MapleMiniGame(MapleCharacter owner, String description) {
+    public enum MiniGameType {
+        UNDEFINED(0), OMOK(1), MATCH_CARD(2);
+        private final int value;
+
+        MiniGameType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
+    public MapleMiniGame(MapleCharacter owner, String description, MiniGameType type) {
         this.owner = owner;
         this.description = description;
+        this.gameType = type;
     }
 
     public boolean hasFreeSlot() {
@@ -51,11 +67,11 @@ public class MapleMiniGame extends AbstractMapleMapObject {
 
     public void addVisitor(MapleCharacter challenger) {
         visitor = challenger;
-        if (GameType == "omok") {
+        if (gameType.equals(MiniGameType.OMOK)) {
             this.getOwner().getClient().getSession().write(MaplePacketCreator.getMiniGameNewVisitor(challenger, 1));
             this.getOwner().getMap().broadcastMessage(MaplePacketCreator.addOmokBox(owner, 2, 0));
         }
-        if (GameType == "matchcard") {
+        if (gameType.equals(MiniGameType.MATCH_CARD)) {
             this.getOwner().getClient().getSession().write(MaplePacketCreator.getMatchCardNewVisitor(challenger, 1));
             this.getOwner().getMap().broadcastMessage(MaplePacketCreator.addMatchCardBox(owner, 2, 0));
         }
@@ -65,10 +81,10 @@ public class MapleMiniGame extends AbstractMapleMapObject {
         if (visitor == challenger) {
             visitor = null;
             this.getOwner().getClient().getSession().write(MaplePacketCreator.getMiniGameRemoveVisitor());
-            if (GameType == "omok") {
+            if (gameType.equals(MiniGameType.OMOK)) {
                 this.getOwner().getMap().broadcastMessage(MaplePacketCreator.addOmokBox(owner, 1, 0));
             }
-            if (GameType == "matchcard") {
+            if (gameType.equals(MiniGameType.MATCH_CARD)) {
                 this.getOwner().getMap().broadcastMessage(MaplePacketCreator.addMatchCardBox(owner, 1, 0));
             }
         }
@@ -192,7 +208,7 @@ public class MapleMiniGame extends AbstractMapleMapObject {
     }
 
     public void setGameType(String game) {
-        if (GameType.equals("matchcard")) {
+        if (gameType.equals(MiniGameType.MATCH_CARD)) {
             if (matchestowin == 6) {
                 for (int i = 0; i < 6; i++) {
                     list4x3.add(i);
@@ -214,8 +230,8 @@ public class MapleMiniGame extends AbstractMapleMapObject {
         }
     }
 
-    public String getGameType() {
-        return GameType;
+    public MiniGameType getGameType() {
+        return gameType;
     }
 
     public void shuffleList() {
@@ -268,11 +284,11 @@ public class MapleMiniGame extends AbstractMapleMapObject {
     }
 
     public void sendOmok(MapleClient c, int type) {
-        c.getSession().write(MaplePacketCreator.getMiniGame(c, this, isOwner(c.getPlayer()), type));
+        c.getSession().write(MaplePacketCreator.getMiniGame(this, isOwner(c.getPlayer()), type));
     }
 
     public void sendMatchCard(MapleClient c, int type) {
-        c.getSession().write(MaplePacketCreator.getMatchCard(c, this, isOwner(c.getPlayer()), type));
+        c.getSession().write(MaplePacketCreator.getMatchCard(this, isOwner(c.getPlayer()), type));
     }
 
     public MapleCharacter getOwner() {
@@ -293,14 +309,6 @@ public class MapleMiniGame extends AbstractMapleMapObject {
 
     public MapleCharacter getSlot3() {
         return slot3;
-    }
-
-    public void setReady() {
-        if (ready = false) {
-            ready = true;
-        } else {
-            ready = false;
-        }
     }
 
     public boolean isReady() {

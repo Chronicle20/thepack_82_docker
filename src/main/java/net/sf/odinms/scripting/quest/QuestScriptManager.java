@@ -15,8 +15,8 @@ import net.sf.odinms.scripting.AbstractScriptManager;
 
 public class QuestScriptManager extends AbstractScriptManager {
 
-	private Map<MapleClient,QuestActionManager> qms = new HashMap<MapleClient,QuestActionManager>();
-	private Map<MapleClient,Invocable> scripts = new HashMap<MapleClient,Invocable>();
+	private Map<MapleClient,QuestActionManager> qms = new HashMap<>();
+	private Map<MapleClient,Invocable> scripts = new HashMap<>();
 	private static QuestScriptManager instance = new QuestScriptManager();
 	
 	public synchronized static QuestScriptManager getInstance() {

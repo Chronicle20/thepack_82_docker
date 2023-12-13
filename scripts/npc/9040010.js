@@ -12,7 +12,7 @@ function start() {
                     var start = parseInt(eim.getProperty("entryTimestamp"));
                     var diff = System.currentTimeMillis() - start;
                     var points = 1000 - Math.floor(diff / (100 * 60));
-                    cm.getGuild().gainGP(points);
+                    cm.getGuild().orElseThrow().gainGP(points);
                 }
                 eim.finishPQ();
             }

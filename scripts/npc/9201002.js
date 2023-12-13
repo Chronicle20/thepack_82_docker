@@ -183,7 +183,7 @@ function action(mode, type, selection) {
 			} else if (status == 2) {
 				var mapid = 99;
 				var txt = cm.getText();
-				var chrr = cm.getCharByName(txt);
+				var chrr = cm.getCharByName(txt).orElseThrow();
 				if (chrr != null)
 				mapid = chrr.getMapId();
 				if (mapid == 680000200) {

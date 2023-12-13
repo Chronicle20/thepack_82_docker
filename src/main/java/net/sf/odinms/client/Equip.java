@@ -3,7 +3,6 @@ package net.sf.odinms.client;
 import java.util.LinkedList;
 
 public class Equip extends Item implements IEquip {
-
     private byte upgradeSlots;
     private byte level;
     private byte locked;
@@ -42,7 +41,7 @@ public class Equip extends Item implements IEquip {
         ret.locked = locked;
         ret.upgradeSlots = upgradeSlots;
         ret.level = level;
-        ret.log = new LinkedList<String>(log);
+        ret.log = new LinkedList<>(log);
         ret.setOwner(getOwner());
         ret.setQuantity(getQuantity());
         return ret;

@@ -17,7 +17,7 @@ public class MapleTrade {
 
     private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MapleTrade.class);
     private MapleTrade partner = null;
-    private List<IItem> items = new LinkedList<IItem>();
+    private List<IItem> items = new LinkedList<>();
     private List<IItem> exchangeItems;
     private int meso = 0;
     private int exchangeMeso;
@@ -33,15 +33,15 @@ public class MapleTrade {
     private int getFee(int meso) {
         int fee = 0;
         if (meso >= 10000000) {
-            fee = (int) Math.round(meso / 25);
+            fee = Math.round(meso / 25);
         } else if (meso >= 5000000) {
             fee = (int) Math.round(0.03 * meso);
         } else if (meso >= 1000000) {
-            fee = (int) Math.round(meso / 50);
+            fee = Math.round(meso / 50);
         } else if (meso >= 100000) {
-            fee = (int) Math.round(meso / 100);
+            fee = Math.round(meso / 100);
         } else if (meso >= 50000) {
-            fee = (int) Math.round(meso / 200);
+            fee = Math.round(meso / 200);
         }
         return fee;
     }
@@ -148,19 +148,15 @@ public class MapleTrade {
     }
 
     public List<IItem> getItems() {
-        return new LinkedList<IItem>(items);
+        return new LinkedList<>(items);
     }
 
     public boolean fitsInInventory() {
         MapleItemInformationProvider mii = MapleItemInformationProvider.getInstance();
-        Map<MapleInventoryType, Integer> neededSlots = new LinkedHashMap<MapleInventoryType, Integer>();
+        Map<MapleInventoryType, Integer> neededSlots = new LinkedHashMap<>();
         for (IItem item : exchangeItems) {
             MapleInventoryType type = mii.getInventoryType(item.getItemId());
-            if (neededSlots.get(type) == null) {
-                neededSlots.put(type, 1);
-            } else {
-                neededSlots.put(type, neededSlots.get(type) + 1);
-            }
+            neededSlots.merge(type, 1, Integer::sum);
         }
         for (Map.Entry<MapleInventoryType, Integer> entry : neededSlots.entrySet()) {
             if (chr.getInventory(entry.getKey()).isFull(entry.getValue() - 1)) {

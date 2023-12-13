@@ -39,17 +39,16 @@ public class LoginServer implements Runnable, LoginServerMBean {
     private IoAcceptor acceptor;
     static final Logger log = LoggerFactory.getLogger(LoginServer.class);
     private static WorldRegistry worldRegistry = null;
-    private Map<Integer, String> channelServer = new HashMap<Integer, String>();
+    private Map<Integer, String> channelServer = new HashMap<>();
     private LoginWorldInterface lwi;
     private WorldLoginInterface wli;
     private Properties prop = new Properties();
     private Properties initialProp = new Properties();
     private Boolean worldReady = Boolean.TRUE;
     private Properties subnetInfo = new Properties();
-    private Map<Integer, Integer> load = new HashMap<Integer, Integer>();
+    private Map<Integer, Integer> load = new HashMap<>();
     private String serverName,  eventMessage;
     int flag, maxCharacters, userLimit, loginInterval, worlds;
-    private long rankingInterval;
     private static LoginServer instance = new LoginServer();
 
     static {
@@ -207,7 +206,7 @@ public class LoginServer implements Runnable, LoginServerMBean {
         tMan.start();
         loginInterval = Integer.parseInt(prop.getProperty("net.sf.odinms.login.interval"));
         tMan.register(LoginWorker.getInstance(), loginInterval);
-        rankingInterval = Long.parseLong(prop.getProperty("net.sf.odinms.login.ranking.interval"));
+        long rankingInterval = Long.parseLong(prop.getProperty("net.sf.odinms.login.ranking.interval"));
         PORT = Integer.parseInt(prop.getProperty("net.sf.odinms.login.port"));
         tMan.register(new RankingWorker(), rankingInterval);
         try {
@@ -241,7 +240,7 @@ public class LoginServer implements Runnable, LoginServerMBean {
         return wli;
     }
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
             LoginServer.getInstance().run();

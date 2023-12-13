@@ -2,37 +2,13 @@ package net.sf.odinms.tools;
 
 import java.io.Serializable;
 
-public class Pair<E, F> implements Serializable {
+public record Pair<E, F>(E left, F right) implements Serializable {
 
-    static final long serialVersionUID = 9179541993413738569L;
-    private E left;
-    private F right;
-
-    public Pair(E left, F right) {
-        this.left = left;
-        this.right = right;
-    }
-
-    public E getLeft() {
-        return left;
-    }
-
-    public F getRight() {
-        return right;
-    }
+    private static final long serialVersionUID = 9179541993413738569L;
 
     @Override
     public String toString() {
         return left.toString() + ":" + right.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((left == null) ? 0 : left.hashCode());
-        result = prime * result + ((right == null) ? 0 : right.hashCode());
-        return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -47,7 +23,7 @@ public class Pair<E, F> implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Pair other = (Pair) obj;
+        final Pair<E, F> other = (Pair<E, F>) obj;
         if (left == null) {
             if (other.left != null) {
                 return false;

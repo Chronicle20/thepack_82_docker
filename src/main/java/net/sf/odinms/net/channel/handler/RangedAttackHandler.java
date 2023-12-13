@@ -11,7 +11,7 @@ import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventory;
 import net.sf.odinms.client.MapleInventoryType;
 import net.sf.odinms.client.MapleJob;
-import net.sf.odinms.client.MapleWeaponType;
+import net.sf.odinms.client.WeaponType;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.client.anticheat.CheatingOffense;
 import net.sf.odinms.net.MaplePacket;
@@ -31,8 +31,8 @@ public class RangedAttackHandler extends AbstractDealDamageHandler {
         MapleInventory equip = player.getInventory(MapleInventoryType.EQUIPPED);
         IItem weapon = equip.getItem((byte) -11);
         MapleItemInformationProvider mii = MapleItemInformationProvider.getInstance();
-        MapleWeaponType type = mii.getWeaponType(weapon.getItemId());
-        if (type == MapleWeaponType.NOT_A_WEAPON) {
+        WeaponType type = mii.getWeaponType(weapon.getItemId());
+        if (type == WeaponType.NOT_A_WEAPON) {
             throw new RuntimeException("[h4x] Player " + player.getName() + " is attacking with something that's not a weapon");
         }
         MapleInventory use = player.getInventory(MapleInventoryType.USE);
@@ -54,10 +54,10 @@ public class RangedAttackHandler extends AbstractDealDamageHandler {
         for (int i = 0; i < 255; i++) { // impose order...
             IItem item = use.getItem((byte) i);
             if (item != null) {
-                boolean clawCondition = weapon.getItemId() != 1472063 && type == MapleWeaponType.CLAW && mii.isThrowingStar(item.getItemId());
-                boolean bowCondition = weapon.getItemId() != 1472063 && type == MapleWeaponType.BOW && mii.isArrowForBow(item.getItemId());
-                boolean crossbowCondition = type == MapleWeaponType.CROSSBOW && mii.isArrowForCrossBow(item.getItemId());
-                boolean gunCondition = type == MapleWeaponType.GUN && mii.isBullet(item.getItemId());
+                boolean clawCondition = weapon.getItemId() != 1472063 && type == WeaponType.CLAW && mii.isThrowingStar(item.getItemId());
+                boolean bowCondition = weapon.getItemId() != 1472063 && type == WeaponType.BOW && mii.isArrowForBow(item.getItemId());
+                boolean crossbowCondition = type == WeaponType.CROSSBOW && mii.isArrowForCrossBow(item.getItemId());
+                boolean gunCondition = type == WeaponType.GUN && mii.isBullet(item.getItemId());
                 boolean mittenCondition = weapon.getItemId() == 1472063 && (item.getItemId() == 2060005 || item.getItemId() == 2060006);
                 if ((clawCondition || bowCondition || crossbowCondition || mittenCondition || gunCondition) && item.getQuantity() >= bulletCount) {
                     projectile = item.getItemId();

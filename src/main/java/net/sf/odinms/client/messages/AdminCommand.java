@@ -1,9 +1,5 @@
 package net.sf.odinms.client.messages;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.database.DatabaseConnection;
@@ -16,26 +12,15 @@ import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.tools.Pair;
 import net.sf.odinms.tools.StringUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  * @author Moogra
  */
 public class AdminCommand {
-
-    private static class ShutdownAnnouncer implements Runnable {
-
-        private ChannelServer cserv;
-        private long startTime,  time;
-
-        public ShutdownAnnouncer(ChannelServer cs, long t) {
-            cserv = cs;
-            time = t;
-            startTime = System.currentTimeMillis();
-        }
-
-        public void run() {
-            cserv.broadcastPacket(MaplePacketCreator.serverNotice(0, "The world will be shut down in " + ((time - System.currentTimeMillis() + startTime) / 60000) + " minutes, please log off safely."));
-        }
-    }
 
     public static boolean executeAdminCommand(MapleClient c, MessageCallback mc, String line, org.slf4j.Logger log, List<Pair<MapleCharacter, String>> gmlog, Runnable persister) {
         ChannelServer cserv = c.getChannelServer();
@@ -115,8 +100,7 @@ public class AdminCommand {
                 mc.dropMessage("You have entered an invalid Npc-Id");
             }
         } else if (splitted[0].equals("!setGMlevel")) {
-            cserv.getPlayerStorage().getCharacterByName(splitted[1]).setGMLevel(Integer.parseInt(splitted[2]));
-            mc.dropMessage("Done.");
+            applyGmLevel(mc, cserv, splitted);
         } else if (splitted[0].equals("!shutdown") || splitted[0].equals("!shutdownnow")) {
             for (MapleCharacter everyone : cserv.getPlayerStorage().getAllCharacters()) {
                 everyone.saveToDB(true);
@@ -124,7 +108,7 @@ public class AdminCommand {
             int time = 60000;
             if (splitted.length > 1) {
                 time *= Integer.parseInt(splitted[1]);
-                TimerManager.getInstance().register(new ShutdownAnnouncer(cserv, (long) time), 300000, 300000);
+                TimerManager.getInstance().register(new ShutdownAnnouncer(cserv, time), 300000, 300000);
             }
             if (splitted[0].equals("!shutdownnow")) {
                 time = 1;
@@ -146,5 +130,26 @@ public class AdminCommand {
             return false;
         }
         return true;
+    }
+
+    private static void applyGmLevel(MessageCallback mc, ChannelServer cserv, String[] splitted) {
+        cserv.getPlayerStorage().getCharacterByName(splitted[1]).ifPresent(c -> c.setGMLevel(Integer.parseInt(splitted[2])));
+        mc.dropMessage("Done.");
+    }
+
+    private static class ShutdownAnnouncer implements Runnable {
+
+        private ChannelServer cserv;
+        private long startTime, time;
+
+        public ShutdownAnnouncer(ChannelServer cs, long t) {
+            cserv = cs;
+            time = t;
+            startTime = System.currentTimeMillis();
+        }
+
+        public void run() {
+            cserv.broadcastPacket(MaplePacketCreator.serverNotice(0, "The world will be shut down in " + ((time - System.currentTimeMillis() + startTime) / 60000) + " minutes, please log off safely."));
+        }
     }
 }

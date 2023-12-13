@@ -32,6 +32,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import net.sf.odinms.provider.MapleData;
 import net.sf.odinms.provider.MapleDataEntity;
 import net.sf.odinms.provider.wz.MapleDataType;
@@ -43,7 +46,7 @@ import net.sf.odinms.provider.wz.MapleDataType;
 public class MapleCustomQuestData implements MapleData, Serializable {
 	private static final long serialVersionUID = -8600005891655365066L;
 	
-	private List<MapleCustomQuestData> children = new LinkedList<MapleCustomQuestData>();
+	private List<MapleCustomQuestData> children = new LinkedList<>();
 	private String name;
 	private Object data;
 	private MapleDataEntity parent;
@@ -69,14 +72,14 @@ public class MapleCustomQuestData implements MapleData, Serializable {
 	public List<MapleData> getChildren() {
 		MapleData[] ret = new MapleData[children.size()];
 		ret = children.toArray(ret);
-		return new ArrayList<MapleData>(Arrays.asList(ret));
+		return new ArrayList<>(Arrays.asList(ret));
 	}
 
 	public MapleData getChildByPath(String name) {
 		if (name.equals(this.name)) return this;
 		String lookup;
 		String nextName;
-		if (name.indexOf("/") == -1) {
+		if (!name.contains("/")) {
 			lookup = name;
 			nextName = name;
 		} else {
@@ -92,6 +95,11 @@ public class MapleCustomQuestData implements MapleData, Serializable {
 
 	public Object getData() {
 		return data;
+	}
+
+	@Override
+	public Stream<MapleData> stream() {
+		return StreamSupport.stream(spliterator(), false);
 	}
 
 	public Iterator<MapleData> iterator() {

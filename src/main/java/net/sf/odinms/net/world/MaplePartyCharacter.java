@@ -17,9 +17,7 @@ public class MaplePartyCharacter implements Serializable {
 	private int doorTarget = 999999999;
 	private Point doorPosition = new Point(0, 0);
 	private boolean online;
-    private int gender;
- 	private int married;
-	
+
 	public MaplePartyCharacter(MapleCharacter maplechar) {
 		this.name = maplechar.getName();
 		this.level = maplechar.getLevel();
@@ -28,9 +26,7 @@ public class MaplePartyCharacter implements Serializable {
 		this.jobid = maplechar.getJob().getId();
 		this.mapid = maplechar.getMapId();
 		this.online = true;
-        this.gender = maplechar.getGender();
- 	    this.married = maplechar.isMarried();
-		if (maplechar.getDoors().size() > 0) {
+		if (!maplechar.getDoors().isEmpty()) {
 			this.doorTown = maplechar.getDoors().get(0).getTown().getId();
 			this.doorTarget = maplechar.getDoors().get(0).getTarget().getId();
 			this.doorPosition = maplechar.getDoors().get(0).getTargetPosition();
@@ -84,14 +80,6 @@ public class MaplePartyCharacter implements Serializable {
 	public Point getDoorPosition() {
 		return doorPosition;
 	}
-
-    public int getGender() {
-       return gender;
-    }
-
-   public int isMarried() {
-       return married;
-  }
 
 	@Override
 	public int hashCode() {

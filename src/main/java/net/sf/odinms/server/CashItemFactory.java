@@ -14,8 +14,8 @@ import net.sf.odinms.tools.StringUtil;
  * @author Lerk
  */
 public class CashItemFactory {
-	private static Map<Integer, Integer> snLookup = new HashMap<Integer,Integer>();
-	private static Map<Integer, CashItemInfo> itemStats = new HashMap<Integer, CashItemInfo>();
+	private static Map<Integer, Integer> snLookup = new HashMap<>();
+	private static Map<Integer, CashItemInfo> itemStats = new HashMap<>();
 	private static MapleDataProvider data = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/Etc.wz"));
 	private static MapleData commodities = data.getData(StringUtil.getLeftPaddedStr("Commodity.img", '0', 11));
 	

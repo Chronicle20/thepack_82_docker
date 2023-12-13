@@ -1,11 +1,5 @@
 package net.sf.odinms.scripting;
 
-import java.rmi.RemoteException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.Random;
 import net.sf.odinms.client.Equip;
 import net.sf.odinms.client.IItem;
 import net.sf.odinms.client.InventoryException;
@@ -13,20 +7,27 @@ import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventory;
 import net.sf.odinms.client.MapleInventoryType;
-import net.sf.odinms.client.MaplePet;
 import net.sf.odinms.client.MapleQuestStatus;
+import net.sf.odinms.client.Pet;
 import net.sf.odinms.net.channel.ChannelServer;
 import net.sf.odinms.net.world.MapleParty;
 import net.sf.odinms.net.world.MaplePartyCharacter;
 import net.sf.odinms.net.world.guild.MapleGuild;
-import net.sf.odinms.server.MaplePortal;
 import net.sf.odinms.server.MapleInventoryManipulator;
 import net.sf.odinms.server.MapleItemInformationProvider;
+import net.sf.odinms.server.MaplePortal;
 import net.sf.odinms.server.maps.MapleMap;
 import net.sf.odinms.server.maps.MapleMapObject;
 import net.sf.odinms.server.maps.MapleMapObjectType;
 import net.sf.odinms.server.quest.MapleQuest;
 import net.sf.odinms.tools.MaplePacketCreator;
+
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AbstractPlayerInteraction {
 
@@ -115,7 +116,7 @@ public class AbstractPlayerInteraction {
 
     public void gainItem(int id, short quantity, boolean randomStats) {
         if (id >= 5000000 && id <= 5000100) {
-            MapleInventoryManipulator.addById(c, id, (short) 1, null, null, MaplePet.createPet(id));
+            MapleInventoryManipulator.addById(c, id, (short) 1, null, null, Pet.createPet(id));
         }
         if (quantity >= 0) {
             MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
@@ -129,7 +130,7 @@ public class AbstractPlayerInteraction {
                 if (randomStats) {
                     MapleInventoryManipulator.addFromDrop(c, ii.randomizeStats((Equip) item), "", false);
                 } else {
-                    MapleInventoryManipulator.addFromDrop(c, (Equip) item, "", false);
+                    MapleInventoryManipulator.addFromDrop(c, item, "", false);
                 }
             } else {
                 MapleInventoryManipulator.addById(c, id, quantity, "");
@@ -182,18 +183,16 @@ public class AbstractPlayerInteraction {
     }
 
     public void guildMessage(int type, String message) {
-        if (getGuild() != null) {
-            getGuild().guildMessage(MaplePacketCreator.serverNotice(type, message));
-        }
+        getGuild().ifPresent(g -> g.guildMessage(MaplePacketCreator.serverNotice(type, message)));
     }
 
-    public MapleGuild getGuild() {
+    public Optional<MapleGuild> getGuild() {
         try {
             return c.getChannelServer().getWorldInterface().getGuild(getPlayer().getGuildId(), null);
         } catch (RemoteException ex) {
             Logger.getLogger(AbstractPlayerInteraction.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+        return Optional.empty();
     }
 
     public MapleParty getParty() {
@@ -209,8 +208,7 @@ public class AbstractPlayerInteraction {
         for (MapleCharacter chr : party) {
             MapleClient cl = chr.getClient();
             if (quantity >= 0) {
-                StringBuilder logInfo = new StringBuilder(cl.getPlayer().getName()+" received "+quantity+" from event "+chr.getEventInstance().getName());
-                MapleInventoryManipulator.addById(cl, id, quantity, logInfo.toString());
+                MapleInventoryManipulator.addById(cl, id, quantity, cl.getPlayer().getName() + " received " + quantity + " from event " + chr.getEventInstance().getName());
             } else {
                 MapleInventoryManipulator.removeById(cl, MapleItemInformationProvider.getInstance().getInventoryType(id), id, -quantity, true, false);
             }
@@ -253,7 +251,7 @@ public class AbstractPlayerInteraction {
     }
 
     public void gainCloseness(int closeness, int index) {
-        MaplePet pet = getPlayer().getPet(index);
+        Pet pet = getPlayer().getPet(index);
         if (pet != null) {
             pet.setCloseness(pet.getCloseness() + closeness);
             getClient().getSession().write(MaplePacketCreator.updatePet(pet, true));
@@ -261,7 +259,7 @@ public class AbstractPlayerInteraction {
     }
 
     public void gainClosenessAll(int closeness) {
-        for (MaplePet pet : getPlayer().getPets()) {
+        for (Pet pet : getPlayer().getPets()) {
             if (pet != null) {
                 pet.setCloseness(pet.getCloseness() + closeness);
                 getClient().getSession().write(MaplePacketCreator.updatePet(pet, true));
@@ -288,7 +286,7 @@ public class AbstractPlayerInteraction {
     public void resetMap(int mapid) {
         getMap(mapid).resetReactors();
         getMap(mapid).killAllMonsters(false);
-        List<MapleMapObject> items = getMap(mapid).getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.ITEM));
+        List<MapleMapObject> items = getMap(mapid).getMapObjectsInRange(c.getPlayer().getPosition(), Double.POSITIVE_INFINITY, List.of(MapleMapObjectType.ITEM));
         for (MapleMapObject i : items) {
             getMap(mapid).removeMapObject(i);
             getMap(mapid).broadcastMessage(MaplePacketCreator.removeItemFromMap(i.getObjectId(), 0, c.getPlayer().getId()));

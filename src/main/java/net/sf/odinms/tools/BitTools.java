@@ -5,14 +5,14 @@ public class BitTools {
     private BitTools() {
     }
 
-    public static int getShort(byte array[], int index) {
+    public static int getShort(byte[] array, int index) {
         int ret = array[index];
         ret &= 0xFF;
         ret |= ((int) (array[index + 1]) << 8) & 0xFF00;
         return ret;
     }
 
-    public static String getString(byte array[], int index, int length) {
+    public static String getString(byte[] array, int index, int length) {
         char[] cret = new char[length];
         for (int x = 0; x < length; x++) {
             cret[x] = (char) array[x + index];
@@ -20,8 +20,8 @@ public class BitTools {
         return String.valueOf(cret);
     }
 
-    public static String getMapleString(byte array[], int index) {
-        int length = ((int) (array[index]) & 0xFF) | ((int) (array[index + 1] << 8) & 0xFF00);
+    public static String getMapleString(byte[] array, int index) {
+        int length = ((int) (array[index]) & 0xFF) | ((array[index + 1] << 8) & 0xFF00);
         return BitTools.getString(array, index + 2, length);
     }
 

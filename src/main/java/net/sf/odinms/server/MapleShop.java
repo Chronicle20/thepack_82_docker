@@ -1,5 +1,16 @@
 package net.sf.odinms.server;
 
+import net.sf.odinms.client.IItem;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.MapleInventoryType;
+import net.sf.odinms.client.Pet;
+import net.sf.odinms.database.DatabaseConnection;
+import net.sf.odinms.net.PacketProcessor;
+import net.sf.odinms.net.channel.ChannelServer;
+import net.sf.odinms.tools.MaplePacketCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,30 +20,16 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import net.sf.odinms.client.IItem;
-import net.sf.odinms.client.Item;
-import net.sf.odinms.client.MapleClient;
-import net.sf.odinms.client.MapleInventoryType;
-import net.sf.odinms.client.MaplePet;
-import net.sf.odinms.database.DatabaseConnection;
-import net.sf.odinms.net.PacketProcessor;
-import net.sf.odinms.net.channel.ChannelServer;
-import net.sf.odinms.tools.MaplePacketCreator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Matze
  */
 public class MapleShop {
 
-    private static final Set<Integer> rechargeableItems = new LinkedHashSet<Integer>();
-    private int id;
-    private int npcId;
-    private List<MapleShopItem> items;
-    private int tokenvalue = 1000000000;
-    private int token = 4000313;
+    private static final Set<Integer> rechargeableItems = new LinkedHashSet<>();
+    private final int id;
+    private final int npcId;
+    private final List<MapleShopItem> items;
     private static Logger log = LoggerFactory.getLogger(PacketProcessor.class);
 
 
@@ -49,11 +46,13 @@ public class MapleShop {
         }
     }
 
-    /** Creates a new instance of MapleShop */
+    /**
+     * Creates a new instance of MapleShop
+     */
     private MapleShop(int id, int npcId) {
         this.id = id;
         this.npcId = npcId;
-        items = new LinkedList<MapleShopItem>();
+        items = new LinkedList<>();
     }
 
     public void addItem(MapleShopItem item) {
@@ -68,43 +67,42 @@ public class MapleShop {
     public void buy(MapleClient c, int itemId, short quantity) {
         MapleShopItem item = findById(itemId);
         MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
-        if (item != null && item.getPrice() > 0) {
-            if (c.getPlayer().getMeso() >= item.getPrice() * quantity) {
+        if (item != null && item.price() > 0) {
+            if (c.getPlayer().getMeso() >= item.price() * quantity) {
                 if (MapleInventoryManipulator.checkSpace(c, itemId, quantity, "")) {
                     if (!ii.isRechargable(itemId)) {
                         if (itemId >= 5000000 && itemId <= 5000100) {
-                            int petId = MaplePet.createPet(itemId);
+                            int petId = Pet.createPet(itemId);
                             MapleInventoryManipulator.addById(c, itemId, quantity, "Pet was purchased.", null, petId);
                         } else {
-                            StringBuilder logInfo = new StringBuilder(c.getPlayer().getName() + " bought " + quantity + " for " + item.getPrice() * quantity + " from shop " + id);
-                            MapleInventoryManipulator.addById(c, itemId, quantity, logInfo.toString());
+                            MapleInventoryManipulator.addById(c, itemId, quantity, c.getPlayer().getName() + " bought " + quantity + " for " + item.price() * quantity + " from shop " + id);
                         }
-                        c.getPlayer().gainMeso(-(item.getPrice() * quantity), false);
+                        c.getPlayer().gainMeso(-(item.price() * quantity), false);
                     } else {
-                        short slotMax = ii.getSlotMax(c, item.getItemId());
-                        quantity = slotMax;
+                        quantity = ii.getSlotMax(c, item.itemId());
                         MapleInventoryManipulator.addById(c, itemId, quantity, "Rechargable item purchased.");
-                        c.getPlayer().gainMeso(-(item.getPrice()), false);
+                        c.getPlayer().gainMeso(-(item.price()), false);
                     }
                 } else {
                     c.getSession().write(MaplePacketCreator.serverNotice(1, "Your Inventory is full"));
                 }
                 c.getSession().write(MaplePacketCreator.confirmShopTransaction((byte) 0));
             } else {
+                int token = 4000313;
                 if (c.getPlayer().getInventory(MapleInventoryType.CASH).countById(token) != 0) {
                     int amount = c.getPlayer().getInventory(MapleInventoryType.CASH).countById(token);
+                    int tokenvalue = 1000000000;
                     int value = amount * tokenvalue;
-                    int cost = item.getPrice() * quantity;
+                    int cost = item.price() * quantity;
                     if (c.getPlayer().getMeso() + value >= cost) {
                         int cardreduce = value - cost;
                         int diff = cardreduce + c.getPlayer().getMeso(); // Should make it lose mesos if the card isn't enough to pay for it
                         if (MapleInventoryManipulator.checkSpace(c, itemId, quantity, "")) {
                             if (itemId >= 5000000 && itemId <= 5000100) {
-                                int petId = MaplePet.createPet(itemId);
+                                int petId = Pet.createPet(itemId);
                                 MapleInventoryManipulator.addById(c, itemId, quantity, "Pet was purchased.", null, petId);
                             } else {
-                                StringBuilder logInfo = new StringBuilder(c.getPlayer().getName() + " bought " + quantity + " for " + item.getPrice() * quantity + " from shop " + id);
-                                MapleInventoryManipulator.addById(c, itemId, quantity, logInfo.toString());
+                                MapleInventoryManipulator.addById(c, itemId, quantity, c.getPlayer().getName() + " bought " + quantity + " for " + item.price() * quantity + " from shop " + id);
                             }
                             c.getPlayer().gainMeso(diff, false);
                         } else {
@@ -168,7 +166,7 @@ public class MapleShop {
             int price = (int) Math.round(ii.getPrice(item.getItemId()) * (slotMax - item.getQuantity()));
             if (c.getPlayer().getMeso() >= price) {
                 item.setQuantity(slotMax);
-                c.getSession().write(MaplePacketCreator.updateInventorySlot(MapleInventoryType.USE, (Item) item));
+                c.getSession().write(MaplePacketCreator.updateInventorySlot(MapleInventoryType.USE, item));
                 c.getPlayer().gainMeso(-price, false, true, false);
                 c.getSession().write(MaplePacketCreator.confirmShopTransaction((byte) 0x8));
             }
@@ -177,7 +175,7 @@ public class MapleShop {
 
     protected MapleShopItem findById(int itemId) {
         for (MapleShopItem item : items) {
-            if (item.getItemId() == itemId) {
+            if (item.itemId() == itemId) {
                 return item;
             }
         }
@@ -212,20 +210,20 @@ public class MapleShop {
             ps = con.prepareStatement("SELECT * FROM shopitems WHERE shopid = ? ORDER BY position ASC");
             ps.setInt(1, shopId);
             rs = ps.executeQuery();
-            List<Integer> recharges = new ArrayList<Integer>(rechargeableItems);
+            List<Integer> recharges = new ArrayList<>(rechargeableItems);
             while (rs.next()) {
                 if (ii.isThrowingStar(rs.getInt("itemid")) || ii.isBullet(rs.getInt("itemid"))) {
                     MapleShopItem starItem = new MapleShopItem((short) 1, rs.getInt("itemid"), rs.getInt("price"));
                     ret.addItem(starItem);
-                    if (rechargeableItems.contains(starItem.getItemId())) {
-                        recharges.remove(Integer.valueOf(starItem.getItemId()));
+                    if (rechargeableItems.contains(starItem.itemId())) {
+                        recharges.remove(Integer.valueOf(starItem.itemId()));
                     }
                 } else {
                     ret.addItem(new MapleShopItem((short) 1000, rs.getInt("itemid"), rs.getInt("price")));
                 }
             }
             for (Integer recharge : recharges) {
-                ret.addItem(new MapleShopItem((short) 1000, recharge.intValue(), 0));
+                ret.addItem(new MapleShopItem((short) 1000, recharge, 0));
             }
             rs.close();
             ps.close();

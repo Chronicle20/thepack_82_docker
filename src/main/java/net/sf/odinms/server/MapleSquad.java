@@ -14,8 +14,8 @@ import net.sf.odinms.tools.MaplePacketCreator;
 public class MapleSquad {
 
     private MapleCharacter leader;
-    private List<MapleCharacter> members = new LinkedList<MapleCharacter>();
-    private List<MapleCharacter> bannedMembers = new LinkedList<MapleCharacter>();
+    private List<MapleCharacter> members = new LinkedList<>();
+    private List<MapleCharacter> bannedMembers = new LinkedList<>();
     private int ch;
     private int status = 0;
 
@@ -95,9 +95,7 @@ public class MapleSquad {
 
     public boolean equals(MapleSquad other) {
         if (other.ch == ch) {
-            if (other.leader.getId() == leader.getId()) {
-                return true;
-            }
+            return other.leader.getId() == leader.getId();
         }
         return false;
     }

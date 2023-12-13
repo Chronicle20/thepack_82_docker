@@ -45,7 +45,7 @@ public class MapleNPC extends AbstractLoadedMapleLife {
 	}
 	
 	public String getName() {
-		return stats.getName();
+		return stats.name();
 	}
 
 	public boolean isCustom() {

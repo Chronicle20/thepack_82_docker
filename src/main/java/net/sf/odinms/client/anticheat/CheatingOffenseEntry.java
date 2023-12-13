@@ -37,10 +37,7 @@ public class CheatingOffenseEntry {
     }
 
     public boolean isExpired() {
-        if (lastOffense < (System.currentTimeMillis() - offense.getValidityDuration())) {
-            return true;
-        }
-        return false;
+        return lastOffense < (System.currentTimeMillis() - offense.getValidityDuration());
     }
 
     public int getPoints() {
@@ -103,9 +100,6 @@ public class CheatingOffenseEntry {
         } else if (!offense.equals(other.offense)) {
             return false;
         }
-        if (other.firstOffense != firstOffense) {
-            return false;
-        }
-        return true;
+        return other.firstOffense == firstOffense;
     }
 }

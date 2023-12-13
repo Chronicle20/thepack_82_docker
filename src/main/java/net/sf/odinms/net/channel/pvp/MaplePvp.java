@@ -2,9 +2,8 @@ package net.sf.odinms.net.channel.pvp;
 
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.MapleBuffStat;
-import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.client.MapleJob;
-import net.sf.odinms.net.world.guild.MapleGuild;
 import net.sf.odinms.net.channel.handler.AbstractDealDamageHandler;
 import net.sf.odinms.server.life.MapleMonster;
 import net.sf.odinms.server.life.MapleLifeFactory;
@@ -220,7 +219,7 @@ public class MaplePvp {
                 attackedPlayers.cancelBuffStats(MapleBuffStat.MAGIC_GUARD);
             } else {
                 attackedPlayers.setMp(attackedPlayers.getMp() - mploss);
-                attackedPlayers.updateSingleStat(MapleStat.MP, attackedPlayers.getMp());
+                attackedPlayers.updateSingleStat(Statistic.MP, attackedPlayers.getMp());
             }
         } else if (mesoguard != null) {
             int mesoloss = (int) (pvpDamage * .75);
@@ -251,9 +250,9 @@ public class MaplePvp {
             player.gainExp(expReward, true, false);
             if (player.getGuildId() != 0 && player.getGuildId() != attackedPlayers.getGuildId()) {
                 try {
-                    MapleGuild guild = player.getClient().getChannelServer().getWorldInterface().getGuild(player.getGuildId(), null);
-                    guild.gainGP(gpReward);
+                    player.getClient().getChannelServer().getWorldInterface().getGuild(player.getGuildId(), null).ifPresent(g -> g.gainGP(gpReward));
                 } catch (Exception e) {
+                    //TODO
                 }
             }
             player.gainPvpKill();

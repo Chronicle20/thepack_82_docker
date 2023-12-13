@@ -17,23 +17,23 @@ import net.sf.odinms.tools.StringUtil;
 
 public class MobAttackInfoFactory {
 	
-	private static Map<Pair<Integer, Integer>, MobAttackInfo> mobAttacks = new HashMap<Pair<Integer, Integer>, MobAttackInfo>();
+	private static Map<Pair<Integer, Integer>, MobAttackInfo> mobAttacks = new HashMap<>();
 	private static MapleDataProvider dataSource = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/Mob.wz"));
 	
 	public static MobAttackInfo getMobAttackInfo(MapleMonster mob, int attack) {
-		MobAttackInfo ret = mobAttacks.get(new Pair<Integer, Integer>(Integer.valueOf(mob.getId()), Integer.valueOf(attack)));
+		MobAttackInfo ret = mobAttacks.get(new Pair<>(mob.getId(), attack));
 		if (ret != null) {
 			return ret;
 		}
 		synchronized (mobAttacks) {
 			// see if someone else that's also synchronized has loaded the skill by now
-			ret = mobAttacks.get(new Pair<Integer, Integer>(Integer.valueOf(mob.getId()), Integer.valueOf(attack)));
+			ret = mobAttacks.get(new Pair<>(mob.getId(), attack));
 			if (ret == null) {
-				MapleData mobData = dataSource.getData(StringUtil.getLeftPaddedStr(Integer.toString(mob.getId()) + ".img", '0', 11));
+				MapleData mobData = dataSource.getData(StringUtil.getLeftPaddedStr(mob.getId() + ".img", '0', 11));
 				if (mobData != null) {
 					MapleData infoData = mobData.getChildByPath("info");
 					String linkedmob = MapleDataTool.getString("link", mobData, "");
-					if(!linkedmob.equals("")) {
+					if(!linkedmob.isEmpty()) {
 						mobData = dataSource.getData(StringUtil.getLeftPaddedStr(linkedmob + ".img", '0', 11));
 					}
 					MapleData attackData = mobData.getChildByPath("attack" + (attack + 1) + "/info");
@@ -51,7 +51,7 @@ public class MobAttackInfoFactory {
 						ret.setMpCon(mpCon);
 					}
 				}
-				mobAttacks.put(new Pair<Integer, Integer>(Integer.valueOf(mob.getId()), Integer.valueOf(attack)), ret);
+				mobAttacks.put(new Pair<>(mob.getId(), attack), ret);
 			}
 			return ret;
 		}

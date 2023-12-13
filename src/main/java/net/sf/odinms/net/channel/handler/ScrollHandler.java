@@ -1,12 +1,12 @@
 package net.sf.odinms.net.channel.handler;
 
 import java.util.List;
+import java.util.Optional;
 
 import net.sf.odinms.client.IEquip;
 import net.sf.odinms.client.IItem;
 import net.sf.odinms.client.InventoryException;
 import net.sf.odinms.client.ISkill;
-import net.sf.odinms.client.Item;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleInventory;
 import net.sf.odinms.client.MapleInventoryType;
@@ -44,7 +44,7 @@ public class ScrollHandler extends AbstractMaplePacketHandler {
         }
         byte oldLevel = toScroll.getLevel();
         byte oldSlots = toScroll.getUpgradeSlots();
-        if (((IEquip) toScroll).getUpgradeSlots() < 1) {
+        if (toScroll.getUpgradeSlots() < 1) {
             c.getSession().write(MaplePacketCreator.getInventoryFull());
             return;
         }
@@ -52,15 +52,17 @@ public class ScrollHandler extends AbstractMaplePacketHandler {
         IItem scroll = useInventory.getItem(slot);
         IItem wscroll = null;
         List<Integer> scrollReqs = ii.getScrollReqs(scroll.getItemId());
-        if (scrollReqs.size() > 0 && !scrollReqs.contains(toScroll.getItemId())) {
+        if (!scrollReqs.isEmpty() && !scrollReqs.contains(toScroll.getItemId())) {
             c.getSession().write(MaplePacketCreator.getInventoryFull());
             return;
         }
         if (whiteScroll) {
-            wscroll = useInventory.findById(2340000);
-            if (wscroll == null || wscroll.getItemId() != 2340000) {
+            Optional<IItem> whiteScrollInventoryItem = useInventory.findById(2340000);
+            if (whiteScrollInventoryItem.isEmpty() || whiteScrollInventoryItem.get().getItemId() != 2340000) {
                 whiteScroll = false;
                 return;
+            } else {
+                wscroll = whiteScrollInventoryItem.get();
             }
         }
         if (scroll.getItemId() != 2049100 && !ii.isCleanSlate(scroll.getItemId())) {
@@ -85,7 +87,7 @@ public class ScrollHandler extends AbstractMaplePacketHandler {
             if (wscroll.getQuantity() < 1) {
                 c.getSession().write(MaplePacketCreator.clearInventoryItem(MapleInventoryType.USE, wscroll.getPosition(), false));
             } else {
-                c.getSession().write(MaplePacketCreator.updateInventorySlot(MapleInventoryType.USE, (Item) wscroll));
+                c.getSession().write(MaplePacketCreator.updateInventorySlot(MapleInventoryType.USE, wscroll));
             }
         }
         if (scrollSuccess == IEquip.ScrollResult.CURSE) {

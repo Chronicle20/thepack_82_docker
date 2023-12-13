@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 public class MapleAESOFB {
 
-    private byte iv[];
+    private byte[] iv;
     private Cipher cipher;
     private short mapleVersion;
     private static final byte[] funnyBytes = new byte[]{(byte) 0xEC, (byte) 0x3F, (byte) 0x77, (byte) 0xA4, (byte) 0x45, (byte) 0xD0, (byte) 0x71, (byte) 0xBF, (byte) 0xB7, (byte) 0x98, (byte) 0x20, (byte) 0xFC,
@@ -34,14 +34,12 @@ public class MapleAESOFB {
         (byte) 0xC6, (byte) 0xE5, (byte) 0x08, (byte) 0x49};
     private Logger log = LoggerFactory.getLogger(MapleAESOFB.class);
 
-    public MapleAESOFB(byte key[], byte iv[], short mapleVersion) {
+    public MapleAESOFB(byte[] key, byte[] iv, short mapleVersion) {
         SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
         try {
             cipher = Cipher.getInstance("AES");
-        } catch (NoSuchAlgorithmException e) {
-            log.error("ERROR", e);
-        } catch (NoSuchPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             log.error("ERROR", e);
         }
         try {
@@ -78,9 +76,7 @@ public class MapleAESOFB {
                         for (int j = 0; j < myIv.length; j++) {
                             myIv[j] = newIv[j];
                         }
-                    } catch (IllegalBlockSizeException e) {
-                        e.printStackTrace();
-                    } catch (BadPaddingException e) {
+                    } catch (IllegalBlockSizeException | BadPaddingException e) {
                         e.printStackTrace();
                     }
                 }
@@ -125,13 +121,13 @@ public class MapleAESOFB {
     }
 
     public boolean checkPacket(int packetHeader) {
-        byte packetHeaderBuf[] = new byte[2];
+        byte[] packetHeaderBuf = new byte[2];
         packetHeaderBuf[0] = (byte) ((packetHeader >> 24) & 0xFF);
         packetHeaderBuf[1] = (byte) ((packetHeader >> 16) & 0xFF);
         return checkPacket(packetHeaderBuf);
     }
 
-    public static byte[] getNewIv(byte oldIv[]) {
+    public static byte[] getNewIv(byte[] oldIv) {
         byte[] in = {(byte) 0xf2, 0x53, (byte) 0x50, (byte) 0xc6};
         for (int x = 0; x < 4; x++) {
             funnyShit(oldIv[x], in);

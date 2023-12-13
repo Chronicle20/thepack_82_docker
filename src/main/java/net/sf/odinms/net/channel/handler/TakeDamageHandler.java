@@ -63,7 +63,7 @@ public class TakeDamageHandler extends AbstractMaplePacketHandler {
                     for (int manaReflect : manaReflectSkillId) {
                         ISkill manaReflectSkill = SkillFactory.getSkill(manaReflect);
                         if (player.isBuffFrom(MapleBuffStat.MANA_REFLECTION, manaReflectSkill) && player.getSkillLevel(manaReflectSkill) > 0 && manaReflectSkill.getEffect(player.getSkillLevel(manaReflectSkill)).makeChanceResult()) {
-                            int bouncedamage = (int) (damage * (manaReflectSkill.getEffect(player.getSkillLevel(manaReflectSkill)).getX() / 100));
+                            int bouncedamage = damage * (manaReflectSkill.getEffect(player.getSkillLevel(manaReflectSkill)).getX() / 100);
                             if (bouncedamage > attacker.getMaxHp() * .2) {
                                 bouncedamage = (int) (attacker.getMaxHp() * .2);
                             }
@@ -78,7 +78,7 @@ public class TakeDamageHandler extends AbstractMaplePacketHandler {
             }
         }
         if (damage == -1) {
-            int job = (int) (player.getJob().getId() / 10 - 40);
+            int job = player.getJob().getId() / 10 - 40;
             fake = 4020002 + (job * 100000);
         }
         if (damage < -1 || damage > 60000) {
@@ -96,8 +96,9 @@ public class TakeDamageHandler extends AbstractMaplePacketHandler {
                 MapleMist mist = (MapleMist) mmo;
                 if (mist.getSourceSkill().getId() == 4221006) {
                     for (MapleMapObject mmoplayer : player.getMap().getMapObjectsInBox(mist.getBox(), Collections.singletonList(MapleMapObjectType.PLAYER))) {
-                        if (player == (MapleCharacter) mmoplayer) {
+                        if (player == mmoplayer) {
                             smokescreen = true;
+                            break;
                         }
                     }
                 }
@@ -115,7 +116,7 @@ public class TakeDamageHandler extends AbstractMaplePacketHandler {
                 }
             }
             if (damagefrom != -2) {
-                Integer achilles = 0;
+                int achilles = 0;
                 ISkill achilles1 = null;
                 switch (player.getJob().getId()) {
                     case 112:
@@ -133,8 +134,7 @@ public class TakeDamageHandler extends AbstractMaplePacketHandler {
                 }
                 if (achilles != 0 && achilles1 != null) {
                     double multiplier = achilles1.getEffect(achilles).getX() / 1000.0;
-                    int newdamage = (int) (multiplier * damage);
-                    damage = newdamage;
+                    damage = (int) (multiplier * damage);
                 }
             }
             Integer mesoguard = player.getBuffedValue(MapleBuffStat.MESOGUARD);

@@ -30,15 +30,15 @@ public class MapleDataTool {
 	}
 
 	public static double getDouble(MapleData data) {
-		return ((Double) data.getData()).doubleValue();
+		return (Double) data.getData();
 	}
 
 	public static float getFloat(MapleData data) {
-		return ((Float) data.getData()).floatValue();
+		return (Float) data.getData();
 	}
 	
 	public static int getInt(MapleData data) {
-		return ((Integer) data.getData()).intValue();
+		return (Integer) data.getData();
 	}
 
 	public static int getInt(MapleData data, int def) {
@@ -48,7 +48,7 @@ public class MapleDataTool {
 			if (data.getType() == MapleDataType.STRING) {
 				return Integer.parseInt(getString(data));
 			} else {
-				return ((Integer) data.getData()).intValue();
+				return (Integer) data.getData();
 			}
 		}
 	}
@@ -115,10 +115,10 @@ public class MapleDataTool {
 	}
 	
 	public static String getFullDataPath(MapleData data) {
-		String path = "";
+		StringBuilder path = new StringBuilder();
 		MapleDataEntity myData = data;
 		while (myData != null) {
-			path = myData.getName() + "/" + path;
+			path.insert(0, myData.getName() + "/");
 			myData = myData.getParent();
 		}
 		return path.substring(0, path.length() - 1);

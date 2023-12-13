@@ -7,16 +7,9 @@ import net.sf.odinms.server.MapleStatEffect;
  *
  * @author Danny
  */
-public class PlayerBuffValueHolder implements Serializable {
-	static final long serialVersionUID = 9179541993413738569L;
-	public long startTime;
-	public MapleStatEffect effect;
-	private int id;
-
+public record PlayerBuffValueHolder (long startTime, MapleStatEffect effect, int id) implements Serializable {
 	public PlayerBuffValueHolder(long startTime, MapleStatEffect effect) {
-		this.startTime = startTime;
-		this.effect = effect;
-		this.id = (int) (Math.random()*100);
+		this(startTime, effect,  (int) (Math.random()*100));
 	}
 
 	@Override
@@ -36,8 +29,6 @@ public class PlayerBuffValueHolder implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		final PlayerBuffValueHolder other = (PlayerBuffValueHolder) obj;
-		if (id != other.id)
-			return false;
-		return true;
-	}
+        return id == other.id;
+    }
 }

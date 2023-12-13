@@ -43,7 +43,7 @@ public class WZFile implements MapleDataProvider {
 	}
 
 	@SuppressWarnings("unused")
-	private void load() throws IOException {
+	private void load() {
 		String sPKG = lea.readAsciiString(4);
 		int size1 = lea.readInt();
 		int size2 = lea.readInt();
@@ -106,7 +106,7 @@ public class WZFile implements MapleDataProvider {
 	}
 
 	public WZIMGFile getImgFile(String path) throws IOException {
-		String segments[] = path.split("/");
+		String[] segments = path.split("/");
 
 		WZDirectoryEntry dir = root;
 		for (int x = 0; x < segments.length - 1; x++) {
@@ -129,8 +129,7 @@ public class WZFile implements MapleDataProvider {
 			if (imgFile == null) {
 				return null;
 			}
-			MapleData ret = imgFile.getRoot();
-			return ret;
+            return imgFile.getRoot();
 		} catch (IOException e) {
 			log.error("THROW", e);
 		}

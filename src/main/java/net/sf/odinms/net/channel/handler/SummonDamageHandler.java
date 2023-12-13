@@ -58,7 +58,7 @@ public class SummonDamageHandler extends AbstractMaplePacketHandler {
         ISkill summonSkill = SkillFactory.getSkill(summon.getSkill());
         MapleStatEffect summonEffect = summonSkill.getEffect(summon.getSkillLevel());
         slea.skip(5);
-        List<SummonAttackEntry> allDamage = new ArrayList<SummonAttackEntry>();
+        List<SummonAttackEntry> allDamage = new ArrayList<>();
         int numAttacked = slea.readByte();
         player.getCheatTracker().checkSummonAttack();
         for (int x = 0; x < numAttacked; x++) {
@@ -76,7 +76,7 @@ public class SummonDamageHandler extends AbstractMaplePacketHandler {
             int damage = attackEntry.getDamage();
             MapleMonster target = player.getMap().getMonsterByOid(attackEntry.getMonsterOid());
             if (target != null) {
-                if (damage > 0 && summonEffect.getMonsterStati().size() > 0) {
+                if (damage > 0 && !summonEffect.getMonsterStati().isEmpty()) {
                     if (summonEffect.makeChanceResult()) {
                         MonsterStatusEffect monsterStatusEffect = new MonsterStatusEffect(summonEffect.getMonsterStati(), summonSkill, false);
                         target.applyStatus(player, monsterStatusEffect, summonEffect.isPoison(), 4000);

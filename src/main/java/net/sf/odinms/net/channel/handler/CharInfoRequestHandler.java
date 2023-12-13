@@ -20,7 +20,6 @@ public class CharInfoRequestHandler extends AbstractMaplePacketHandler {
             c.getSession().write(MaplePacketCreator.charInfo((MapleCharacter) c.getPlayer().getMap().getMapObject(cid), cid==c.getPlayer().getId()));
         } else {
             c.getSession().write(MaplePacketCreator.enableActions());
-            return;
         }
     }
 }

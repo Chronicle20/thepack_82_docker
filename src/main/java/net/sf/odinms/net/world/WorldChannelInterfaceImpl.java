@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
@@ -186,7 +187,7 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
     }
 
     public Map<Integer, Integer> getConnected() throws RemoteException {
-        Map<Integer, Integer> ret = new HashMap<Integer, Integer>();
+        Map<Integer, Integer> ret = new HashMap<>();
         int total = 0;
         for (int i : WorldRegistryImpl.getInstance().getChannelServer()) {
             ChannelWorldInterface cwi = WorldRegistryImpl.getInstance().getChannel(i);
@@ -302,7 +303,7 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
     }
 
     public List<CheaterData> getCheaters() throws RemoteException {
-        List<CheaterData> allCheaters = new ArrayList<CheaterData>();
+        List<CheaterData> allCheaters = new ArrayList<>();
         for (int i : WorldRegistryImpl.getInstance().getChannelServer()) {
             ChannelWorldInterface cwi = WorldRegistryImpl.getInstance().getChannel(i);
             try {
@@ -317,8 +318,7 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
 
     @Override
     public ChannelWorldInterface getChannelInterface(int channel) {
-        ChannelWorldInterface cwi = WorldRegistryImpl.getInstance().getChannel(channel);
-        return cwi;
+        return WorldRegistryImpl.getInstance().getChannel(channel);
     }
 
     @Override
@@ -330,18 +330,18 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
 
     @Override
     public CharacterIdChannelPair[] multiBuddyFind(int charIdFrom, int[] characterIds) throws RemoteException {
-        List<CharacterIdChannelPair> foundsChars = new ArrayList<CharacterIdChannelPair>(characterIds.length);
+        List<CharacterIdChannelPair> foundsChars = new ArrayList<>(characterIds.length);
         for (int i : WorldRegistryImpl.getInstance().getChannelServer()) {
             ChannelWorldInterface cwi = WorldRegistryImpl.getInstance().getChannel(i);
             for (int charid : cwi.multiBuddyFind(charIdFrom, characterIds)) {
                 foundsChars.add(new CharacterIdChannelPair(charid, i));
             }
         }
-        return foundsChars.toArray(new CharacterIdChannelPair[foundsChars.size()]);
+        return foundsChars.toArray(new CharacterIdChannelPair[0]);
     }
 
     @Override
-    public MapleGuild getGuild(int id, MapleGuildCharacter mgc) throws RemoteException {
+    public Optional<MapleGuild> getGuild(int id, MapleGuildCharacter mgc) throws RemoteException {
         return WorldRegistryImpl.getInstance().getGuild(id, mgc);
     }
 
@@ -351,8 +351,7 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
     }
 
     @Override
-    public void setGuildMemberOnline(MapleGuildCharacter mgc,
-            boolean bOnline, int channel) throws RemoteException {
+    public void setGuildMemberOnline(MapleGuildCharacter mgc, boolean bOnline, int channel) throws RemoteException {
         WorldRegistryImpl.getInstance().setGuildMemberOnline(mgc, bOnline, channel);
     }
 

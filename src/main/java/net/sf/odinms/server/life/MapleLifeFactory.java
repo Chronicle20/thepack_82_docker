@@ -23,7 +23,7 @@ public class MapleLifeFactory {
 	private static MapleDataProvider stringDataWZ = MapleDataProviderFactory.getDataProvider(new File(System.getProperty("net.sf.odinms.wzpath") + "/String.wz"));
 	private static MapleData mobStringData = stringDataWZ.getData("Mob.img");
 	private static MapleData npcStringData = stringDataWZ.getData("Npc.img");
-	private static Map<Integer, MapleMonsterStats> monsterStats = new HashMap<Integer, MapleMonsterStats>();
+	private static Map<Integer, MapleMonsterStats> monsterStats = new HashMap<>();
 
 	public static AbstractLoadedMapleLife getLife(int id, String type) {
 		if (type.equalsIgnoreCase("n")) {
@@ -37,9 +37,9 @@ public class MapleLifeFactory {
 	}
 	
 	public static MapleMonster getMonster (int mid) {
-		MapleMonsterStats stats = monsterStats.get(Integer.valueOf(mid));
+		MapleMonsterStats stats = monsterStats.get(mid);
 		if (stats == null) {
-			MapleData monsterData = data.getData(StringUtil.getLeftPaddedStr(Integer.toString(mid) + ".img", '0', 11));
+			MapleData monsterData = data.getData(StringUtil.getLeftPaddedStr(mid + ".img", '0', 11));
 			if (monsterData == null) {
 				return null;
 			}
@@ -88,7 +88,7 @@ public class MapleLifeFactory {
 			}
 			MapleData reviveInfo = monsterInfoData.getChildByPath("revive");
 			if (reviveInfo != null) {
-				List<Integer> revives = new LinkedList<Integer>();
+				List<Integer> revives = new LinkedList<>();
 				for (MapleData data_ : reviveInfo) {			
 					revives.add(MapleDataTool.getInt(data_));		
 				}
@@ -98,23 +98,22 @@ public class MapleLifeFactory {
 			MapleData monsterSkillData = monsterInfoData.getChildByPath("skill");
 			if (monsterSkillData != null) {
 				int i = 0;
-				List<Pair<Integer, Integer>> skills = new ArrayList<Pair<Integer, Integer>>();
+				List<Pair<Integer, Integer>> skills = new ArrayList<>();
 				while(monsterSkillData.getChildByPath(Integer.toString(i)) != null) {
-					skills.add(new Pair<Integer, Integer>(Integer.valueOf(MapleDataTool.getInt(i + "/skill", monsterSkillData, 0)), Integer.valueOf(MapleDataTool.getInt(i + "/level", monsterSkillData, 0))));
+					skills.add(new Pair<>(MapleDataTool.getInt(i + "/skill", monsterSkillData, 0), MapleDataTool.getInt(i + "/level", monsterSkillData, 0)));
 					i++;
 				}
 				stats.setSkills(skills);
 			}
-			monsterStats.put(Integer.valueOf(mid), stats);
+			monsterStats.put(mid, stats);
 		}
-		MapleMonster ret = new MapleMonster(mid, stats);
-		return ret;
+        return new MapleMonster(mid, stats);
 	}
 	
 	public static void decodeElementalString (MapleMonsterStats stats, String elemAttr) {
 		for (int i = 0; i < elemAttr.length(); i += 2) {
 			Element e = Element.getFromChar(elemAttr.charAt(i));
-			ElementalEffectiveness ee = ElementalEffectiveness.getByNumber(Integer.valueOf(String.valueOf(elemAttr.charAt(i+1))));
+			ElementalEffectiveness ee = ElementalEffectiveness.getByNumber(Integer.parseInt(String.valueOf(elemAttr.charAt(i+1))));
 			stats.setEffectiveness(e, ee);
 		}
 	}

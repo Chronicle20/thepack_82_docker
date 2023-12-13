@@ -2,7 +2,7 @@ package net.sf.odinms.server.life;
 
 import java.awt.Point;
 import java.util.concurrent.atomic.AtomicInteger;
-import net.sf.odinms.client.MapleCharacter;
+
 import net.sf.odinms.server.maps.MapleMap;
 
 public class SpawnPoint {
@@ -47,18 +47,14 @@ public class SpawnPoint {
         MapleMonster mob = new MapleMonster(monster);
         mob.setPosition(new Point(pos));
         spawnedMonsters.incrementAndGet();
-        mob.addListener(new MonsterListener() {
-
-            @Override
-            public void monsterKilled(MapleMonster monster, MapleCharacter highestDamageChar) {
-                nextPossibleSpawn = System.currentTimeMillis();
-                if (mobTime > 0) {
-                    nextPossibleSpawn += mobTime * 1000;
-                } else {
-                    nextPossibleSpawn += monster.getAnimationTime("die1");
-                }
-                spawnedMonsters.decrementAndGet();
+        mob.addListener((monster, highestDamageChar) -> {
+            nextPossibleSpawn = System.currentTimeMillis();
+            if (mobTime > 0) {
+                nextPossibleSpawn += mobTime * 1000;
+            } else {
+                nextPossibleSpawn += monster.getAnimationTime("die1");
             }
+            spawnedMonsters.decrementAndGet();
         });
         mapleMap.spawnMonster(mob);
         if (mobTime == 0) {

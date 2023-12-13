@@ -9,7 +9,7 @@ import net.sf.odinms.net.world.guild.*;
 import java.util.Iterator;
 import net.sf.odinms.tools.MaplePacketCreator;
 import net.sf.odinms.client.MapleCharacter;
-import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.Pet;
 
 public class GuildOperationHandler extends AbstractMaplePacketHandler {
 
@@ -29,7 +29,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
         mc.getMap().broadcastMessage(mc, MaplePacketCreator.removePlayerFromMap(mc.getId()), false);
         mc.getMap().broadcastMessage(mc, MaplePacketCreator.spawnPlayerMapobject(mc), false);
         if (mc.getNoPets() > 0) {
-            for (MaplePet pet : mc.getPets()) {
+            for (Pet pet : mc.getPets()) {
                 mc.getMap().broadcastMessage(mc, MaplePacketCreator.showPet(mc, pet, false, false), false);
             }
         }
@@ -57,7 +57,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
         }
     }
     private Logger log = LoggerFactory.getLogger(this.getClass());
-    private java.util.List<Invited> invited = new java.util.LinkedList<Invited>();
+    private java.util.List<Invited> invited = new java.util.LinkedList<>();
     private long nextPruneTime = System.currentTimeMillis() + 20 * 60 * 1000;
 
     @Override
@@ -160,7 +160,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
                 mc.setGuildRank(5); // start at lowest rank
                 int s;
                 try {
-                    s = c.getChannelServer().getWorldInterface().addGuildMember(mc.getMGC());
+                    s = c.getChannelServer().getWorldInterface().addGuildMember(mc.getMGC().orElseThrow());
                 } catch (java.rmi.RemoteException e) {
                     log.error("RemoteException occurred while attempting to add character to guild", e);
                     c.getSession().write(MaplePacketCreator.serverNotice(5, "Unable to connect to the World Server. Please try again later."));
@@ -184,7 +184,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
                     return;
                 }
                 try {
-                    c.getChannelServer().getWorldInterface().leaveGuild(mc.getMGC());
+                    c.getChannelServer().getWorldInterface().leaveGuild(mc.getMGC().orElseThrow());
                 } catch (java.rmi.RemoteException re) {
                     log.error("RemoteException occurred while attempting to leave guild", re);
                     c.getSession().write(MaplePacketCreator.serverNotice(5, "Unable to connect to the World Server. Please try again later."));
@@ -203,7 +203,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
                     return;
                 }
                 try {
-                    c.getChannelServer().getWorldInterface().expelMember(mc.getMGC(), name, cid);
+                    c.getChannelServer().getWorldInterface().expelMember(mc.getMGC().orElseThrow(), name, cid);
                 } catch (java.rmi.RemoteException re) {
                     log.error("RemoteException occurred while attempting to change rank", re);
                     c.getSession().write(MaplePacketCreator.serverNotice(5, "Unable to connect to the World Server. Please try again later."));
@@ -216,7 +216,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
                             " tried to change guild rank titles when s/he does not have permission.");
                     return;
                 }
-                String ranks[] = new String[5];
+                String[] ranks = new String[5];
                 for (int i = 0; i < 5; i++) {
                     ranks[i] = slea.readMapleAsciiString();
                 }
@@ -287,7 +287,7 @@ public class GuildOperationHandler extends AbstractMaplePacketHandler {
                 }
                 break;
             default:
-                log.info("Unhandled GUILD_OPERATION packet: \n" + slea.toString());
+                log.info("Unhandled GUILD_OPERATION packet: \n" + slea);
         }
     }
 }

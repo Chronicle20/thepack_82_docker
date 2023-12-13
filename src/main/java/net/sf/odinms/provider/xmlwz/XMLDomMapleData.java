@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -29,14 +31,10 @@ public class XMLDomMapleData implements MapleData {
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			Document document = documentBuilder.parse(fis);
 			this.node = document.getFirstChild();
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		} catch (SAXException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
+		} catch (ParserConfigurationException | IOException | SAXException e) {
 			throw new RuntimeException(e);
 		}
-		this.imageDataDir = imageDataDir;
+        this.imageDataDir = imageDataDir;
 	}
 
 	private XMLDomMapleData(Node node) {
@@ -45,27 +43,27 @@ public class XMLDomMapleData implements MapleData {
 
 	@Override
 	public MapleData getChildByPath(String path) {
-		String segments[] = path.split("/");
+		String[] segments = path.split("/");
 		if (segments[0].equals("..")) {
 			return ((MapleData) getParent()).getChildByPath(path.substring(path.indexOf("/") + 1));
 		}
 		
 		Node myNode = node;
-		for (int x = 0; x < segments.length; x++) {
-			NodeList childNodes = myNode.getChildNodes();
-			boolean foundChild = false;
-			for (int i = 0; i < childNodes.getLength(); i++) {
-				Node childNode = childNodes.item(i);
-				if (childNode.getNodeType() == Node.ELEMENT_NODE && childNode.getAttributes().getNamedItem("name").getNodeValue().equals(segments[x])) {
-					myNode = childNode;
-					foundChild = true;
-					break;
-				}
-			}
-			if (!foundChild) {
-				return null;
-			}
-		}
+        for (String segment : segments) {
+            NodeList childNodes = myNode.getChildNodes();
+            boolean foundChild = false;
+            for (int i = 0; i < childNodes.getLength(); i++) {
+                Node childNode = childNodes.item(i);
+                if (childNode.getNodeType() == Node.ELEMENT_NODE && childNode.getAttributes().getNamedItem("name").getNodeValue().equals(segment)) {
+                    myNode = childNode;
+                    foundChild = true;
+                    break;
+                }
+            }
+            if (!foundChild) {
+                return null;
+            }
+        }
 		XMLDomMapleData ret = new XMLDomMapleData(myNode);
 		ret.imageDataDir = new File(imageDataDir, getName() + "/" + path).getParentFile();
 		return ret;
@@ -73,7 +71,7 @@ public class XMLDomMapleData implements MapleData {
 
 	@Override
 	public List<MapleData> getChildren() {
-		List<MapleData> ret = new ArrayList<MapleData>();
+		List<MapleData> ret = new ArrayList<>();
 		NodeList childNodes = node.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node childNode = childNodes.item(i);
@@ -100,13 +98,13 @@ public class XMLDomMapleData implements MapleData {
 				String value = attributes.getNamedItem("value").getNodeValue();
 				switch (type) {
 					case DOUBLE:
-						return Double.valueOf(Double.parseDouble(value));
+						return Double.parseDouble(value);
 					case FLOAT:
-						return Float.valueOf(Float.parseFloat(value));
+						return Float.parseFloat(value);
 					case INT:
-						return Integer.valueOf(Integer.parseInt(value));
+						return Integer.parseInt(value);
 					case SHORT:
-						return Short.valueOf(Short.parseShort(value));
+						return Short.parseShort(value);
 					case STRING:
 					case UOL:
 						return value;
@@ -125,6 +123,11 @@ public class XMLDomMapleData implements MapleData {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Stream<MapleData> stream() {
+		return StreamSupport.stream(spliterator(), false);
 	}
 
 	@Override

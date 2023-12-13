@@ -49,7 +49,7 @@ public class MagicDamageHandler extends AbstractDealDamageHandler {
 			int eaterLevel = player.getSkillLevel(eaterSkill);
 			if (eaterLevel > 0) {
 				for (Pair<Integer, List<Integer>> singleDamage : attack.allDamage) {
-					eaterSkill.getEffect(eaterLevel).applyPassive(player, player.getMap().getMapObject(singleDamage.getLeft()), 0);
+					eaterSkill.getEffect(eaterLevel).applyPassive(player, player.getMap().getMapObject(singleDamage.left()), 0);
 				}
 				break;
 			}

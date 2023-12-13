@@ -1,7 +1,7 @@
 package net.sf.odinms.net.channel.handler;
 
 import net.sf.odinms.client.MapleClient;
-import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.Pet;
 import net.sf.odinms.client.anticheat.CheatingOffense;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.server.MapleInventoryManipulator;
@@ -27,7 +27,7 @@ public class PetLootHandler extends AbstractMaplePacketHandler {
 		if (c.getPlayer().getNoPets() == 0) {
 			return;
 		}
-		MaplePet pet = c.getPlayer().getPet(c.getPlayer().getPetIndex(slea.readInt()));
+		Pet pet = c.getPlayer().getPet(c.getPlayer().getPetIndex(slea.readInt()));
 		slea.skip(13);
 		int oid = slea.readInt();
 		MapleMapObject ob = c.getPlayer().getMap().getMapObject(oid);
@@ -50,7 +50,7 @@ public class PetLootHandler extends AbstractMaplePacketHandler {
 					c.getPlayer().getCheatTracker().registerOffense(CheatingOffense.SHORT_ITEMVAC);
 				}
 				if (mapitem.getMeso() > 0) {
-					if(c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).findById(1812000) != null) { //Something weird about this item
+					if(c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).findById(1812000).isPresent()) { //Something weird about this item
 						c.getPlayer().gainMeso(mapitem.getMeso(), true, true);
 						c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.removeItemFromMap(mapitem.getObjectId(), 5, c.getPlayer().getId(), true, c.getPlayer().getPetIndex(pet)), mapitem.getPosition());
 						c.getPlayer().getCheatTracker().pickupComplete();

@@ -90,7 +90,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         if (attack.skill == 4211006) {
             int delay = 0;
             for (Pair<Integer, List<Integer>> oned : attack.allDamage) {
-                MapleMapObject mapobject = map.getMapObject(oned.getLeft().intValue());
+                MapleMapObject mapobject = map.getMapObject(oned.left());
                 if (mapobject != null && mapobject.getType() == MapleMapObjectType.ITEM) {
                     final MapleMapItem mapitem = (MapleMapItem) mapobject;
                     if (mapitem.getMeso() > 9) {
@@ -98,13 +98,10 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                             if (mapitem.isPickedUp()) {
                                 return;
                             }
-                            TimerManager.getInstance().schedule(new Runnable() {
-
-                                public void run() {
-                                    map.removeMapObject(mapitem);
-                                    map.broadcastMessage(MaplePacketCreator.removeItemFromMap(mapitem.getObjectId(), 4, 0), mapitem.getPosition());
-                                    mapitem.setPickedUp(true);
-                                }
+                            TimerManager.getInstance().schedule(() -> {
+                                map.removeMapObject(mapitem);
+                                map.broadcastMessage(MaplePacketCreator.removeItemFromMap(mapitem.getObjectId(), 4, 0), mapitem.getPosition());
+                                mapitem.setPickedUp(true);
                             }, delay);
                             delay += 100;
                         }
@@ -119,11 +116,11 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             }
         }
         for (Pair<Integer, List<Integer>> oned : attack.allDamage) {
-            MapleMonster monster = map.getMonsterByOid(oned.getLeft().intValue());
+            MapleMonster monster = map.getMonsterByOid(oned.left());
             if (monster != null) {
                 int totDamageToOneMonster = 0;
-                for (Integer eachd : oned.getRight()) {
-                    totDamageToOneMonster += eachd.intValue();
+                for (Integer eachd : oned.right()) {
+                    totDamageToOneMonster += eachd;
                 }
                 totDamage += totDamageToOneMonster;
                 player.checkMonsterAggro(monster);
@@ -222,7 +219,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                 if (attack.isHH && !monster.isBoss()) {
                     map.damageMonster(player, monster, monster.getHp() - 1);
                 } else if (attack.isHH && monster.isBoss()) {
-                    int HHDmg = (int) (player.calculateMaxBaseDamage(player.getTotalWatk()) * (SkillFactory.getSkill(1221011).getEffect(player.getSkillLevel(SkillFactory.getSkill(1221011))).getDamage() / 100));
+                    int HHDmg = player.calculateMaxBaseDamage(player.getTotalWatk()) * (SkillFactory.getSkill(1221011).getEffect(player.getSkillLevel(SkillFactory.getSkill(1221011))).getDamage() / 100);
                     int sanctuaryDamage = (int) (Math.floor(Math.random() * (HHDmg - HHDmg * .80) + HHDmg * .80));
                     map.damageMonster(player, monster, sanctuaryDamage);
                 } else {
@@ -251,25 +248,20 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
     private void handlePickPocket(MapleCharacter player, MapleMonster monster, Pair<Integer, List<Integer>> oned) {
         ISkill pickpocket = SkillFactory.getSkill(4211003);
         int delay = 0;
-        int maxmeso = player.getBuffedValue(MapleBuffStat.PICKPOCKET).intValue();
+        int maxmeso = player.getBuffedValue(MapleBuffStat.PICKPOCKET);
         int reqdamage = 20000;
         Point monsterPosition = monster.getPosition();
-        for (Integer eachd : oned.getRight()) {
+        for (Integer eachd : oned.right()) {
             if (pickpocket.getEffect(player.getSkillLevel(pickpocket)).makeChanceResult()) {
                 double perc = (double) eachd / (double) reqdamage;
 
-                final int todrop = Math.min((int) Math.max(perc * (double) maxmeso, (double) 1),
+                final int todrop = Math.min((int) Math.max(perc * (double) maxmeso, 1),
                         maxmeso);
                 final MapleMap tdmap = player.getMap();
                 final Point tdpos = new Point((int) (monsterPosition.getX() + (Math.random() * 100) - 50), (int) (monsterPosition.getY()));
                 final MapleMonster tdmob = monster;
                 final MapleCharacter tdchar = player;
-                TimerManager.getInstance().schedule(new Runnable() {
-
-                    public void run() {
-                        tdmap.spawnMesoDrop(todrop, todrop, tdpos, tdmob, tdchar, false);
-                    }
-                }, delay);
+                TimerManager.getInstance().schedule(() -> tdmap.spawnMesoDrop(todrop, todrop, tdpos, tdmob, tdchar, false), delay);
 
                 delay += 100;
             }
@@ -324,22 +316,12 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
                 } else {
                     elementalEffect = 0.5;
                 }
-                switch (monster.getEffectiveness(element)) {
-                    case IMMUNE:
-                        elementalMaxDamagePerMonster = 1;
-                        break;
-                    case NORMAL:
-                        elementalMaxDamagePerMonster = maximumDamageToMonster;
-                        break;
-                    case WEAK:
-                        elementalMaxDamagePerMonster = (int) (maximumDamageToMonster * (1.0 + elementalEffect));
-                        break;
-                    case STRONG:
-                        elementalMaxDamagePerMonster = (int) (maximumDamageToMonster * (1.0 - elementalEffect));
-                        break;
-                    default:
-                        throw new RuntimeException("Unknown enum constant");
-                }
+                elementalMaxDamagePerMonster = switch (monster.getEffectiveness(element)) {
+                    case IMMUNE -> 1;
+                    case NORMAL -> maximumDamageToMonster;
+                    case WEAK -> (int) (maximumDamageToMonster * (1.0 + elementalEffect));
+                    case STRONG -> (int) (maximumDamageToMonster * (1.0 - elementalEffect));
+                };
             } else {
                 elementalMaxDamagePerMonster = maximumDamageToMonster;
             }
@@ -355,7 +337,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         ret.numAttackedAndDamage = lea.readByte();
         ret.numAttacked = (ret.numAttackedAndDamage >>> 4) & 0xF; // guess why there are no skills damaging more than 15 monsters...
         ret.numDamage = ret.numAttackedAndDamage & 0xF; // how often each single monster was attacked o.o
-        ret.allDamage = new ArrayList<Pair<Integer, List<Integer>>>();
+        ret.allDamage = new ArrayList<>();
         ret.skill = lea.readInt();
         if (ret.skill == 2121001 || ret.skill == 2221001 || ret.skill == 2321001 || ret.skill == 5201002 || ret.skill == 5101004) {
             ret.charge = lea.readInt();
@@ -387,18 +369,18 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
         for (int i = 0; i < ret.numAttacked; i++) {
             int oid = lea.readInt();
             lea.skip(14); // seems to contain some position info o.o
-            List<Integer> allDamageNumbers = new ArrayList<Integer>();
+            List<Integer> allDamageNumbers = new ArrayList<>();
             for (int j = 0; j < ret.numDamage; j++) {
                 int damage = lea.readInt();
                 if (ret.skill == 3221007) {
                     damage += 0x80000000; // Critical damage = 0x80000000 + damage
                 }
-                allDamageNumbers.add(Integer.valueOf(damage));
+                allDamageNumbers.add(damage);
             }
             if (ret.skill != 5221004) {
                 lea.skip(4);
             }
-            ret.allDamage.add(new Pair<Integer, List<Integer>>(Integer.valueOf(oid), allDamageNumbers));
+            ret.allDamage.add(new Pair<>(oid, allDamageNumbers));
         }
         return ret;
     }
@@ -410,7 +392,7 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             for (int j = 0; j < bullets; j++) {
                 int mesoid = lea.readInt();
                 lea.skip(1);
-                ret.allDamage.add(new Pair<Integer, List<Integer>>(Integer.valueOf(mesoid), null));
+                ret.allDamage.add(new Pair<>(mesoid, null));
             }
             return ret;
         } else {
@@ -421,19 +403,19 @@ public abstract class AbstractDealDamageHandler extends AbstractMaplePacketHandl
             if (i < ret.numAttacked) {
                 lea.skip(12);
                 int bullets = lea.readByte();
-                List<Integer> allDamageNumbers = new ArrayList<Integer>();
+                List<Integer> allDamageNumbers = new ArrayList<>();
                 for (int j = 0; j < bullets; j++) {
                     int damage = lea.readInt();
-                    allDamageNumbers.add(Integer.valueOf(damage));
+                    allDamageNumbers.add(damage);
                 }
-                ret.allDamage.add(new Pair<Integer, List<Integer>>(Integer.valueOf(oid), allDamageNumbers));
+                ret.allDamage.add(new Pair<>(oid, allDamageNumbers));
                 lea.skip(4);
             } else {
                 int bullets = lea.readByte();
                 for (int j = 0; j < bullets; j++) {
                     int mesoid = lea.readInt();
                     lea.skip(1);
-                    ret.allDamage.add(new Pair<Integer, List<Integer>>(Integer.valueOf(mesoid), null));
+                    ret.allDamage.add(new Pair<>(mesoid, null));
                 }
             }
         }

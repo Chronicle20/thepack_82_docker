@@ -7,10 +7,10 @@ import java.util.List;
 
 public class Item implements IItem {
 
-	private int id;
+	private final int id;
 	private byte position;
 	private short quantity;
-	private int petid;
+	private final int petId;
 	private String owner = "";
 	protected List<String> log;
 
@@ -19,8 +19,8 @@ public class Item implements IItem {
 		this.id = id;
 		this.position = position;
 		this.quantity = quantity;
-		this.petid = -1;
-		this.log = new LinkedList<String>();
+		this.petId = -1;
+		this.log = new LinkedList<>();
 	}
 	
 	public Item(int id, byte position, short quantity, int petid) {
@@ -28,14 +28,14 @@ public class Item implements IItem {
 		this.id = id;
 		this.position = position;
 		this.quantity = quantity;
-		this.petid = petid;
-		this.log = new LinkedList<String>();
+		this.petId = petid;
+		this.log = new LinkedList<>();
 	}
 
 	public IItem copy() {
-		Item ret = new Item(id, position, quantity, petid);
+		Item ret = new Item(id, position, quantity, petId);
 		ret.owner = owner;
-		ret.log = new LinkedList<String>(log);
+		ret.log = new LinkedList<>(log);
 		return ret;
 	}
 
@@ -78,17 +78,12 @@ public class Item implements IItem {
 	
 	@Override
 	public int getPetId() {
-		return petid;
+		return petId;
 	}
 
 	@Override
 	public int compareTo(IItem other) {
-		if (Math.abs(position) < Math.abs(other.getPosition()))
-			return -1;
-		else if (Math.abs(position) == Math.abs(other.getPosition()))
-			return 0;
-		else
-			return 1;
+		return Integer.compare(Math.abs(position), Math.abs(other.getPosition()));
 	}
 
 	@Override

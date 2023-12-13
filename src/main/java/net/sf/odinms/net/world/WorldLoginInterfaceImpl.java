@@ -35,7 +35,7 @@ public class WorldLoginInterfaceImpl extends UnicastRemoteObject implements Worl
 	}
 
 	public Map<Integer, Integer> getChannelLoad() throws RemoteException {
-		Map<Integer, Integer> ret = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> ret = new HashMap<>();
 		for (ChannelWorldInterface cwi : WorldRegistryImpl.getInstance().getAllChannelServers())
 			ret.put(cwi.getChannelId(), cwi.getConnected());
 		return ret;

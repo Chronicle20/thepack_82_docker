@@ -43,7 +43,7 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> implements Serializable {
             if (!(o instanceof Map.Entry)) {
                 return false;
             }
-            Map.Entry e = (Map.Entry) o;
+            Map.Entry<K, V> e = (Map.Entry<K, V>) o;
             return (key == null ? e.getKey() == null : key.equals(e.getKey())) &&
                     (value == null ? e.getValue() == null : value.equals(e.getValue()));
         }
@@ -64,16 +64,16 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> implements Serializable {
     private ArrayList<Entry<K, V>> list;
 
     public ArrayMap() {
-        list = new ArrayList<Entry<K, V>>();
+        list = new ArrayList<>();
     }
 
     public ArrayMap(Map<K, V> map) {
-        list = new ArrayList<Entry<K, V>>();
+        list = new ArrayList<>();
         putAll(map);
     }
 
     public ArrayMap(int initialCapacity) {
-        list = new ArrayList<Entry<K, V>>(initialCapacity);
+        list = new ArrayList<>(initialCapacity);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class ArrayMap<K, V> extends AbstractMap<K, V> implements Serializable {
             oldValue = entry.getValue();
             entry.setValue(value);
         } else {
-            list.add(new Entry<K, V>(key, value));
+            list.add(new Entry<>(key, value));
         }
         return oldValue;
     }

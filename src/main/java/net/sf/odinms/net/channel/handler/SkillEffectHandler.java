@@ -17,7 +17,6 @@ public class SkillEffectHandler extends AbstractMaplePacketHandler {
             c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.skillEffect(c.getPlayer(), skillId, level, flags, speed), false);
         } else {
             c.getSession().close();
-            return;
         }
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import net.sf.odinms.client.ISkill;
 import net.sf.odinms.client.MapleClient;
 import net.sf.odinms.client.MapleJob;
-import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.Statistic;
 import net.sf.odinms.client.SkillFactory;
 import net.sf.odinms.net.AbstractMaplePacketHandler;
 import net.sf.odinms.tools.MaplePacketCreator;
@@ -19,7 +19,7 @@ public class DistributeAPHandler extends AbstractMaplePacketHandler {
 	
 	@Override
 	public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
-		List<Pair<MapleStat, Integer>> statupdate = new ArrayList<Pair<MapleStat, Integer>>(2);
+		List<Pair<Statistic, Integer>> statupdate = new ArrayList<>(2);
 		c.getSession().write(MaplePacketCreator.updatePlayerStats(statupdate, true));
 		slea.readInt();
 		int update = slea.readInt();
@@ -29,25 +29,25 @@ public class DistributeAPHandler extends AbstractMaplePacketHandler {
 					if (c.getPlayer().getStr() >= 30000)
 						return;
 					c.getPlayer().setStr(c.getPlayer().getStr() + 1);
-					statupdate.add(new Pair<MapleStat, Integer>(MapleStat.STR, c.getPlayer().getStr()));
+					statupdate.add(new Pair<>(Statistic.STR, c.getPlayer().getStr()));
 					break;
 				case 128: // Dex
 					if (c.getPlayer().getDex() >= 30000)
 						return;
 					c.getPlayer().setDex(c.getPlayer().getDex() + 1);
-					statupdate.add(new Pair<MapleStat, Integer>(MapleStat.DEX, c.getPlayer().getDex()));
+					statupdate.add(new Pair<>(Statistic.DEX, c.getPlayer().getDex()));
 					break;
 				case 256: // Int
 					if (c.getPlayer().getInt() >= 30000)
 						return;
 					c.getPlayer().setInt(c.getPlayer().getInt() + 1);
-					statupdate.add(new Pair<MapleStat, Integer>(MapleStat.INT, c.getPlayer().getInt()));
+					statupdate.add(new Pair<>(Statistic.INT, c.getPlayer().getInt()));
 					break;
 				case 512: // Luk
 					if (c.getPlayer().getLuk() >= 30000)
 						return;
 					c.getPlayer().setLuk(c.getPlayer().getLuk() + 1);
-					statupdate.add(new Pair<MapleStat, Integer>(MapleStat.LUK, c.getPlayer().getLuk()));
+					statupdate.add(new Pair<>(Statistic.LUK, c.getPlayer().getLuk()));
 					break;
 				case 2048: // HP
 					int MaxHP = c.getPlayer().getMaxHp();
@@ -83,7 +83,7 @@ public class DistributeAPHandler extends AbstractMaplePacketHandler {
 					MaxHP = Math.min(30000, MaxHP);
 					c.getPlayer().setHpApUsed(c.getPlayer().getHpApUsed() + 1);
 					c.getPlayer().setMaxHp(MaxHP);
-					statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXHP, MaxHP));
+					statupdate.add(new Pair<>(Statistic.MAXHP, MaxHP));
 					break;
 				case 8192: // MP
 					int MaxMP = c.getPlayer().getMaxMp();
@@ -111,17 +111,17 @@ public class DistributeAPHandler extends AbstractMaplePacketHandler {
 					MaxMP = Math.min(30000, MaxMP);
 					c.getPlayer().setMpApUsed(c.getPlayer().getMpApUsed() + 1);
 					c.getPlayer().setMaxMp(MaxMP);
-					statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXMP, MaxMP));
+					statupdate.add(new Pair<>(Statistic.MAXMP, MaxMP));
 					break;
 				default:
 					c.getSession().write(MaplePacketCreator.updatePlayerStats(MaplePacketCreator.EMPTY_STATUPDATE, true));
 					return;
 			}
 			c.getPlayer().setRemainingAp(c.getPlayer().getRemainingAp() - 1);
-			statupdate.add(new Pair<MapleStat, Integer>(MapleStat.AVAILABLEAP, c.getPlayer().getRemainingAp()));
+			statupdate.add(new Pair<>(Statistic.AVAILABLEAP, c.getPlayer().getRemainingAp()));
 			c.getSession().write(MaplePacketCreator.updatePlayerStats(statupdate, true));
 		} else {
-			log.info("[h4x] Player {} is distributing AP to {} without having any", c.getPlayer().getName(), Integer.valueOf(update));
+			log.info("[h4x] Player {} is distributing AP to {} without having any", c.getPlayer().getName(), update);
 		}
 	}
 	

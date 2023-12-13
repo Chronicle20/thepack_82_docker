@@ -11,7 +11,7 @@ import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 public class MaplePacketEncoder implements ProtocolEncoder {
 
     @Override
-    public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
+    public void encode(IoSession session, Object message, ProtocolEncoderOutput out) {
         MapleClient client = (MapleClient) session.getAttribute(MapleClient.CLIENT_KEY);
         if (client != null) {
             byte[] input = ((MaplePacket) message).getBytes();
@@ -33,6 +33,6 @@ public class MaplePacketEncoder implements ProtocolEncoder {
     }
 
     @Override
-    public void dispose(IoSession session) throws Exception {
+    public void dispose(IoSession session) {
     }
 }
