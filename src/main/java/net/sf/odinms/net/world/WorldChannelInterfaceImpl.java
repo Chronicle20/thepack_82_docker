@@ -1,21 +1,5 @@
 package net.sf.odinms.net.world;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
-import javax.rmi.ssl.SslRMIServerSocketFactory;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.net.channel.remote.ChannelWorldInterface;
 import net.sf.odinms.net.login.remote.LoginWorldInterface;
@@ -28,8 +12,23 @@ import net.sf.odinms.tools.CollectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 /**
- *
  * @author Matze
  */
 public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements WorldChannelInterface, Remote {
@@ -341,8 +340,8 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
     }
 
     @Override
-    public Optional<MapleGuild> getGuild(int id, MapleGuildCharacter mgc) throws RemoteException {
-        return WorldRegistryImpl.getInstance().getGuild(id, mgc);
+    public MapleGuild getGuild(int id, MapleGuildCharacter mgc) throws RemoteException {
+        return WorldRegistryImpl.getInstance().getGuild(id, mgc).orElse(null);
     }
 
     @Override

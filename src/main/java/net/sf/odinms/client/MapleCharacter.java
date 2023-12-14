@@ -3375,7 +3375,7 @@ public class MapleCharacter extends AbstractAnimatedMapleMapObject implements In
 
     public Optional<MapleGuild> getGuild() {
         try {
-            return getClient().getChannelServer().getWorldInterface().getGuild(getGuildId(), null);
+            return Optional.ofNullable(getClient().getChannelServer().getWorldInterface().getGuild(getGuildId(), null));
         } catch (RemoteException ex) {
             log.error("Error retrieving guild.", ex);
         }

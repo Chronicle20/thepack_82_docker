@@ -10,6 +10,8 @@ import net.sf.odinms.server.life.MapleLifeFactory;
 import net.sf.odinms.server.maps.MapleMap;
 import net.sf.odinms.tools.MaplePacketCreator;
 
+import java.util.Optional;
+
 public class MaplePvp {
 
     private static int pvpDamage, maxDis, maxHeight;
@@ -250,7 +252,7 @@ public class MaplePvp {
             player.gainExp(expReward, true, false);
             if (player.getGuildId() != 0 && player.getGuildId() != attackedPlayers.getGuildId()) {
                 try {
-                    player.getClient().getChannelServer().getWorldInterface().getGuild(player.getGuildId(), null).ifPresent(g -> g.gainGP(gpReward));
+                    Optional.ofNullable(player.getClient().getChannelServer().getWorldInterface().getGuild(player.getGuildId(), null)).ifPresent(g -> g.gainGP(gpReward));
                 } catch (Exception e) {
                     //TODO
                 }

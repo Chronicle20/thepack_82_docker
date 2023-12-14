@@ -27,6 +27,7 @@ COPY channel.properties ./
 COPY channel.truststore ./
 COPY db.properties ./
 COPY filename.keystore ./
+COPY src/main/resources/logback.xml ./
 COPY logging.properties ./
 COPY login.keystore ./
 COPY login.properties ./

@@ -123,11 +123,11 @@ public class PlayerLoggedinHandler extends AbstractMaplePacketHandler {
                 log.error("LOADING NOTE", e);
             }
 
-            MaplePacket guildInfo = MaplePacketCreator.showGuildInfo(player);
+            MapleCharacter finalPlayer1 = player;
             player.getMGC().ifPresent(g -> {
                 try {
                     c.getChannelServer().getWorldInterface().setGuildMemberOnline(g, true, c.getChannel());
-                    c.getSession().write(guildInfo);
+                    c.getSession().write(MaplePacketCreator.showGuildInfo(finalPlayer1));
                 } catch (RemoteException e) {
                     log.info("REMOTE THROW", e);
                 }

@@ -527,7 +527,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         int gid = mgc.getGuildId();
         Optional<MapleGuild> g;
         try {
-            g = this.getWorldInterface().getGuild(gid, mgc);
+            g = Optional.ofNullable(this.getWorldInterface().getGuild(gid, mgc));
         } catch (RemoteException re) {
             log.error("RemoteException while fetching MapleGuild.", re);
             return Optional.empty();
@@ -548,7 +548,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         //this shouldn't happen much, if ever, but if we're caught
         //without the summary, we'll have to do a worldop
         try {
-            this.getWorldInterface().getGuild(gid, null).map(MapleGuildSummary::new).ifPresent(g -> gsStore.put(gid, g));
+            Optional.ofNullable(this.getWorldInterface().getGuild(gid, null)).map(MapleGuildSummary::new).ifPresent(g -> gsStore.put(gid, g));
             return Optional.ofNullable(gsStore.get(gid));
         } catch (RemoteException re) {
             log.error("RemoteException while fetching GuildSummary.", re);
@@ -564,7 +564,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         try {
             Optional<MapleGuild> g;
             for (int i : gsStore.keySet()) {
-                g = this.getWorldInterface().getGuild(i, null);
+                g = Optional.ofNullable(this.getWorldInterface().getGuild(i, null));
                 if (g.isPresent()) {
                     gsStore.put(i, new MapleGuildSummary(g.get()));
                 } else {

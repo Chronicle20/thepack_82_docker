@@ -53,7 +53,7 @@ public interface WorldChannelInterface extends WorldChannelCommonOperations {
 
     CharacterIdChannelPair[] multiBuddyFind(int charIdFrom, int[] characterIds) throws RemoteException;
 
-    Optional<MapleGuild> getGuild(int id, MapleGuildCharacter mgc) throws RemoteException;
+    MapleGuild getGuild(int id, MapleGuildCharacter mgc) throws RemoteException;
 
     void clearGuilds() throws RemoteException;
 

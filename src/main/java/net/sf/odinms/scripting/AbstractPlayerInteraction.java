@@ -188,7 +188,7 @@ public class AbstractPlayerInteraction {
 
     public Optional<MapleGuild> getGuild() {
         try {
-            return c.getChannelServer().getWorldInterface().getGuild(getPlayer().getGuildId(), null);
+            return Optional.ofNullable(c.getChannelServer().getWorldInterface().getGuild(getPlayer().getGuildId(), null));
         } catch (RemoteException ex) {
             Logger.getLogger(AbstractPlayerInteraction.class.getName()).log(Level.SEVERE, null, ex);
         }
