@@ -1,7 +1,5 @@
 package net.sf.odinms.scripting;
 
-import net.jcip.annotations.ThreadSafe;
-
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
@@ -10,7 +8,6 @@ import javax.script.ScriptException;
  * Thread safety is achieved by synchronizing all methods.
  * Needed to get around the restriction that GraalVM imposes on evaluated scripts: no concurrent access allowed.
  */
-@ThreadSafe
 public class SynchronizedInvocable implements Invocable {
     private final Invocable invocable;
 
