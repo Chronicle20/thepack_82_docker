@@ -29,7 +29,7 @@
         <graalvm.version>25.0.2</graalvm.version> <!-- ScriptEngine implementation -->
         <yamlbeans.version>1.15</yamlbeans.version> <!-- Config file -->
         <HikariCP.version>5.0.1</HikariCP.version> <!-- Database connection pool -->
-        <mysql-connector-j.version>8.4.0</mysql-connector-j.version> <!-- MySQL JDBC driver -->
+        <mysql-connector-j.version>9.6.0</mysql-connector-j.version> <!-- MySQL JDBC driver -->
         <junit.version>5.9.2</junit.version> <!-- Unit test -->
         <mockito.version>5.1.1</mockito.version> <!-- Unit test -->
     </properties>
