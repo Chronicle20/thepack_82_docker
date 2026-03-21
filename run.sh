@@ -2,7 +2,7 @@
 
 GRAAL_FLAGS="--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"
 
-exec java $GRAAL_FLAGS -cp ".:dist/*" \
+java $GRAAL_FLAGS -cp ".:dist/*" \
 	-Dnet.sf.odinms.recvops=recvops.properties \
 	-Dnet.sf.odinms.sendops=sendops.properties \
 	-Dnet.sf.odinms.wzpath=wz \
@@ -11,7 +11,8 @@ exec java $GRAAL_FLAGS -cp ".:dist/*" \
 	-Djavax.net.ssl.trustStore=filename.keystore \
 	-Djavax.net.ssl.trustStorePassword=passwd \
 	net.sf.odinms.net.world.WorldServer &
-exec java $GRAAL_FLAGS -cp ".:dist/*" \
+sleep 5
+java $GRAAL_FLAGS -cp ".:dist/*" \
 	-Dnet.sf.odinms.recvops=recvops.properties \
 	-Dnet.sf.odinms.sendops=sendops.properties \
 	-Dnet.sf.odinms.wzpath=wz \
