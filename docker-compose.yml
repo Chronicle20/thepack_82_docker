@@ -1,8 +1,7 @@
 version:                                    '3.5'
 services:
   db:
-    image: mysql:8.0.32
-    command:                                --default-authentication-plugin=mysql_native_password
+    image: mysql:8.4
     restart:                                always
     volumes:
       - ./sql/thepack.sql:/docker-entrypoint-initdb.d/init.sql:ro
