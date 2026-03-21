@@ -1,4 +1,4 @@
-FROM maven:3.9.14-amazoncorretto-21-debian AS jar
+FROM maven:3.9.14-amazoncorretto-25-debian AS jar
 
 # Build in a separated location which won't have permissions issues.
 WORKDIR /opt/dir
@@ -12,7 +12,7 @@ RUN mvn -f ./pom.xml clean dependency:go-offline -Dmaven.test.skip -T 1C
 COPY src ./src
 RUN mvn -f ./pom.xml clean package -Dmaven.test.skip -T 1C
 
-FROM amazoncorretto:21.0.7-alpine3.18
+FROM amazoncorretto:25-alpine
 
 RUN apk add --no-cache bash
 
