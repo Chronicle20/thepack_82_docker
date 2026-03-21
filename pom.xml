@@ -24,7 +24,7 @@
         <maven-assembly-plugin.version>3.5.0</maven-assembly-plugin.version> <!-- For packaging the executable fat jar -->
 
         <!-- Dependencies -->
-        <slf4j-api.version>2.0.5</slf4j-api.version> <!-- Logging facade -->
+        <slf4j-api.version>2.0.17</slf4j-api.version> <!-- Logging facade -->
         <log4j.version>2.20.0</log4j.version> <!-- Slf4j implementation -->
         <graalvm.version>25.0.2</graalvm.version> <!-- ScriptEngine implementation -->
         <yamlbeans.version>1.15</yamlbeans.version> <!-- Config file -->
