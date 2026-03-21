@@ -27,7 +27,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
+import net.sf.odinms.net.world.NoVerifySslRMIClientSocketFactory;
 import net.sf.odinms.client.MapleCharacter;
 import net.sf.odinms.client.messages.CommandProcessor;
 import net.sf.odinms.database.DatabaseConnection;
@@ -139,7 +139,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
                         initialProp.load(fr);
                         fr.close();
                         Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"),
-                                Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());
+                                Registry.REGISTRY_PORT, new NoVerifySslRMIClientSocketFactory());
                         worldRegistry = (WorldRegistry) registry.lookup("WorldRegistry");
                         cwi = new ChannelWorldInterfaceImpl(this);
                         wci = worldRegistry.registerChannelServer(key, cwi);
@@ -593,7 +593,7 @@ public class ChannelServer implements Runnable, ChannelServerMBean {
         System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
         initialProp = new Properties();
         initialProp.load(new FileReader(System.getProperty("net.sf.odinms.channel.config")));
-        Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());
+        Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new NoVerifySslRMIClientSocketFactory());
         worldRegistry = (WorldRegistry) registry.lookup("WorldRegistry");
         for (int i = 0; i < Integer.parseInt(initialProp.getProperty("net.sf.odinms.channel.count", "0")); i++) {
             newInstance(initialProp.getProperty("net.sf.odinms.channel." + i + ".key")).run();

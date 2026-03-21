@@ -6,7 +6,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Properties;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
 import net.sf.odinms.database.DatabaseConnection;
 import org.slf4j.Logger;
@@ -59,8 +58,8 @@ public class WorldServer {
 	public static void main(String[] args) {
 		try {
 			System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
-			Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT, 
-				new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+			Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT,
+				new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
 			registry.rebind("WorldRegistry", WorldRegistryImpl.getInstance());
 		} catch (RemoteException ex) {
 			log.error("Could not initialize RMI system", ex);

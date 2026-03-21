@@ -32,7 +32,7 @@ COPY login.keystore ./
 COPY login.properties ./
 COPY login.truststore ./
 COPY recvops.properties ./
-COPY run.sh ./
+COPY --chmod=755 run.sh ./
 COPY sendops.properties ./
 COPY world.keystore ./
 COPY world.properties ./

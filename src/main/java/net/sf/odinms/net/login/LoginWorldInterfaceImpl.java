@@ -2,8 +2,8 @@ package net.sf.odinms.net.login;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import net.sf.odinms.net.world.NoVerifySslRMIClientSocketFactory;
 import net.sf.odinms.net.login.remote.LoginWorldInterface;
 
 /**
@@ -14,7 +14,7 @@ public class LoginWorldInterfaceImpl extends UnicastRemoteObject implements Logi
 	private static final long serialVersionUID = -3405666366539470037L;
 
 	public LoginWorldInterfaceImpl() throws RemoteException {
-		super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+		super(0, new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
 	}
 
 	public void channelOnline(int channel, String ip) throws RemoteException {
