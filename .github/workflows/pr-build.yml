@@ -1,0 +1,15 @@
+name: PR Build
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -f app.Dockerfile -t thepack:pr-${{ github.event.pull_request.number }} .
