@@ -28,7 +28,6 @@
         <log4j.version>2.20.0</log4j.version> <!-- Slf4j implementation -->
         <graalvm.version>22.3.5</graalvm.version> <!-- ScriptEngine implementation -->
         <yamlbeans.version>1.15</yamlbeans.version> <!-- Config file -->
-        <jcip-annotations.version>1.0</jcip-annotations.version> <!-- Annotations for concurrency documentation -->
         <HikariCP.version>5.0.1</HikariCP.version> <!-- Database connection pool -->
         <mysql-connector-j.version>8.2.0</mysql-connector-j.version> <!-- MySQL JDBC driver -->
         <junit.version>5.9.2</junit.version> <!-- Unit test -->
@@ -36,11 +35,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>net.jcip</groupId>
-            <artifactId>jcip-annotations</artifactId>
-            <version>${jcip-annotations.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.mina</groupId>
             <artifactId>mina-core</artifactId>
