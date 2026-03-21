@@ -11,6 +11,7 @@ java $GRAAL_FLAGS -cp ".:dist/*" \
 	-Djavax.net.ssl.trustStore=filename.keystore \
 	-Djavax.net.ssl.trustStorePassword=passwd \
 	net.sf.odinms.net.world.WorldServer &
+sleep 5
 java $GRAAL_FLAGS -cp ".:dist/*" \
 	-Dnet.sf.odinms.recvops=recvops.properties \
 	-Dnet.sf.odinms.sendops=sendops.properties \
