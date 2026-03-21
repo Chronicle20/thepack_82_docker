@@ -21,7 +21,7 @@
         <!-- Maven plugins -->
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version> <!-- For running unit tests -->
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version> <!-- Disabled. (for building thin jar) -->
-        <maven-assembly-plugin.version>3.5.0</maven-assembly-plugin.version> <!-- For packaging the executable fat jar -->
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version> <!-- For packaging the executable fat jar -->
 
         <!-- Dependencies -->
         <slf4j-api.version>2.0.17</slf4j-api.version> <!-- Logging facade -->
