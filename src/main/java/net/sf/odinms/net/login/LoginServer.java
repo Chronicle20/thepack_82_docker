@@ -16,7 +16,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
+import net.sf.odinms.net.world.NoVerifySslRMIClientSocketFactory;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.net.MapleServerHandler;
 import net.sf.odinms.net.PacketProcessor;
@@ -129,7 +129,7 @@ public class LoginServer implements Runnable, LoginServerMBean {
                         FileReader fileReader = new FileReader(System.getProperty("net.sf.odinms.login.config"));
                         initialProp.load(fileReader);
                         fileReader.close();
-                        Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());
+                        Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new NoVerifySslRMIClientSocketFactory());
                         worldRegistry = (WorldRegistry) registry.lookup("WorldRegistry");
                         lwi = new LoginWorldInterfaceImpl();
                         wli = worldRegistry.registerLoginServer(initialProp.getProperty("net.sf.odinms.login.key"), lwi);
@@ -172,7 +172,7 @@ public class LoginServer implements Runnable, LoginServerMBean {
             FileReader fileReader = new FileReader(System.getProperty("net.sf.odinms.login.config"));
             initialProp.load(fileReader);
             fileReader.close();
-            Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new SslRMIClientSocketFactory());
+            Registry registry = LocateRegistry.getRegistry(initialProp.getProperty("net.sf.odinms.world.host"), Registry.REGISTRY_PORT, new NoVerifySslRMIClientSocketFactory());
             worldRegistry = (WorldRegistry) registry.lookup("WorldRegistry");
             lwi = new LoginWorldInterfaceImpl();
             wli = worldRegistry.registerLoginServer(initialProp.getProperty("net.sf.odinms.login.key"), lwi);

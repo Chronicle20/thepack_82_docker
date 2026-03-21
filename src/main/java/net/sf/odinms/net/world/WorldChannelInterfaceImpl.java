@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import net.sf.odinms.net.world.NoVerifySslRMIClientSocketFactory;
 import net.sf.odinms.database.DatabaseConnection;
 import net.sf.odinms.net.channel.remote.ChannelWorldInterface;
 import net.sf.odinms.net.login.remote.LoginWorldInterface;
@@ -40,11 +40,11 @@ public class WorldChannelInterfaceImpl extends UnicastRemoteObject implements Wo
     private boolean ready = false;
 
     public WorldChannelInterfaceImpl() throws RemoteException {
-        super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+        super(0, new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
     }
 
     public WorldChannelInterfaceImpl(ChannelWorldInterface cb, int dbId) throws RemoteException {
-        super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+        super(0, new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
         this.cb = cb;
         this.dbId = dbId;
     }

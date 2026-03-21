@@ -5,8 +5,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import net.sf.odinms.net.world.NoVerifySslRMIClientSocketFactory;
 import net.sf.odinms.net.channel.remote.ChannelWorldInterface;
 import net.sf.odinms.net.world.guild.MapleGuildCharacter;
 import net.sf.odinms.net.world.remote.WorldLoginInterface;
@@ -19,7 +19,7 @@ public class WorldLoginInterfaceImpl extends UnicastRemoteObject implements Worl
 	private static final long serialVersionUID = -4965323089596332908L;
 
 	public WorldLoginInterfaceImpl() throws RemoteException {
-		super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+		super(0, new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
 	}
 
 	public Properties getDatabaseProperties() throws RemoteException {

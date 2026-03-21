@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import net.sf.odinms.net.world.NoVerifySslRMIClientSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.sf.odinms.client.BuddyList;
@@ -43,11 +43,11 @@ public class ChannelWorldInterfaceImpl extends UnicastRemoteObject implements Ch
     private ChannelServer server;
 
     public ChannelWorldInterfaceImpl() throws RemoteException {
-        super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+        super(0, new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
     }
 
     public ChannelWorldInterfaceImpl(ChannelServer server) throws RemoteException {
-        super(0, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
+        super(0, new NoVerifySslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
         this.server = server;
     }
 
