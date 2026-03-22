@@ -9,7 +9,7 @@ jobs:
     name: Docker Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build Docker image
         run: docker build -f app.Dockerfile -t thepack:pr-${{ github.event.pull_request.number }} .
