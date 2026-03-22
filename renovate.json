@@ -4,11 +4,13 @@
     "config:recommended"
   ],
   "forkProcessing": "enabled",
+  "platformAutomerge": false,
   "packageRules": [
     {
       "matchManagers": ["maven"],
       "groupName": null,
-      "automerge": true
+      "automerge": true,
+      "automergeType": "pr"
     }
   ]
 }
