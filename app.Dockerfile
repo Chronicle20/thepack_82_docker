@@ -1,4 +1,4 @@
-FROM maven:3.9.14-amazoncorretto-25-debian AS jar
+FROM maven:3.9.15-amazoncorretto-25-debian AS jar
 
 # Build in a separated location which won't have permissions issues.
 WORKDIR /opt/dir
