@@ -12,7 +12,7 @@ RUN mvn -f ./pom.xml clean dependency:go-offline -Dmaven.test.skip -T 1C
 COPY src ./src
 RUN mvn -f ./pom.xml clean package -Dmaven.test.skip -T 1C
 
-FROM amazoncorretto:25.0.2-alpine
+FROM amazoncorretto:25.0.3-alpine
 
 RUN apk add --no-cache bash
 
