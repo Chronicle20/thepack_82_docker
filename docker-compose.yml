@@ -1,7 +1,7 @@
 version:                                    '3.5'
 services:
   db:
-    image: mysql:8.4
+    image: mysql:9.7
     restart:                                always
     volumes:
       - ./sql/thepack.sql:/docker-entrypoint-initdb.d/init.sql:ro
