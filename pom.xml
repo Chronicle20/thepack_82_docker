@@ -26,7 +26,7 @@
         <!-- Dependencies -->
         <slf4j-api.version>2.0.18</slf4j-api.version> <!-- Logging facade -->
         <log4j.version>2.20.0</log4j.version> <!-- Slf4j implementation -->
-        <graalvm.version>25.1.3</graalvm.version> <!-- ScriptEngine implementation -->
+        <graalvm.version>25.2.4</graalvm.version> <!-- ScriptEngine implementation -->
         <yamlbeans.version>1.15</yamlbeans.version> <!-- Config file -->
         <HikariCP.version>5.0.1</HikariCP.version> <!-- Database connection pool -->
         <mysql-connector-j.version>9.7.0</mysql-connector-j.version> <!-- MySQL JDBC driver -->
